@@ -8,8 +8,7 @@ from shutil import which
 from typing import TYPE_CHECKING, assert_never
 from zipfile import ZipFile
 
-from installer.constants import HOME, LOCAL_BIN, SSH, XDG_CONFIG_HOME
-
+from .constants import HOME, LOCAL_BIN, SSH, XDG_CONFIG_HOME
 from .enums import System
 from .utilities import (
     TemporaryDirectory,
