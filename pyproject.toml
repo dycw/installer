@@ -2,8 +2,8 @@
 
 # build-system
 [build-system]
-build-backend = "hatchling.build"
-requires = ["hatchling"]
+build-backend = "uv_build"
+requires = ["uv_build"]
 
 # dependency groups
 [dependency-groups]
@@ -48,15 +48,6 @@ skip_empty = true
 branch = true
 data_file = ".coverage/data"
 parallel = true
-
-# hatch
-[tool.hatch]
-
-[tool.hatch.build.targets.sdist]
-include = ["src"]
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/installer"]
 
 # nitpick
 [tool.nitpick]
