@@ -22,7 +22,8 @@ if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping
     from types import TracebackType
 
-    from install.types import PathLike
+    from .types import PathLike
+
 
 _LOGGER = getLogger(__name__)
 

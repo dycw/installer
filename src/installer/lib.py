@@ -8,8 +8,10 @@ from shutil import which
 from typing import TYPE_CHECKING, assert_never
 from zipfile import ZipFile
 
-from install.enums import System
-from install.utilities import (
+from installer.constants import HOME, LOCAL_BIN, SSH, XDG_CONFIG_HOME
+
+from .enums import System
+from .utilities import (
     TemporaryDirectory,
     apt_install,
     brew_install,
@@ -32,10 +34,9 @@ from install.utilities import (
     yield_github_latest_download,
 )
 
-from installer.constants import HOME, LOCAL_BIN, SSH, XDG_CONFIG_HOME
-
 if TYPE_CHECKING:
-    from install.types import PathLike
+    from .types import PathLike
+
 
 _LOGGER = getLogger(__name__)
 
