@@ -8,7 +8,6 @@ from shutil import which
 from typing import TYPE_CHECKING, assert_never
 from zipfile import ZipFile
 
-from install.constants import HOME, LOCAL_BIN, SSH, XDG_CONFIG_HOME
 from install.enums import System
 from install.utilities import (
     TemporaryDirectory,
@@ -32,6 +31,8 @@ from install.utilities import (
     yield_download,
     yield_github_latest_download,
 )
+
+from installer.constants import HOME, LOCAL_BIN, SSH, XDG_CONFIG_HOME
 
 if TYPE_CHECKING:
     from install.types import PathLike
