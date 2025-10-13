@@ -129,6 +129,31 @@ def cp(
         chown(path_to)
 
 
+def cp_contents(
+    path: PathLike,
+    text: str,
+    /,
+    *,
+    executable: bool = False,
+    immutable: bool = False,
+    ownership: bool = False,
+) -> None:
+    path = full_path(path)
+    if path.exists() and (path.read_text() == text):
+        _LOGGER.debug("%r is already copied", str(path))
+        return
+    with TemporaryDirectory() as temp_dir:
+        path_from = temp_dir / path.name
+        _ = path_from.write_text(text)
+        cp(
+            path_from,
+            path,
+            executable=executable,
+            immutable=immutable,
+            ownership=ownership,
+        )
+
+
 def download(url: str, path: PathLike, /) -> None:
     with urlopen(url) as response, full_path(path).open(mode="wb") as fh:
         _ = fh.write(response.read())
@@ -363,6 +388,7 @@ __all__ = [
     "chmod",
     "chown",
     "cp",
+    "cp_contents",
     "download",
     "dpkg_install",
     "full_path",
