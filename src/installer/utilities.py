@@ -223,10 +223,13 @@ def run_commands(
     *cmds: str,
     direnv: bool = False,
     env: Mapping[str, str | None] | None = None,
+    cwd: PathLike | None = None,
     suppress_failure: bool = False,
 ) -> None:
     for cmd in cmds:
-        run_one_command(cmd, direnv=direnv, env=env, suppress_failure=suppress_failure)
+        run_one_command(
+            cmd, direnv=direnv, env=env, cwd=cwd, suppress_failure=suppress_failure
+        )
 
 
 def run_one_command(
@@ -235,6 +238,7 @@ def run_one_command(
     *,
     direnv: bool = False,
     env: Mapping[str, str | None] | None = None,
+    cwd: PathLike | None = None,
     suppress_failure: bool = False,
 ) -> None:
     cmd_use = cmd
@@ -245,15 +249,17 @@ def run_one_command(
     desc = f"Running {cmd_use!r}"
     if env is not None:
         desc = f"{desc} [env={env}]"
+    if cwd is not None:
+        desc = f"{desc} [cwd={cwd}]"
     if suppress_failure:
         desc = f"{desc} [suppress]"
     _LOGGER.info("%s...", desc)
     with temp_environ(env):
         if suppress_failure:
             with suppress(CalledProcessError):
-                _ = check_call(cmd_use, shell=True)
+                _ = check_call(cmd_use, shell=True, cwd=cwd)
         else:
-            _ = check_call(cmd_use, shell=True)
+            _ = check_call(cmd_use, shell=True, cwd=cwd)
 
 
 def symlink(path_from: PathLike, path_to: PathLike, /) -> None:
