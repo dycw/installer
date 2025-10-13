@@ -20,12 +20,12 @@ dependencies = []
 name = "installer"
 readme = "README.md"
 requires-python = ">= 3.13"
-version = "0.2.2"
+version = "0.2.3"
 
 # bump-my-version
 [tool.bumpversion]
 allow_dirty = true
-current_version = "0.2.2"
+current_version = "0.2.3"
 
 [[tool.bumpversion.files]]
 filename = "src/installer/__init__.py"
@@ -93,10 +93,6 @@ addopts = [
   "-ra",
   "-vv",
   "--color=auto",
-  "--cov=installer",
-  "--cov-config=pyproject.toml",
-  "--cov-report=html",
-  "--pdbcls=pudb.debugger:Debugger",
   "--strict-markers",
 ]
 asyncio_default_fixture_loop_scope = "function"
