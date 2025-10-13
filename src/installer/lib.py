@@ -16,6 +16,7 @@ from .utilities import (
     brew_install,
     brew_installed,
     check_for_commands,
+    contains_line,
     cp,
     dpkg_install,
     full_path,
@@ -27,7 +28,6 @@ from .utilities import (
     symlink,
     symlink_if_given,
     symlink_many_if_given,
-    touch,
     uv_tool_install,
     yield_download,
     yield_github_latest_download,
@@ -42,21 +42,11 @@ _LOGGER = getLogger(__name__)
 
 def add_to_known_hosts() -> None:
     path = SSH / "known_hosts"
-
-    def run() -> None:
-        _LOGGER.info("Adding 'github.com' to known hosts...")
-        run_commands(f"ssh-keyscan github.com >> {path}")
-
-    try:
-        contents = path.read_text()
-    except FileNotFoundError:
-        touch(path)
-        run()
-        return
-    if any(search(r"github\.com", line) for line in contents.splitlines()):
+    if contains_line(path, r"github\.com"):
         _LOGGER.debug("Known hosts already contains 'github.com'")
         return
-    run()
+    _LOGGER.info("Adding 'github.com' to known hosts...")
+    run_commands(f"ssh-keyscan github.com >> {path}")
 
 
 def install_age() -> None:
@@ -1092,6 +1082,10 @@ def install_zoom(*, deb_file: PathLike | None = None) -> None:
             assert_never(never)
 
 
+def setup_bashrc(*, bashrc: PathLike | None = None) -> None:
+    symlink_if_given(HOME / ".bashrc", bashrc)
+
+
 def setup_pdb(*, pdbrc: PathLike | None = None) -> None:
     symlink_if_given(HOME / ".pdbrc", pdbrc)
 
@@ -1102,6 +1096,30 @@ def setup_psql(*, psqlrc: PathLike | None = None) -> None:
 
 def setup_ssh(*, config: PathLike | None = None) -> None:
     symlink_if_given(SSH / ".config", config)
+
+
+def setup_ssh_config(
+    *, host: str | None = None, identity_file: PathLike | None = None
+) -> None:
+    if (host is None) or (identity_file is None):
+        return
+    path = SSH / "config"
+    header = f"Host {host}"
+    if contains_line(path, header):
+        _LOGGER.info("SSH config already contains %r", header)
+        return
+    _LOGGER.info("Adding %r to SSH config...", header)
+    expected = f"""\
+{header}
+    User git
+    HostName github.com
+    IdentityFile {identity_file}
+"""
+    if path.exists():
+        with path.open(mode="w") as fh:
+            _ = fh.write(f"\n\n{expected}")
+    else:
+        _ = path.write_text(expected)
 
 
 def setup_ssh_keys(ssh_keys: PathLike, /) -> None:
@@ -1197,9 +1215,11 @@ __all__ = [
     "install_yq",
     "install_zoom",
     "install_zoxide",
+    "setup_bashrc",
     "setup_pdb",
     "setup_psql",
     "setup_ssh",
+    "setup_ssh_config",
     "setup_ssh_keys",
     "setup_sshd",
 ]
