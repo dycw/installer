@@ -111,6 +111,7 @@ def cp(
     /,
     *,
     executable: bool = False,
+    immutable: bool = False,
     ownership: bool = False,
 ) -> None:
     path_from, path_to = map(full_path, [path_from, path_to])
@@ -122,6 +123,8 @@ def cp(
     run_commands(f"sudo mkdir -p {path_to.parent}", f"sudo cp {path_from} {path_to}")
     if executable:
         chmod(path_to)
+    if immutable:
+        run_commands(f"sudo chattr +i {path_to}")
     if ownership:
         chown(path_to)
 
