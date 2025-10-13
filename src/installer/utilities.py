@@ -193,18 +193,38 @@ def rm(path: PathLike, /) -> None:
 
 def run_commands(
     *cmds: str,
+    direnv: bool = False,
     env: Mapping[str, str | None] | None = None,
     suppress_failure: bool = False,
 ) -> None:
-    root = is_root()
+    run_one_command(*cmds, direnv=direnv, env=env, suppress_failure=suppress_failure)
+
+
+def run_one_command(
+    cmd: str,
+    /,
+    *,
+    direnv: bool = False,
+    env: Mapping[str, str | None] | None = None,
+    suppress_failure: bool = False,
+) -> None:
+    cmd_use = cmd
+    if is_root():
+        cmd_use = cmd_use.replace("sudo ", "")
+    if direnv:
+        cmd_use = f'eval "$(direnv export bash)" && {cmd_use}'
+    desc = f"Running {cmd_use!r}"
+    if env is not None:
+        desc = f"{desc} [env={env}]"
+    if suppress_failure:
+        desc = f"{desc} [suppress]"
+    _LOGGER.info("%s...", desc)
     with temp_environ(env):
-        for cmd in cmds:
-            cmd_use = cmd.replace("sudo ", "") if root else cmd
-            if suppress_failure:
-                with suppress(CalledProcessError):
-                    _ = check_call(cmd_use, shell=True)
-            else:
+        if suppress_failure:
+            with suppress(CalledProcessError):
                 _ = check_call(cmd_use, shell=True)
+        else:
+            _ = check_call(cmd_use, shell=True)
 
 
 def symlink(path_from: PathLike, path_to: PathLike, /) -> None:
@@ -352,6 +372,7 @@ __all__ = [
     "replace_lines",
     "rm",
     "run_commands",
+    "run_one_command",
     "symlink",
     "symlink_if_given",
     "symlink_many_if_given",
