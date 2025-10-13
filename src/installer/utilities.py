@@ -398,6 +398,7 @@ __all__ = [
     "is_root",
     "luarocks_install",
     "mac_app_exists",
+    "replace_line",
     "replace_lines",
     "rm",
     "run_commands",
