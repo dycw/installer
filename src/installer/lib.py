@@ -8,7 +8,14 @@ from shutil import which
 from typing import TYPE_CHECKING, assert_never
 from zipfile import ZipFile
 
-from .constants import HOME, LOCAL_BIN, SSH, XDG_CONFIG_HOME
+from .constants import (
+    AUTHORIZED_KEYS,
+    HOME,
+    KNOWN_HOSTS,
+    LOCAL_BIN,
+    SSH_CONFIG,
+    XDG_CONFIG_HOME,
+)
 from .enums import System
 from .utilities import (
     TemporaryDirectory,
@@ -18,6 +25,7 @@ from .utilities import (
     check_for_commands,
     contains_line,
     cp,
+    cp_contents,
     dpkg_install,
     full_path,
     have_command,
@@ -41,12 +49,11 @@ _LOGGER = getLogger(__name__)
 
 
 def add_to_known_hosts() -> None:
-    path = SSH / "known_hosts"
-    if contains_line(path, r"github\.com"):
+    if contains_line(KNOWN_HOSTS, r"github\.com"):
         _LOGGER.debug("Known hosts already contains 'github.com'")
         return
     _LOGGER.info("Adding 'github.com' to known hosts...")
-    run_commands(f"ssh-keyscan github.com >> {path}")
+    run_commands(f"ssh-keyscan github.com >> {KNOWN_HOSTS}")
 
 
 def install_age() -> None:
@@ -1095,7 +1102,7 @@ def setup_psql(*, psqlrc: PathLike | None = None) -> None:
 
 
 def setup_ssh(*, config: PathLike | None = None) -> None:
-    symlink_if_given(SSH / ".config", config)
+    symlink_if_given(SSH_CONFIG, config)
 
 
 def setup_ssh_config(
@@ -1103,23 +1110,22 @@ def setup_ssh_config(
 ) -> None:
     if (host is None) or (identity_file is None):
         return
-    path = SSH / "config"
     header = f"Host {host}"
-    if contains_line(path, header):
+    if contains_line(SSH_CONFIG, header):
         _LOGGER.info("SSH config already contains %r", header)
         return
     _LOGGER.info("Adding %r to SSH config...", header)
-    expected = f"""\
+    text = f"""\
 {header}
     User git
     HostName github.com
     IdentityFile {identity_file}
 """
-    if path.exists():
-        with path.open(mode="w") as fh:
-            _ = fh.write(f"\n\n{expected}")
+    if SSH_CONFIG.exists():
+        with SSH_CONFIG.open(mode="w") as fh:
+            _ = fh.write(f"\n\n{text}")
     else:
-        _ = path.write_text(expected)
+        cp_contents(SSH_CONFIG, text)
 
 
 def setup_ssh_keys(ssh_keys: PathLike, /) -> None:
@@ -1130,7 +1136,7 @@ def setup_ssh_keys(ssh_keys: PathLike, /) -> None:
             if (stripped := line.strip()) != ""
         ]
         joined = "\n".join(keys)
-        _ = (SSH / "authorized_keys").write_text(joined)
+        _ = AUTHORIZED_KEYS.write_text(joined)
 
     if isinstance(ssh_keys, Path) or full_path(ssh_keys).exists():
         run(ssh_keys)
