@@ -225,7 +225,8 @@ def run_commands(
     env: Mapping[str, str | None] | None = None,
     suppress_failure: bool = False,
 ) -> None:
-    run_one_command(*cmds, direnv=direnv, env=env, suppress_failure=suppress_failure)
+    for cmd in cmds:
+        run_one_command(cmd, direnv=direnv, env=env, suppress_failure=suppress_failure)
 
 
 def run_one_command(
