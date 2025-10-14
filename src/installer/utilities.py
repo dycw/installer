@@ -202,6 +202,10 @@ def is_root() -> bool:
     return geteuid() == 0
 
 
+def log_installer_version() -> None:
+    _LOGGER.info("'installer' version: 0.2.30")
+
+
 def luarocks_install(package: str, /) -> None:
     check_for_commands("luarocks")
     run_commands(f"sudo luarocks install {package}")
@@ -462,6 +466,7 @@ __all__ = [
     "get_output",
     "have_command",
     "is_root",
+    "log_installer_version",
     "luarocks_install",
     "mac_app_exists",
     "replace_line",

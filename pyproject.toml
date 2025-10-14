@@ -20,17 +20,22 @@ dependencies = []
 name = "installer"
 readme = "README.md"
 requires-python = ">= 3.13"
-version = "0.2.29"
+version = "0.2.30"
 
 # bump-my-version
 [tool.bumpversion]
 allow_dirty = true
-current_version = "0.2.29"
+current_version = "0.2.30"
 
 [[tool.bumpversion.files]]
 filename = "src/installer/__init__.py"
 replace = "__version__ = \"{new_version}\""
 search = "__version__ = \"{current_version}\""
+
+[[tool.bumpversion.files]]
+filename = "src/installer/utilities.py"
+replace = "'installer' version: {new_version}"
+search = "'installer' version: {current_version}"
 
 # coverage
 [tool.coverage]
