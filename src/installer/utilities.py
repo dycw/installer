@@ -38,7 +38,7 @@ def append_contents(path: PathLike, text: str, /, *, new_lines: int = 1) -> None
             _ = fh.write(new_lines * "\n")
             _ = fh.write(text)
     else:
-        cp_contents(path, text)
+        write_text(path, text)
 
 
 def apt_install(*packages: str, env: Mapping[str, str | None] | None = None) -> None:
@@ -142,29 +142,11 @@ def cp(
         chown(path_to)
 
 
-def cp_contents(
-    path: PathLike,
-    text: str,
-    /,
-    *,
-    executable: bool = False,
-    immutable: bool = False,
-    ownership: bool = False,
-) -> None:
-    path = full_path(path)
-    if path.exists() and (path.read_text() == text):
-        _LOGGER.debug("%r is already copied", str(path))
-        return
-    with TemporaryDirectory() as temp_dir:
-        path_from = temp_dir / path.name
-        _ = path_from.write_text(text)
-        cp(
-            path_from,
-            path,
-            executable=executable,
-            immutable=immutable,
-            ownership=ownership,
-        )
+def cp_named_temporary(path: PathLike, /) -> Path:
+    path_from = full_path(path)
+    path_to = NamedTemporaryFile()
+    write_text(path_from.read_text(), path_to)
+    return path_to
 
 
 def download(url: str, path: PathLike, /) -> None:
@@ -269,6 +251,7 @@ def run_one_command(
     cmd_use = cmd
     if is_root():
         cmd_use = cmd_use.replace("sudo ", "")
+    executable = which("bash")
     if direnv:
         cmd_use = f'eval "$(direnv export bash)" && {cmd_use}'
     if not skip_log:
@@ -283,9 +266,9 @@ def run_one_command(
     with temp_environ(env):
         if suppress_failure:
             with suppress(CalledProcessError):
-                _ = check_call(cmd_use, shell=True, cwd=cwd)
+                _ = check_call(cmd_use, executable=executable, shell=True, cwd=cwd)
         else:
-            _ = check_call(cmd_use, shell=True, cwd=cwd)
+            _ = check_call(cmd_use, executable=executable, shell=True, cwd=cwd)
 
 
 def symlink(path_from: PathLike, path_to: PathLike, /) -> None:
@@ -386,6 +369,31 @@ def which(cmd: str, /) -> Path | None:
     return None if result is None else full_path(result)
 
 
+def write_text(
+    text: str,
+    path: PathLike,
+    /,
+    *,
+    executable: bool = False,
+    immutable: bool = False,
+    ownership: bool = False,
+) -> None:
+    path_to = full_path(path)
+    if path_to.exists() and (path_to.read_text() == text):
+        _LOGGER.debug("%r is already copied", str(path_to))
+        return
+    with TemporaryDirectory() as temp_dir:
+        path_from = temp_dir / path_to.name
+        _ = path_from.write_text(text)
+        cp(
+            path_from,
+            path_to,
+            executable=executable,
+            immutable=immutable,
+            ownership=ownership,
+        )
+
+
 @contextmanager
 def yield_download(url: str, /) -> Iterator[Path]:
     _LOGGER.info("Yielding download of %r...", url)
@@ -425,7 +433,7 @@ __all__ = [
     "chmod",
     "chown",
     "cp",
-    "cp_contents",
+    "cp_named_temporary",
     "download",
     "dpkg_install",
     "full_path",
@@ -448,6 +456,7 @@ __all__ = [
     "update_submodules",
     "uv_tool_install",
     "which",
+    "write_text",
     "yield_download",
     "yield_github_latest_download",
     "yield_tar_gz_contents",
