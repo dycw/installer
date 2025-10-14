@@ -38,7 +38,7 @@ def append_contents(path: PathLike, text: str, /, *, new_lines: int = 1) -> None
             _ = fh.write(new_lines * "\n")
             _ = fh.write(text)
     else:
-        write_text(path, text)
+        write_text(text, path)
 
 
 def apt_install(*packages: str, env: Mapping[str, str | None] | None = None) -> None:
