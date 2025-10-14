@@ -203,7 +203,7 @@ def is_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.2.32")
+    _LOGGER.info("'installer' version: 0.2.33")
 
 
 def luarocks_install(package: str, /) -> None:
@@ -307,12 +307,21 @@ def symlink(path_from: PathLike, path_to: PathLike, /) -> None:
         )
     path_from.parent.mkdir(parents=True, exist_ok=True)
     _LOGGER.info("path_to.exists()=%s", path_to.exists())
-    try:
-        if path_to.exists():
-            _LOGGER.info("Symlinking %r -> %r", str(path_from), str(path_to))
-            path_from.symlink_to(path_to)
-    except FileExistsError:
-        breakpoint()
+    if path_to.exists():
+        _LOGGER.info("Symlinking %r -> %r", str(path_from), str(path_to))
+        for i in range(5):
+            _LOGGER.info(
+                "i=%d, path_from=%s, exists=%s, path_to=%s, exists=%s",
+                i,
+                str(path_from),
+                path_from.exists(),
+                str(path_to),
+                path_to.exists(),
+            )
+            try:
+                path_from.symlink_to(path_to)
+            except FileExistsError:
+                _LOGGER.info("i=%d failed", i)
 
 
 def symlink_if_given(path_from: PathLike, path_to: PathLike | None, /) -> None:
