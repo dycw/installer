@@ -13,6 +13,7 @@ from .constants import (
     HOME,
     KNOWN_HOSTS,
     LOCAL_BIN,
+    SSH,
     SSH_CONFIG,
     XDG_CONFIG_HOME,
 )
@@ -1111,11 +1112,14 @@ def setup_ssh_config(
 ) -> None:
     if (host is None) or (identity_file is None):
         return
+    identity_file = full_path(identity_file)
+    path_to = SSH / identity_file.name
+    cp(identity_file, SSH)
     text = f"""\
 Host {host}
     User git
     HostName github.com
-    IdentityFile {identity_file}
+    IdentityFile {path_to}
 """
     append_contents(SSH_CONFIG, text, new_lines=2)
 
