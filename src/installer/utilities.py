@@ -221,7 +221,6 @@ def rm(path: PathLike, /) -> None:
 
 def run_commands(
     *cmds: str,
-    direnv: bool = False,
     skip_log: bool = False,
     env: Mapping[str, str | None] | None = None,
     cwd: PathLike | None = None,
@@ -229,12 +228,7 @@ def run_commands(
 ) -> None:
     for cmd in cmds:
         run_one_command(
-            cmd,
-            direnv=direnv,
-            skip_log=skip_log,
-            env=env,
-            cwd=cwd,
-            suppress_failure=suppress_failure,
+            cmd, skip_log=skip_log, env=env, cwd=cwd, suppress_failure=suppress_failure
         )
 
 
@@ -242,7 +236,6 @@ def run_one_command(
     cmd: str,
     /,
     *,
-    direnv: bool = False,
     skip_log: bool = False,
     env: Mapping[str, str | None] | None = None,
     cwd: PathLike | None = None,
@@ -252,10 +245,8 @@ def run_one_command(
     if is_root():
         cmd_use = cmd_use.replace("sudo ", "")
     executable = which("bash")
-    if direnv:
-        cmd_use = f'eval "$(direnv export bash)" && {cmd_use}'
     if not skip_log:
-        desc = f"Running {cmd_use!r}"
+        desc = f"Running {cmd_use!r} [bashrc]"
         if env is not None:
             desc = f"{desc} [env={env}]"
         if cwd is not None:
@@ -263,6 +254,7 @@ def run_one_command(
         if suppress_failure:
             desc = f"{desc} [suppress]"
         _LOGGER.info("%s...", desc)
+    cmd_use = f"[ -f ~/.bashrc ] && source ~/.bashrc; {cmd_use}"
     with temp_environ(env):
         if suppress_failure:
             with suppress(CalledProcessError):
