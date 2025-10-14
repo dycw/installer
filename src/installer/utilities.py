@@ -14,6 +14,7 @@ from re import search
 from stat import S_IXUSR
 from string import Template
 from subprocess import CalledProcessError, check_call, check_output
+from time import sleep
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -203,7 +204,7 @@ def is_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.2.33")
+    _LOGGER.info("'installer' version: 0.2.34")
 
 
 def luarocks_install(package: str, /) -> None:
@@ -302,6 +303,7 @@ def symlink(path_from: PathLike, path_to: PathLike, /) -> None:
     if (is_symlink and not res_exists_and_correct) or path_from.exists():
         _LOGGER.info("Removing symlink %r...", str(path_from))
         rm(path_from)
+        sleep(int(getenv("SLEEP", "10")))
         _LOGGER.info(
             "After removing symlink, path_from.exists()=%s...", path_from.exists()
         )
@@ -322,6 +324,7 @@ def symlink(path_from: PathLike, path_to: PathLike, /) -> None:
                 path_from.symlink_to(path_to)
             except FileExistsError:
                 _LOGGER.info("i=%d failed", i)
+            sleep(int(getenv("SLEEP", "10")))
 
 
 def symlink_if_given(path_from: PathLike, path_to: PathLike | None, /) -> None:
