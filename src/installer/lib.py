@@ -10,12 +10,27 @@ from zipfile import ZipFile
 
 from .constants import (
     AUTHORIZED_KEYS,
-    HOME,
+    BASHRC,
+    CONFIG_BOTTOM_TOML,
+    CONFIG_DIRENV,
+    CONFIG_FD_IGNORE,
+    CONFIG_FISH,
+    CONFIG_FISH_CONF_D,
+    CONFIG_FISH_FUNCTIONS,
+    CONFIG_GIT,
+    CONFIG_GLAB_CONFIG_YML,
+    CONFIG_NVIM,
+    CONFIG_SOPS_AGE,
+    CONFIG_STARSHIP_TOML,
+    CONFIG_TMUX_CONF_LOCAL,
+    CONFIG_TMUX_CONF_OH_MY_TMUX,
+    CONFIG_WEZTERM_LUA,
     KNOWN_HOSTS,
     LOCAL_BIN,
+    PDBRC,
+    PSQLRC,
     SSH,
     SSH_CONFIG,
-    XDG_CONFIG_HOME,
 )
 from .enums import System
 from .utilities import (
@@ -27,6 +42,7 @@ from .utilities import (
     check_for_commands,
     contains_line,
     cp,
+    cp_if_given,
     dpkg_install,
     full_path,
     have_command,
@@ -141,7 +157,7 @@ def install_bottom(*, bottom_toml: PathLike | None = None) -> None:
                     dpkg_install(path)
             case never:
                 assert_never(never)
-    symlink_if_given(XDG_CONFIG_HOME / "bottom/bottom.toml", bottom_toml)
+    symlink_if_given(CONFIG_BOTTOM_TOML, bottom_toml)
 
 
 def install_build_essential() -> None:
@@ -224,9 +240,9 @@ def install_direnv(
                 )
             case never:
                 assert_never(never)
-    direnv = XDG_CONFIG_HOME / "direnv"
     symlink_many_if_given(
-        (direnv / "direnv.toml", direnv_toml), (direnv / "direnvrc", direnvrc)
+        (CONFIG_DIRENV / "direnv.toml", direnv_toml),
+        (CONFIG_DIRENV / "direnvrc", direnvrc),
     )
 
 
@@ -321,7 +337,7 @@ def install_fd(*, ignore: PathLike | None = None) -> None:
             msg = "'fdfind' should be installed"
             raise RuntimeError(msg)
         symlink(LOCAL_BIN / "fd", path_to)
-    symlink_if_given(XDG_CONFIG_HOME / "fd/ignore", ignore)
+    symlink_if_given(CONFIG_FD_IGNORE, ignore)
 
 
 def install_fish(
@@ -352,13 +368,11 @@ def install_fish(
     else:
         _LOGGER.info("Setting 'fish' as the default shell...")
         _ = run_commands("chsh -s $(which fish)")
-    fish = XDG_CONFIG_HOME / "fish"
-    conf_d = fish / "conf.d"
     symlink_many_if_given(
-        (fish / "config.fish", config),
-        (conf_d / "0-env.fish", env),
-        (conf_d / "git.fish", git),
-        (conf_d / "work.fish", work),
+        (CONFIG_FISH / "config.fish", config),
+        (CONFIG_FISH_CONF_D / "0-env.fish", env),
+        (CONFIG_FISH_CONF_D / "git.fish", git),
+        (CONFIG_FISH_CONF_D / "work.fish", work),
     )
 
 
@@ -376,7 +390,7 @@ def install_fzf(*, fzf_fish: PathLike | None = None) -> None:
                 assert_never(never)
     if fzf_fish is not None:
         for path in (full_path(fzf_fish) / "functions").iterdir():
-            cp(path, XDG_CONFIG_HOME / f"fish/functions/{path.name}")
+            cp(path, CONFIG_FISH_FUNCTIONS / path.name)
 
 
 def install_ggrep() -> None:
@@ -449,8 +463,9 @@ def install_git(
                 apt_install("git")
             case never:
                 assert_never(never)
-    git = XDG_CONFIG_HOME / "git"
-    symlink_many_if_given((git / "config", config), (git / "ignore", ignore))
+    symlink_many_if_given(
+        (CONFIG_GIT / "config", config), (CONFIG_GIT / "ignore", ignore)
+    )
 
 
 def install_gitweb() -> None:
@@ -483,7 +498,7 @@ def install_glab(*, config_yml: PathLike | None = None) -> None:
                 apt_install("glab")
             case never:
                 assert_never(never)
-    symlink_if_given(XDG_CONFIG_HOME / "glab-ci/config.yml", config_yml)
+    cp_if_given(CONFIG_GLAB_CONFIG_YML, config_yml)
 
 
 def install_gsed() -> None:
@@ -612,7 +627,7 @@ def install_neovim(*, nvim_dir: PathLike | None = None) -> None:
                     cp(appimage, path_to, executable=True)
             case never:
                 assert_never(never)
-    symlink_if_given(XDG_CONFIG_HOME / "nvim", nvim_dir)
+    symlink_if_given(CONFIG_NVIM, nvim_dir)
 
 
 def install_neovim_dependencies() -> None:
@@ -776,7 +791,7 @@ def install_sops(*, age_secret_key: PathLike | None = None) -> None:
                     cp(binary, path_to, executable=True)
             case never:
                 assert_never(never)
-    symlink_if_given(XDG_CONFIG_HOME / "sops/age/keys.txt", age_secret_key)
+    symlink_if_given(CONFIG_SOPS_AGE, age_secret_key)
 
 
 def install_spotify() -> None:
@@ -817,7 +832,7 @@ def install_starship(*, starship_toml: PathLike | None = None) -> None:
                 )
             case never:
                 assert_never(never)
-    symlink_if_given(XDG_CONFIG_HOME / "starship.toml", starship_toml)
+    symlink_if_given(CONFIG_STARSHIP_TOML, starship_toml)
 
 
 def install_stylua() -> None:
@@ -925,10 +940,9 @@ def install_tmux(
                 apt_install("tmux")
             case never:
                 assert_never(never)
-    tmux = XDG_CONFIG_HOME / "tmux"
     symlink_many_if_given(
-        (tmux / "tmux.conf", tmux_conf_oh_my_tmux),
-        (tmux / "tmux.conf.local", tmux_conf_local),
+        (CONFIG_TMUX_CONF_OH_MY_TMUX, tmux_conf_oh_my_tmux),
+        (CONFIG_TMUX_CONF_LOCAL, tmux_conf_local),
     )
 
 
@@ -1020,7 +1034,7 @@ def install_wezterm(*, wezterm_lua: PathLike | None = None) -> None:
                 apt_install("wezterm")
             case never:
                 assert_never(never)
-    symlink_if_given(XDG_CONFIG_HOME / "wezterm/wezterm.lua", wezterm_lua)
+    symlink_if_given(CONFIG_WEZTERM_LUA, wezterm_lua)
 
 
 def install_whatsapp() -> None:
@@ -1093,15 +1107,15 @@ def install_zoom(*, deb_file: PathLike | None = None) -> None:
 
 
 def setup_bashrc(*, bashrc: PathLike | None = None) -> None:
-    symlink_if_given(HOME / ".bashrc", bashrc)
+    symlink_if_given(BASHRC, bashrc)
 
 
 def setup_pdb(*, pdbrc: PathLike | None = None) -> None:
-    symlink_if_given(HOME / ".pdbrc", pdbrc)
+    symlink_if_given(PDBRC, pdbrc)
 
 
 def setup_psql(*, psqlrc: PathLike | None = None) -> None:
-    symlink_if_given(HOME / ".psqlrc", psqlrc)
+    symlink_if_given(PSQLRC, psqlrc)
 
 
 def setup_ssh(*, config: PathLike | None = None) -> None:

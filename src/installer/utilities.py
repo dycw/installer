@@ -142,6 +142,25 @@ def cp(
         chown(path_to)
 
 
+def cp_if_given(
+    path_from: PathLike,
+    path_to: PathLike | None,
+    /,
+    *,
+    executable: bool = False,
+    immutable: bool = False,
+    ownership: bool = False,
+) -> None:
+    if path_to is not None:
+        cp(
+            path_from,
+            path_to,
+            executable=executable,
+            immutable=immutable,
+            ownership=ownership,
+        )
+
+
 def cp_named_temporary(path: PathLike, /) -> Path:
     path_from = full_path(path)
     path_to = NamedTemporaryFile()
@@ -427,6 +446,7 @@ __all__ = [
     "chmod",
     "chown",
     "cp",
+    "cp_if_given",
     "cp_named_temporary",
     "download",
     "dpkg_install",
