@@ -284,13 +284,16 @@ def run_one_command(
 
 def symlink(path_from: PathLike, path_to: PathLike, /) -> None:
     path_from, path_to = map(full_path, [path_from, path_to])
-    if path_from.is_symlink():
-        resolved = path_from.resolve()
-        if resolved.exists() and (resolved == path_to.resolve()):
-            _LOGGER.debug("%r -> %r is already symlinked", str(path_from), str(path_to))
-            return
-        rm(path_from)
-    elif path_from.exists():
+    if (
+        path_from.is_symlink()
+        and path_from.resolve().exists()
+        and (path_from.resolve() == path_to.resolve())
+    ):
+        _LOGGER.debug("%r -> %r is already symlinked", str(path_from), str(path_to))
+        return
+    if (path_from.is_symlink() and not path_from.resolve().exists()) or (
+        path_from.exists() and not path_from.is_symlink()
+    ):
         rm(path_from)
     path_from.parent.mkdir(parents=True, exist_ok=True)
     _LOGGER.info("Symlinking %r -> %r", str(path_from), str(path_to))
