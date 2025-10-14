@@ -210,6 +210,11 @@ def mac_app_exists(app: str, /) -> bool:
     return full_path(f"/Applications/{app}.app").is_dir()
 
 
+def NamedTemporaryFile() -> Path:  # noqa: N802
+    temp_file = tempfile.NamedTemporaryFile(delete=False)  # noqa: SIM115
+    return Path(temp_file.name)
+
+
 def replace_line(path: PathLike, from_: str, to: str, /) -> None:
     if not contains_line(path, from_):
         _LOGGER.debug("%r not found in %r", from_, str(path))
@@ -410,6 +415,7 @@ def yield_tar_gz_contents(path: Path, /) -> Iterator[Path]:
 
 
 __all__ = [
+    "NamedTemporaryFile",
     "TemporaryDirectory",
     "append_contents",
     "apt_install",
