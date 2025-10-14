@@ -1115,7 +1115,7 @@ def setup_ssh_config(
         return
     identity_file = full_path(identity_file)
     path_to = SSH / identity_file.name
-    cp(identity_file, SSH)
+    cp(identity_file, path_to)
     text = f"""\
 Host {host}
     User git
