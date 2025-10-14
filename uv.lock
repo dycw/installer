@@ -2,6 +2,9 @@ version = 1
 revision = 3
 requires-python = ">=3.13"
 
+[options]
+prerelease-mode = "disallow"
+
 [[package]]
 name = "atomicwrites"
 version = "1.4.1"
@@ -220,7 +223,7 @@ wheels = [
 
 [[package]]
 name = "installer"
-version = "0.2.23"
+version = "0.2.24"
 source = { editable = "." }
 
 [package.dev-dependencies]
