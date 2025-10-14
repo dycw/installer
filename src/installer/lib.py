@@ -38,6 +38,7 @@ from .utilities import (
     symlink_if_given,
     symlink_many_if_given,
     uv_tool_install,
+    write_text,
     yield_download,
     yield_github_latest_download,
 )
@@ -1131,8 +1132,8 @@ def setup_ssh_keys(ssh_keys: PathLike, /) -> None:
             for line in full_path(path).read_text().splitlines()
             if (stripped := line.strip()) != ""
         ]
-        joined = "\n".join(keys)
-        _ = AUTHORIZED_KEYS.write_text(joined)
+        text = "\n".join(keys) + "\n"
+        write_text(text, AUTHORIZED_KEYS)
 
     if isinstance(ssh_keys, Path) or full_path(ssh_keys).exists():
         run(ssh_keys)
@@ -1152,6 +1153,7 @@ def setup_sshd(*, permit_root_login: bool = False) -> None:
 
 
 __all__ = [
+    "add_to_known_hosts",
     "install_age",
     "install_agg",
     "install_asciinema",
