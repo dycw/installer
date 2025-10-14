@@ -14,7 +14,6 @@ from re import search
 from stat import S_IXUSR
 from string import Template
 from subprocess import CalledProcessError, check_call, check_output
-from time import sleep
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -204,7 +203,7 @@ def is_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.2.36")
+    _LOGGER.info("'installer' version: 0.2.37")
 
 
 def luarocks_install(package: str, /) -> None:
@@ -288,43 +287,19 @@ def run_one_command(
 
 
 def symlink(path_from: PathLike, path_to: PathLike, /) -> None:
-    _LOGGER.info("Got path_from=%s and path_to=%s", path_from, path_to)
     path_from, path_to = map(full_path, [path_from, path_to])
     is_symlink = path_from.is_symlink()
-    _LOGGER.info("is_symlink=%s", is_symlink)
     resolved = path_from.resolve()
-    _LOGGER.info("resolved=%s", resolved)
     res_exists_and_correct = resolved.exists() and (resolved == path_to.resolve())
-    _LOGGER.info("res_exists_and_correct=%s", res_exists_and_correct)
     if is_symlink and res_exists_and_correct:
         _LOGGER.debug("%r -> %r is already symlinked", str(path_from), str(path_to))
         return
-    _LOGGER.info("path_from.exists()=%s", path_from.exists())
     if (is_symlink and not res_exists_and_correct) or path_from.exists():
-        _LOGGER.info("Removing symlink %r...", str(path_from))
         run_commands(f"sudo unlink {path_from}")
-        sleep(int(getenv("SLEEP", "10")))
-        _LOGGER.info(
-            "After removing symlink, path_from.exists()=%s...", path_from.exists()
-        )
     path_from.parent.mkdir(parents=True, exist_ok=True)
-    _LOGGER.info("path_to.exists()=%s", path_to.exists())
     if path_to.exists():
         _LOGGER.info("Symlinking %r -> %r", str(path_from), str(path_to))
-        for i in range(2):
-            _LOGGER.info(
-                "i=%d, path_from=%s, exists=%s, path_to=%s, exists=%s",
-                i,
-                str(path_from),
-                path_from.exists(),
-                str(path_to),
-                path_to.exists(),
-            )
-            try:
-                run_commands(f"ln -s {path_to} {path_from}")
-            except CalledProcessError:
-                _LOGGER.info("i=%d failed", i)
-            sleep(int(getenv("SLEEP", "10")))
+        run_commands(f"ln -s {path_to} {path_from}")
 
 
 def symlink_if_given(path_from: PathLike, path_to: PathLike | None, /) -> None:
