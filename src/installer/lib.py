@@ -19,13 +19,13 @@ from .constants import (
 from .enums import System
 from .utilities import (
     TemporaryDirectory,
+    append_contents,
     apt_install,
     brew_install,
     brew_installed,
     check_for_commands,
     contains_line,
     cp,
-    cp_contents,
     dpkg_install,
     full_path,
     have_command,
@@ -1111,22 +1111,13 @@ def setup_ssh_config(
 ) -> None:
     if (host is None) or (identity_file is None):
         return
-    header = f"Host {host}"
-    if contains_line(SSH_CONFIG, header):
-        _LOGGER.info("SSH config already contains %r", header)
-        return
-    _LOGGER.info("Adding %r to SSH config...", header)
     text = f"""\
-{header}
+Host {host}
     User git
     HostName github.com
     IdentityFile {identity_file}
 """
-    if SSH_CONFIG.exists():
-        with SSH_CONFIG.open(mode="w") as fh:
-            _ = fh.write(f"\n\n{text}")
-    else:
-        cp_contents(SSH_CONFIG, text)
+    append_contents(SSH_CONFIG, text, new_lines=2)
 
 
 def setup_ssh_keys(ssh_keys: PathLike, /) -> None:
