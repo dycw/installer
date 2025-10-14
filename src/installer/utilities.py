@@ -296,8 +296,9 @@ def symlink(path_from: PathLike, path_to: PathLike, /) -> None:
     ):
         rm(path_from)
     path_from.parent.mkdir(parents=True, exist_ok=True)
-    _LOGGER.info("Symlinking %r -> %r", str(path_from), str(path_to))
-    path_from.symlink_to(path_to)
+    if path_to.exists():
+        _LOGGER.info("Symlinking %r -> %r", str(path_from), str(path_to))
+        path_from.symlink_to(path_to)
 
 
 def symlink_if_given(path_from: PathLike, path_to: PathLike | None, /) -> None:
