@@ -28,6 +28,19 @@ if TYPE_CHECKING:
 _LOGGER = getLogger(__name__)
 
 
+def append_contents(path: PathLike, text: str, /, *, new_lines: int = 1) -> None:
+    path = full_path(path)
+    if path.exists() and (text in path.read_text()):
+        _LOGGER.debug("%r is already appended", str(path))
+        return
+    if path.exists():
+        with path.open(mode="a") as fh:
+            _ = fh.write(new_lines * "\n")
+            _ = fh.write(text)
+    else:
+        cp_contents(path, text)
+
+
 def apt_install(*packages: str, env: Mapping[str, str | None] | None = None) -> None:
     check_for_commands("apt")
     apt_update()
@@ -396,6 +409,7 @@ def yield_tar_gz_contents(path: Path, /) -> Iterator[Path]:
 
 __all__ = [
     "TemporaryDirectory",
+    "append_contents",
     "apt_install",
     "apt_update",
     "brew_install",
