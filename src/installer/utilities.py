@@ -203,7 +203,7 @@ def is_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.2.38")
+    _LOGGER.info("'installer' version: 0.2.39")
 
 
 def luarocks_install(package: str, /) -> None:
@@ -277,7 +277,7 @@ def run_one_command(
         if suppress_failure:
             desc = f"{desc} [suppress]"
         _LOGGER.info("%s...", desc)
-    cmd_use = '[ -f ~/.bashrc ] && source ~/.bashrc; command -v direnv >/dev/null 2>&1 && eval "$(direnv export bash)"; {cmd_use}'
+    cmd_use = f'[ -f ~/.bashrc ] && source ~/.bashrc; command -v direnv >/dev/null 2>&1 && eval "$(direnv export bash)"; {cmd_use}'
     with temp_environ(env):
         if suppress_failure:
             with suppress(CalledProcessError):
