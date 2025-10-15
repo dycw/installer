@@ -203,7 +203,7 @@ def is_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.2.39")
+    _LOGGER.info("'installer' version: 0.2.40")
 
 
 def luarocks_install(package: str, /) -> None:
@@ -269,7 +269,7 @@ def run_one_command(
         cmd_use = cmd_use.replace("sudo ", "")
     executable = which("bash")
     if not skip_log:
-        desc = f"Running {cmd_use!r} [bashrc]"
+        desc = f"Running {cmd_use!r}"
         if env is not None:
             desc = f"{desc} [env={env}]"
         if cwd is not None:
