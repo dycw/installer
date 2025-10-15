@@ -31,6 +31,7 @@ from .constants import (
     PSQLRC,
     SSH,
     SSH_CONFIG,
+    SSH_CONFIG_D,
 )
 from .enums import System
 from .utilities import (
@@ -1119,8 +1120,12 @@ def setup_psql(*, psqlrc: PathLike | None = None) -> None:
     symlink_if_given(PSQLRC, psqlrc)
 
 
-def setup_ssh(*, config: PathLike | None = None) -> None:
-    symlink_if_given(SSH_CONFIG, config)
+def setup_ssh(*configs: PathLike) -> None:
+    write_text("Include config.d/*", SSH_CONFIG)
+    SSH_CONFIG_D.mkdir(parents=True, exist_ok=True)
+    for config in configs:
+        path_from = SSH_CONFIG_D / full_path(config).name
+        symlink_if_given(path_from, config)
 
 
 def setup_ssh_config(
