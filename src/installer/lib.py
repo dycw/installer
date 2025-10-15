@@ -628,6 +628,7 @@ def install_neovim(*, nvim_dir: PathLike | None = None) -> None:
             case never:
                 assert_never(never)
     symlink_if_given(CONFIG_NVIM, nvim_dir)
+    run_commands("nvim --headless '+Lazy! sync' +qa")
 
 
 def install_neovim_dependencies() -> None:
