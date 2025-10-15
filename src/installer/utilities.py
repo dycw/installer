@@ -26,20 +26,23 @@ if TYPE_CHECKING:
 
 
 _LOGGER = getLogger(__name__)
-TRY_DIRENV_EXPORT = 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi; if command -v direnv >/dev/null 2>&1; then eval "$(direnv export bash)"; fi;'
+TRY_DIRENV_EXPORT = 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi; if command -v direnv >/dev/null 2>&1; then eval "$(direnv export bash)" >/dev/null 2>&1; fi;'
 
 
-def append_contents(path: PathLike, text: str, /, *, new_lines: int = 1) -> None:
+def append_contents(
+    path: PathLike, text: str, /, *, skip_log: bool = False, new_lines: int = 1
+) -> None:
     path = full_path(path)
-    if path.exists() and (text in path.read_text()):
-        _LOGGER.debug("%r is already appended", str(path))
-        return
     if path.exists():
+        if text in path.read_text():
+            return
+        if not skip_log:
+            _LOGGER.info("Appending %r text to %r...", text, str(path))
         with path.open(mode="a") as fh:
             _ = fh.write(new_lines * "\n")
             _ = fh.write(text)
-    else:
-        write_text(text, path)
+        return
+    write_text(text, path, skip_log=skip_log)
 
 
 def apt_install(*packages: str, env: Mapping[str, str | None] | None = None) -> None:
@@ -85,30 +88,22 @@ def check_for_commands(*cmds: str) -> None:
         raise RuntimeError(msg)
 
 
-def chmod(path: PathLike, /) -> None:
+def chmod(path: PathLike, /, *, skip_log: bool = False) -> None:
     path = full_path(path)
     mode = path.stat().st_mode
     if mode & S_IXUSR:
-        _LOGGER.debug("%r is already executable", str(path))
         return
-    _LOGGER.info("Setting %r to be executable...", str(path))
-    run_commands(f"sudo chmod u+x {path}")
+    run_commands(f"sudo chmod u+x {path}", skip_log=skip_log)
 
 
-def chown(path: PathLike, /) -> None:
+def chown(path: PathLike, /, *, skip_log: bool = False) -> None:
     path = full_path(path)
     stat = path.stat()
     file_user, curr_user = [getpwuid(i).pw_name for i in [stat.st_uid, geteuid()]]
     file_group, curr_group = [getgrgid(i).gr_name for i in [stat.st_gid, getegid()]]
     if (file_user == curr_user) and (file_group == curr_group):
-        _LOGGER.debug(
-            "%r is already owned by '%s:%s'", str(path), curr_user, curr_group
-        )
         return
-    _LOGGER.info(
-        "Setting ownership of %r to '%s:%s'...", str(path), curr_user, curr_group
-    )
-    run_commands(f"sudo chown {curr_user}:{curr_group} {path}")
+    run_commands(f"sudo chown {curr_user}:{curr_group} {path}", skip_log=skip_log)
 
 
 def contains_line(path: PathLike, text: str, /, *, flags: int = 0) -> bool:
@@ -124,23 +119,28 @@ def cp(
     path_to: PathLike,
     /,
     *,
+    skip_log: bool = False,
     executable: bool = False,
     immutable: bool = False,
     ownership: bool = False,
 ) -> None:
     path_from, path_to = map(full_path, [path_from, path_to])
     if path_to.exists() and (path_to.read_bytes() == path_from.read_bytes()):
-        _LOGGER.debug("%r -> %r is already copied", str(path_from), str(path_to))
         return
-    rm(path_to)
-    _LOGGER.info("Copying %r -> %r...", str(path_from), str(path_to))
-    run_commands(f"sudo mkdir -p {path_to.parent}", f"sudo cp {path_from} {path_to}")
+    rm(path_to, skip_log=skip_log)
+    if not skip_log:
+        _LOGGER.info("Copying %r -> %r...", str(path_from), str(path_to))
+    run_commands(
+        f"sudo mkdir -p {path_to.parent}",
+        f"sudo cp {path_from} {path_to}",
+        skip_log=skip_log,
+    )
     if executable:
-        chmod(path_to)
+        chmod(path_to, skip_log=skip_log)
     if immutable:
-        run_commands(f"sudo chattr +i {path_to}")
+        run_commands(f"sudo chattr +i {path_to}", skip_log=skip_log)
     if ownership:
-        chown(path_to)
+        chown(path_to, skip_log=skip_log)
 
 
 def cp_if_given(
@@ -148,6 +148,7 @@ def cp_if_given(
     path_to: PathLike | None,
     /,
     *,
+    skip_log: bool = False,
     executable: bool = False,
     immutable: bool = False,
     ownership: bool = False,
@@ -156,16 +157,17 @@ def cp_if_given(
         cp(
             path_from,
             path_to,
+            skip_log=skip_log,
             executable=executable,
             immutable=immutable,
             ownership=ownership,
         )
 
 
-def cp_named_temporary(path: PathLike, /) -> Path:
+def cp_named_temporary(path: PathLike, /, *, skip_log: bool = False) -> Path:
     path_from = full_path(path)
     path_to = NamedTemporaryFile()
-    write_text(path_from.read_text(), path_to)
+    write_text(path_from.read_text(), path_to, skip_log=skip_log)
     return path_to
 
 
@@ -204,7 +206,7 @@ def is_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.2.42")
+    _LOGGER.info("'installer' version: 0.2.43")
 
 
 def luarocks_install(package: str, /) -> None:
@@ -221,26 +223,26 @@ def NamedTemporaryFile() -> Path:  # noqa: N802
     return Path(temp_file.name)
 
 
-def replace_line(path: PathLike, from_: str, to: str, /) -> None:
+def replace_line(
+    path: PathLike, from_: str, to: str, /, *, skip_log: bool = False
+) -> None:
     if not contains_line(path, from_):
-        _LOGGER.debug("%r not found in %r", from_, str(path))
         return
-    _LOGGER.info("Replacing %r -> %r in %r...", from_, to, str(path))
-    run_commands(f"sudo sed -i 's|{from_}|{to}|' {path}")
+    run_commands(f"sudo sed -i 's|{from_}|{to}|' {path}", skip_log=skip_log)
 
 
-def replace_lines(path: PathLike, /, *lines: tuple[str, str]) -> None:
+def replace_lines(
+    path: PathLike, /, *lines: tuple[str, str], skip_log: bool = False
+) -> None:
     for from_, to in lines:
-        replace_line(path, from_, to)
+        replace_line(path, from_, to, skip_log=skip_log)
 
 
-def rm(path: PathLike, /) -> None:
+def rm(path: PathLike, /, *, skip_log: bool = False) -> None:
     path = full_path(path)
     if not path.exists():
-        _LOGGER.debug("%r is already removed...", str(path))
         return
-    _LOGGER.info("Removing %r...", str(path))
-    run_commands(f"sudo rm {path}")
+    run_commands(f"sudo rm {path}", skip_log=skip_log)
 
 
 def run_commands(
@@ -265,12 +267,11 @@ def run_one_command(
     cwd: PathLike | None = None,
     suppress_failure: bool = False,
 ) -> None:
-    cmd_use = cmd
     if is_root():
-        cmd_use = cmd_use.replace("sudo ", "")
+        cmd = cmd.replace("sudo ", "")
     executable = which("bash")
     if not skip_log:
-        desc = f"Running {cmd_use!r}"
+        desc = f"Running {cmd!r}"
         if env is not None:
             desc = f"{desc} [env={env}]"
         if cwd is not None:
@@ -278,7 +279,7 @@ def run_one_command(
         if suppress_failure:
             desc = f"{desc} [suppress]"
         _LOGGER.info("%s...", desc)
-    cmd_use = f'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi; if command -v direnv >/dev/null 2>&1; then eval "$(direnv export bash)"; fi; {cmd_use}'
+    cmd_use = f"{TRY_DIRENV_EXPORT}; {cmd}"
     with temp_environ(env):
         if suppress_failure:
             with suppress(CalledProcessError):
@@ -287,30 +288,34 @@ def run_one_command(
             _ = check_call(cmd_use, executable=executable, shell=True, cwd=cwd)
 
 
-def symlink(path_from: PathLike, path_to: PathLike, /) -> None:
+def symlink(
+    path_from: PathLike, path_to: PathLike, /, *, skip_log: bool = False
+) -> None:
     path_from, path_to = map(full_path, [path_from, path_to])
     is_symlink = path_from.is_symlink()
     resolved = path_from.resolve()
     res_exists_and_correct = resolved.exists() and (resolved == path_to.resolve())
     if is_symlink and res_exists_and_correct:
-        _LOGGER.debug("%r -> %r is already symlinked", str(path_from), str(path_to))
         return
     if (is_symlink and not res_exists_and_correct) or path_from.exists():
-        run_commands(f"sudo unlink {path_from}")
+        run_commands(f"sudo unlink {path_from}", skip_log=skip_log)
     path_from.parent.mkdir(parents=True, exist_ok=True)
     if path_to.exists():
-        _LOGGER.info("Symlinking %r -> %r", str(path_from), str(path_to))
-        run_commands(f"ln -s {path_to} {path_from}")
+        run_commands(f"ln -s {path_to} {path_from}", skip_log=skip_log)
 
 
-def symlink_if_given(path_from: PathLike, path_to: PathLike | None, /) -> None:
+def symlink_if_given(
+    path_from: PathLike, path_to: PathLike | None, /, *, skip_log: bool = False
+) -> None:
     if path_to is not None:
-        symlink(path_from, path_to)
+        symlink(path_from, path_to, skip_log=skip_log)
 
 
-def symlink_many_if_given(*paths: tuple[PathLike, PathLike | None]) -> None:
+def symlink_many_if_given(
+    *paths: tuple[PathLike, PathLike | None], skip_log: bool = False
+) -> None:
     for path_from, path_to in paths:
-        symlink_if_given(path_from, path_to)
+        symlink_if_given(path_from, path_to, skip_log=skip_log)
 
 
 @contextmanager
@@ -377,7 +382,6 @@ def update_submodules() -> None:
 
 def uv_tool_install(tool: str, /) -> None:
     if have_command(tool):
-        _LOGGER.debug("%r is already installed", tool)
         return
     _LOGGER.info("Installing %r...", tool)
     run_commands(f"uv tool install {tool}")
@@ -393,20 +397,23 @@ def write_text(
     path: PathLike,
     /,
     *,
+    skip_log: bool = False,
     executable: bool = False,
     immutable: bool = False,
     ownership: bool = False,
 ) -> None:
     path_to = full_path(path)
     if path_to.exists() and (path_to.read_text() == text):
-        _LOGGER.debug("%r is already copied", str(path_to))
         return
+    if not skip_log:
+        _LOGGER.info("Writing %r to %r...", text, str(path))
     with TemporaryDirectory() as temp_dir:
         path_from = temp_dir / path_to.name
         _ = path_from.write_text(text)
         cp(
             path_from,
             path_to,
+            skip_log=True,
             executable=executable,
             immutable=immutable,
             ownership=ownership,
