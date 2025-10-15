@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 
 
 _LOGGER = getLogger(__name__)
+TRY_DIRENV_EXPORT = 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi; if command -v direnv >/dev/null 2>&1; then eval "$(direnv export bash)"; fi;'
 
 
 def append_contents(path: PathLike, text: str, /, *, new_lines: int = 1) -> None:
@@ -203,7 +204,7 @@ def is_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.2.41")
+    _LOGGER.info("'installer' version: 0.2.42")
 
 
 def luarocks_install(package: str, /) -> None:
@@ -441,6 +442,7 @@ def yield_tar_gz_contents(path: Path, /) -> Iterator[Path]:
 
 
 __all__ = [
+    "TRY_DIRENV_EXPORT",
     "NamedTemporaryFile",
     "TemporaryDirectory",
     "append_contents",
