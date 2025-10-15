@@ -29,14 +29,12 @@ from .constants import (
     LOCAL_BIN,
     PDBRC,
     PSQLRC,
-    SSH,
     SSH_CONFIG,
     SSH_CONFIG_D,
 )
 from .enums import System
 from .utilities import (
     TemporaryDirectory,
-    append_contents,
     apt_install,
     brew_install,
     brew_installed,
@@ -1128,23 +1126,6 @@ def setup_ssh(*configs: PathLike) -> None:
         symlink_if_given(path_from, config)
 
 
-def setup_ssh_config(
-    *, host: str | None = None, identity_file: PathLike | None = None
-) -> None:
-    if (host is None) or (identity_file is None):
-        return
-    identity_file = full_path(identity_file)
-    path_to = SSH / identity_file.name
-    cp(identity_file, path_to)
-    text = f"""\
-Host {host}
-    User git
-    HostName github.com
-    IdentityFile {path_to}
-"""
-    append_contents(SSH_CONFIG, text, new_lines=2)
-
-
 def setup_ssh_keys(ssh_keys: PathLike, /) -> None:
     def run(path: PathLike, /) -> None:
         keys = [
@@ -1243,7 +1224,6 @@ __all__ = [
     "setup_pdb",
     "setup_psql",
     "setup_ssh",
-    "setup_ssh_config",
     "setup_ssh_keys",
     "setup_sshd",
 ]
