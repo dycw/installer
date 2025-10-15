@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 
 _LOGGER = getLogger(__name__)
-TRY_DIRENV_EXPORT = 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi; if command -v direnv >/dev/null 2>&1; then eval "$(direnv export bash)" >/dev/null 2>&1; fi;'
+TRY_DIRENV_EXPORT = 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi; if command -v direnv >/dev/null 2>&1; then eval "$(direnv export bash)" >/dev/null 2>&1; fi'
 
 
 def append_contents(
@@ -206,7 +206,7 @@ def is_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.2.43")
+    _LOGGER.info("'installer' version: 0.2.44")
 
 
 def luarocks_install(package: str, /) -> None:
