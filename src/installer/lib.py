@@ -1118,12 +1118,18 @@ def setup_psql(*, psqlrc: PathLike | None = None) -> None:
     symlink_if_given(PSQLRC, psqlrc)
 
 
-def setup_ssh(*configs: PathLike) -> None:
+def setup_ssh(*configs: PathLike | tuple[PathLike, str]) -> None:
     write_text("Include config.d/*", SSH_CONFIG)
     SSH_CONFIG_D.mkdir(parents=True, exist_ok=True)
     for config in configs:
-        path_from = SSH_CONFIG_D / full_path(config).name
-        symlink_if_given(path_from, config)
+        match config:
+            case Path() | str() as path_to:
+                path_from = SSH_CONFIG_D / full_path(path_to).name
+            case Path() | str() as path_to, str() as path_from_name:
+                path_from = SSH_CONFIG_D / path_from_name
+            case never:
+                assert_never(never)
+        symlink_if_given(path_from, path_to)
 
 
 def setup_ssh_keys(ssh_keys: PathLike, /) -> None:
