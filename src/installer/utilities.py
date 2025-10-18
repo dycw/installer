@@ -14,7 +14,7 @@ from re import search
 from stat import S_IXUSR
 from string import Template
 from subprocess import CalledProcessError, check_call, check_output
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
@@ -206,7 +206,7 @@ def is_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.2.53")
+    _LOGGER.info("'installer' version: 0.2.54")
 
 
 def luarocks_install(package: str, /) -> None:
@@ -392,6 +392,29 @@ def which(cmd: str, /) -> Path | None:
     return None if result is None else full_path(result)
 
 
+def write_template(
+    path_from: PathLike,
+    path_to: PathLike,
+    /,
+    *,
+    skip_log: bool = False,
+    executable: bool = False,
+    immutable: bool = False,
+    ownership: bool = False,
+    **kwargs: Any,
+) -> None:
+    path_from = full_path(path_from)
+    text = Template(path_from.read_text()).substitute(**kwargs)
+    write_text(
+        text,
+        path_to,
+        skip_log=skip_log,
+        executable=executable,
+        immutable=immutable,
+        ownership=ownership,
+    )
+
+
 def write_text(
     text: str,
     path: PathLike,
@@ -485,6 +508,7 @@ __all__ = [
     "update_submodules",
     "uv_tool_install",
     "which",
+    "write_template",
     "write_text",
     "yield_download",
     "yield_github_latest_download",
