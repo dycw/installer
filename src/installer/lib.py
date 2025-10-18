@@ -1132,11 +1132,12 @@ def setup_ssh(
     for sym in symlinks:
         match sym:
             case Path() | str() as path_to:
-                path_from = SSH_CONFIG_D / full_path(path_to).name
-            case Path() | str() as path_to, str() as path_from_name:
-                path_from = SSH_CONFIG_D / path_from_name
+                name = full_path(path_to).name
+            case Path() | str() as path_to, str() as name:
+                ...
             case never:
                 assert_never(never)
+        path_from = SSH_CONFIG_D / name
         symlink_if_given(path_from, path_to)
     for tem in templates:
         match tem:
