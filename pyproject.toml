@@ -16,12 +16,12 @@
   name = "installer"
   readme = "README.md"
   requires-python = ">= 3.13"
-  version = "0.2.57"
+  version = "0.2.58"
 
 # bump-my-version
 [tool.bumpversion]
   allow_dirty = true
-  current_version = "0.2.57"
+  current_version = "0.2.58"
 
   [[tool.bumpversion.files]]
     filename = "src/installer/__init__.py"
