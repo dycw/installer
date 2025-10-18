@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping
 from logging import getLogger
 from os import environ
 from pathlib import Path
 from re import search
 from shutil import which
-from typing import TYPE_CHECKING, assert_never
+from string import Template
+from typing import TYPE_CHECKING, Any, assert_never
 from zipfile import ZipFile
 
 from .constants import (
@@ -1118,11 +1120,17 @@ def setup_psql(*, psqlrc: PathLike | None = None) -> None:
     symlink_if_given(PSQLRC, psqlrc)
 
 
-def setup_ssh(*configs: PathLike | tuple[PathLike, str]) -> None:
+def setup_ssh(
+    *,
+    symlinks: Iterable[PathLike | tuple[PathLike, str]] = (),
+    templates: Iterable[
+        tuple[PathLike, Mapping[str, Any]] | tuple[PathLike, Mapping[str, Any], str]
+    ] = (),
+) -> None:
     write_text("Include config.d/*", SSH_CONFIG)
     SSH_CONFIG_D.mkdir(parents=True, exist_ok=True)
-    for config in configs:
-        match config:
+    for sym in symlinks:
+        match sym:
             case Path() | str() as path_to:
                 path_from = SSH_CONFIG_D / full_path(path_to).name
             case Path() | str() as path_to, str() as path_from_name:
@@ -1130,6 +1138,18 @@ def setup_ssh(*configs: PathLike | tuple[PathLike, str]) -> None:
             case never:
                 assert_never(never)
         symlink_if_given(path_from, path_to)
+    for tem in templates:
+        match tem:
+            case Path() | str() as template, Mapping() as kwargs:
+                template = full_path(template)
+                text = Template(template.read_text()).substitute(**kwargs)
+                name = template.name
+            case Path() | str() as template, Mapping() as kwargs, str() as name:
+                template = full_path(template)
+                text = Template(template.read_text()).substitute(**kwargs)
+            case never:
+                assert_never(never)
+        write_text(text, SSH_CONFIG_D / name)
 
 
 def setup_ssh_keys(ssh_keys: PathLike, /) -> None:
