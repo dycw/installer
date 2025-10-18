@@ -206,7 +206,7 @@ def is_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.2.50")
+    _LOGGER.info("'installer' version: 0.2.51")
 
 
 def luarocks_install(package: str, /) -> None:
@@ -226,16 +226,17 @@ def NamedTemporaryFile() -> Path:  # noqa: N802
 def replace_line(
     path: PathLike, from_: str, to: str, /, *, skip_log: bool = False
 ) -> None:
-    if not contains_line(path, from_):
-        return
-    run_commands(f"sudo sed -i 's|{from_}|{to}|' {path}", skip_log=skip_log)
+    replace_lines(path, (from_, to), skip_log=skip_log)
 
 
 def replace_lines(
     path: PathLike, /, *lines: tuple[str, str], skip_log: bool = False
 ) -> None:
+    path = full_path(path)
+    text = path.read_text()
     for from_, to in lines:
-        replace_line(path, from_, to, skip_log=skip_log)
+        text = text.replace(from_, to)
+    write_text(text, path, skip_log=skip_log)
 
 
 def rm(path: PathLike, /, *, skip_log: bool = False) -> None:
@@ -300,8 +301,7 @@ def symlink(
     if (is_symlink and not res_exists_and_correct) or path_from.exists():
         run_commands(f"sudo unlink {path_from}", skip_log=skip_log)
     path_from.parent.mkdir(parents=True, exist_ok=True)
-    if path_to.exists():
-        run_commands(f"ln -s {path_to} {path_from}", skip_log=skip_log)
+    run_commands(f"ln -s {path_to} {path_from}", skip_log=skip_log)
 
 
 def symlink_if_given(
