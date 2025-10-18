@@ -211,7 +211,7 @@ def is_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.2.57")
+    _LOGGER.info("'installer' version: 0.2.58")
 
 
 def luarocks_install(package: str, /) -> None:
@@ -435,7 +435,9 @@ def write_text(
     if path_to.exists() and (path_to.read_text() == text):
         return
     if not skip_log:
-        _LOGGER.info("Writing %r to %r...", text, str(path))
+        lines = text.splitlines()
+        desc = "\n".join(lines[:3]) + "..." if len(lines) >= 3 else text
+        _LOGGER.info("Writing %r to %r...", desc, str(path))
     with TemporaryDirectory() as temp_dir:
         path_from = temp_dir / path_to.name
         _ = path_from.write_text(text)
