@@ -6,7 +6,6 @@ from os import environ
 from pathlib import Path
 from re import search
 from shutil import which
-from string import Template
 from typing import TYPE_CHECKING, Any, assert_never
 from zipfile import ZipFile
 
@@ -55,6 +54,7 @@ from .utilities import (
     symlink_if_given,
     symlink_many_if_given,
     uv_tool_install,
+    write_template,
     write_text,
     yield_download,
     yield_github_latest_download,
@@ -1142,15 +1142,12 @@ def setup_ssh(
     for tem in templates:
         match tem:
             case Path() | str() as template, Mapping() as kwargs:
-                template = full_path(template)
-                text = Template(template.read_text()).substitute(**kwargs)
-                name = template.name
+                name = full_path(template).name
             case Path() | str() as template, Mapping() as kwargs, str() as name:
-                template = full_path(template)
-                text = Template(template.read_text()).substitute(**kwargs)
+                ...
             case never:
                 assert_never(never)
-        write_text(text, SSH_CONFIG_D / name)
+        write_template(template, SSH_CONFIG_D / name, **kwargs)
 
 
 def setup_ssh_keys(ssh_keys: PathLike, /) -> None:
