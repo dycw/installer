@@ -197,6 +197,11 @@ def get_output(cmd: str, /) -> str:
     return check_output(cmd, shell=True, text=True).strip("\n")
 
 
+def git_pull(*, cwd: PathLike | None = None) -> None:
+    _LOGGER.info("Pulling 'git'...")
+    run_commands("git pull", cwd=cwd)
+
+
 def have_command(cmd: str, /) -> bool:
     return which(cmd) is not None
 
@@ -206,7 +211,7 @@ def is_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.2.56")
+    _LOGGER.info("'installer' version: 0.2.57")
 
 
 def luarocks_install(package: str, /) -> None:
@@ -368,7 +373,7 @@ def touch(path: PathLike, /) -> None:
     run_commands(f"sudo mkdir -p {path}", f"sudo touch {path}")
 
 
-def update_submodules() -> None:
+def update_submodules(*, cwd: PathLike | None = None) -> None:
     _LOGGER.info("Updating submodules...")
     run_commands(
         "git submodule update --init --recursive",
@@ -377,6 +382,7 @@ def update_submodules() -> None:
             git checkout $(git symbolic-ref refs/remotes/origin/HEAD | sed "s#.*/##") &&
             git pull --ff-only
         '""",
+        cwd=cwd,
     )
 
 
@@ -492,6 +498,7 @@ __all__ = [
     "full_path",
     "get_latest_tag",
     "get_output",
+    "git_pull",
     "have_command",
     "is_root",
     "log_installer_version",
