@@ -479,6 +479,7 @@ __all__ = [
     "apt_install",
     "apt_update",
     "brew_install",
+    "brew_installed",
     "check_for_commands",
     "chmod",
     "chown",
