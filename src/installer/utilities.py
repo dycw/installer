@@ -164,13 +164,6 @@ def cp_if_given(
         )
 
 
-def cp_named_temporary(path: PathLike, /, *, skip_log: bool = False) -> Path:
-    path_from = full_path(path)
-    path_to = NamedTemporaryFile()
-    write_text(path_from.read_text(), path_to, skip_log=skip_log)
-    return path_to
-
-
 def download(url: str, path: PathLike, /) -> None:
     with urlopen(url) as response, full_path(path).open(mode="wb") as fh:
         _ = fh.write(response.read())
@@ -211,7 +204,7 @@ def is_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.2.58")
+    _LOGGER.info("'installer' version: 0.2.59")
 
 
 def luarocks_install(package: str, /) -> None:
@@ -221,11 +214,6 @@ def luarocks_install(package: str, /) -> None:
 
 def mac_app_exists(app: str, /) -> bool:
     return full_path(f"/Applications/{app}.app").is_dir()
-
-
-def NamedTemporaryFile() -> Path:  # noqa: N802
-    temp_file = tempfile.NamedTemporaryFile(delete=False)  # noqa: SIM115
-    return Path(temp_file.name)
 
 
 def replace_line(
@@ -481,7 +469,6 @@ def yield_tar_gz_contents(path: Path, /) -> Iterator[Path]:
 
 __all__ = [
     "TRY_DIRENV_EXPORT",
-    "NamedTemporaryFile",
     "TemporaryDirectory",
     "append_contents",
     "apt_install",
@@ -494,7 +481,6 @@ __all__ = [
     "contains_line",
     "cp",
     "cp_if_given",
-    "cp_named_temporary",
     "download",
     "dpkg_install",
     "full_path",
