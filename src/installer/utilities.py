@@ -214,7 +214,7 @@ def is_not_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.2.66")
+    _LOGGER.info("'installer' version: 0.2.67")
 
 
 def luarocks_install(package: str, /) -> None:
