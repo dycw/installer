@@ -895,7 +895,7 @@ def install_tailscale(*, auth_key: PathLike | None = None) -> None:
                 brew_install("syncthing")
             case System.linux:
                 check_for_commands("curl")
-                run_commands("curl -fsSL https://tailscale.com/install.sh | sh")
+                _ = run_command("curl -fsSL https://tailscale.com/install.sh | sh")
             case never:
                 assert_never(never)
     try:
@@ -968,7 +968,7 @@ def install_uv() -> None:
             brew_install("uv")
         case System.linux:
             check_for_commands("curl")
-            run_commands(
+            _ = run_command(
                 "curl -LsSf https://astral.sh/uv/install.sh | sh -s",
                 env={"UV_NO_MODIFY_PATH": "1"},
             )
@@ -1038,7 +1038,7 @@ def install_wezterm(*, wezterm_lua: PathLike | None = None) -> None:
                 brew_install("wezterm", cask=True)
             case System.linux:
                 check_for_commands("curl")
-                run_commands(
+                _ = run_commands(
                     "curl -fsSL https://apt.fury.io/wez/gpg.key | sudo gpg --yes --dearmor -o /usr/share/keyrings/wezterm-fury.gpg",
                     "echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' | sudo tee /etc/apt/sources.list.d/wezterm.list",
                     "sudo chmod 644 /usr/share/keyrings/wezterm-fury.gpg",
