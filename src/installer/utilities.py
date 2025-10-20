@@ -51,13 +51,13 @@ def apt_install(*packages: str, env: Mapping[str, str | None] | None = None) -> 
     desc = ", ".join(map(repr, packages))
     _LOGGER.info("Installing %s...", desc)
     joined = " ".join(packages)
-    run_commands(f"sudo apt -y install {joined}", env=env)
+    run_commands(f"apt -y install {joined}", env=env)
 
 
 def apt_update() -> None:
     check_for_commands("apt")
     _LOGGER.info("Updating 'apt'...")
-    run_commands("sudo apt -y update")
+    run_commands("apt -y update")
 
 
 def brew_install(*packages: str, cask: bool = False) -> None:
@@ -93,7 +93,7 @@ def chmod(path: PathLike, /, *, skip_log: bool = False) -> None:
     mode = path.stat().st_mode
     if mode & S_IXUSR:
         return
-    run_commands(f"sudo chmod u+x {path}", skip_log=skip_log)
+    run_commands(f"chmod u+x {path}", skip_log=skip_log)
 
 
 def chown(path: PathLike, /, *, skip_log: bool = False) -> None:
@@ -103,7 +103,7 @@ def chown(path: PathLike, /, *, skip_log: bool = False) -> None:
     file_group, curr_group = [getgrgid(i).gr_name for i in [stat.st_gid, getegid()]]
     if (file_user == curr_user) and (file_group == curr_group):
         return
-    run_commands(f"sudo chown {curr_user}:{curr_group} {path}", skip_log=skip_log)
+    run_commands(f"chown {curr_user}:{curr_group} {path}", skip_log=skip_log)
 
 
 def contains_line(path: PathLike, text: str, /, *, flags: int = 0) -> bool:
@@ -131,14 +131,12 @@ def cp(
     if not skip_log:
         _LOGGER.info("Copying %r -> %r...", str(path_from), str(path_to))
     run_commands(
-        f"sudo mkdir -p {path_to.parent}",
-        f"sudo cp {path_from} {path_to}",
-        skip_log=skip_log,
+        f"mkdir -p {path_to.parent}", f"cp {path_from} {path_to}", skip_log=skip_log
     )
     if executable:
         chmod(path_to, skip_log=skip_log)
     if immutable:
-        run_commands(f"sudo chattr +i {path_to}", skip_log=skip_log)
+        run_commands(f"chattr +i {path_to}", skip_log=skip_log)
     if ownership:
         chown(path_to, skip_log=skip_log)
 
@@ -171,7 +169,7 @@ def download(url: str, path: PathLike, /) -> None:
 
 def dpkg_install(path: PathLike, /) -> None:
     check_for_commands("dpkg")
-    run_commands(f"sudo dpkg -i {path}")
+    run_commands(f"dpkg -i {path}")
 
 
 def full_path(*parts: PathLike) -> Path:
@@ -204,12 +202,12 @@ def is_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.2.61")
+    _LOGGER.info("'installer' version: 0.2.62")
 
 
 def luarocks_install(package: str, /) -> None:
     check_for_commands("luarocks")
-    run_commands(f"sudo luarocks install {package}")
+    run_commands(f"luarocks install {package}")
 
 
 def mac_app_exists(app: str, /) -> bool:
@@ -236,7 +234,7 @@ def rm(path: PathLike, /, *, skip_log: bool = False) -> None:
     path = full_path(path)
     if not path.exists():
         return
-    run_commands(f"sudo rm {path}", skip_log=skip_log)
+    run_commands(f"rm {path}", skip_log=skip_log)
 
 
 def run_commands(
@@ -261,8 +259,6 @@ def run_one_command(
     cwd: PathLike | None = None,
     suppress_failure: bool = False,
 ) -> None:
-    if is_root():
-        cmd = cmd.replace("sudo ", "")
     executable = which("bash")
     if not skip_log:
         desc = f"Running {cmd!r}"
@@ -292,7 +288,7 @@ def symlink(
     if is_symlink and res_exists_and_correct:
         return
     if (is_symlink and not res_exists_and_correct) or path_from.exists():
-        run_commands(f"sudo unlink {path_from}", skip_log=skip_log)
+        run_commands(f"unlink {path_from}", skip_log=skip_log)
     path_from.parent.mkdir(parents=True, exist_ok=True)
     run_commands(f"ln -s {path_to} {path_from}", skip_log=skip_log)
 
@@ -358,7 +354,7 @@ def touch(path: PathLike, /) -> None:
         _LOGGER.debug("%r already exists")
         return
     _LOGGER.debug("Touching %r...", str(path))
-    run_commands(f"sudo mkdir -p {path}", f"sudo touch {path}")
+    run_commands(f"mkdir -p {path}", f"touch {path}")
 
 
 def update_submodules(*, cwd: PathLike | None = None) -> None:

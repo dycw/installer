@@ -46,7 +46,6 @@ from .utilities import (
     dpkg_install,
     full_path,
     have_command,
-    is_root,
     luarocks_install,
     mac_app_exists,
     replace_lines,
@@ -864,9 +863,6 @@ def install_stylua() -> None:
 
 
 def install_sudo() -> None:
-    if is_root():
-        _LOGGER.debug("'sudo' is not needed for 'root'")
-        return
     if have_command("sudo"):
         _LOGGER.debug("'sudo' is already installed")
         return
