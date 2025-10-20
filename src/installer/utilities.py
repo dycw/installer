@@ -204,7 +204,7 @@ def is_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.3.0")
+    _LOGGER.info("'installer' version: 0.3.1")
 
 
 def luarocks_install(package: str, /) -> None:
@@ -361,7 +361,9 @@ def touch(path: PathLike, /) -> None:
     run_commands(f"sudo mkdir -p {path}", f"sudo touch {path}")
 
 
-def update_submodules(*, cwd: PathLike | None = None) -> None:
+def update_submodules(
+    *, cwd: PathLike | None = None, version: str | None = None
+) -> None:
     _LOGGER.info("Updating submodules...")
     run_commands(
         "git submodule update --init --recursive",
@@ -372,6 +374,8 @@ def update_submodules(*, cwd: PathLike | None = None) -> None:
         '""",
         cwd=cwd,
     )
+    if version is not None:
+        run_commands(f"git checkout {version}", cwd=cwd)
 
 
 def uv_tool_install(tool: str, /) -> None:
