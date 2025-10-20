@@ -72,6 +72,7 @@ def add_to_known_hosts() -> None:
         _LOGGER.debug("Known hosts already contains 'github.com'")
         return
     _LOGGER.info("Adding 'github.com' to known hosts...")
+    KNOWN_HOSTS.parent.mkdir(parents=True, exist_ok=True)
     run_commands(f"ssh-keyscan github.com >> {KNOWN_HOSTS}")
 
 
