@@ -204,7 +204,7 @@ def is_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.3.1")
+    _LOGGER.info("'installer' version: 0.3.2")
 
 
 def luarocks_install(package: str, /) -> None:
@@ -368,9 +368,8 @@ def update_submodules(
     run_commands(
         "git submodule update --init --recursive",
         """git submodule foreach --recursive '
-            git checkout -- . &&
-            git checkout $(git symbolic-ref refs/remotes/origin/HEAD | sed "s#.*/##") &&
-            git pull --ff-only
+            git reset --hard origin/$(git symbolic-ref refs/remotes/origin/HEAD | sed "s#.*/##") &&
+            git pull --ff-only --force --prune --tags
         '""",
         cwd=cwd,
     )
