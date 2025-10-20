@@ -214,7 +214,7 @@ def is_not_root() -> bool:
 
 
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.2.65")
+    _LOGGER.info("'installer' version: 0.2.66")
 
 
 def luarocks_install(package: str, /) -> None:
@@ -251,14 +251,20 @@ def rm(path: PathLike, /, *, skip_log: bool = False) -> None:
 
 def run_commands(
     *cmds: str,
-    skip_log: bool = False,
+    direnv: bool = False,
     env: Mapping[str, str | None] | None = None,
     cwd: PathLike | None = None,
     suppress_failure: bool = False,
+    skip_log: bool = False,
 ) -> None:
     for cmd in cmds:
         run_one_command(
-            cmd, skip_log=skip_log, env=env, cwd=cwd, suppress_failure=suppress_failure
+            cmd,
+            direnv=direnv,
+            env=env,
+            cwd=cwd,
+            suppress_failure=suppress_failure,
+            skip_log=skip_log,
         )
 
 
@@ -266,28 +272,29 @@ def run_one_command(
     cmd: str,
     /,
     *,
-    skip_log: bool = False,
+    direnv: bool = False,
     env: Mapping[str, str | None] | None = None,
     cwd: PathLike | None = None,
     suppress_failure: bool = False,
+    skip_log: bool = False,
 ) -> None:
-    executable = which("bash")
+    desc = f"Running {cmd!r}"
+    if direnv:
+        desc = f"{desc} [direnv]"
+        cmd = f"{TRY_DIRENV_EXPORT}; {cmd}"
+    if env is not None:
+        desc = f"{desc} [env={env}]"
+    if cwd is not None:
+        desc = f"{desc} [cwd={cwd}]"
     if not skip_log:
-        desc = f"Running {cmd!r}"
-        if env is not None:
-            desc = f"{desc} [env={env}]"
-        if cwd is not None:
-            desc = f"{desc} [cwd={cwd}]"
-        if suppress_failure:
-            desc = f"{desc} [suppress]"
         _LOGGER.info("%s...", desc)
-    cmd_use = f"{TRY_DIRENV_EXPORT}; {cmd}"
+    executable = which("bash")
     with temp_environ(env):
         if suppress_failure:
             with suppress(CalledProcessError):
-                _ = check_call(cmd_use, executable=executable, shell=True, cwd=cwd)
+                _ = check_call(cmd, executable=executable, shell=True, cwd=cwd)
         else:
-            _ = check_call(cmd_use, executable=executable, shell=True, cwd=cwd)
+            _ = check_call(cmd, executable=executable, shell=True, cwd=cwd)
 
 
 def symlink(
