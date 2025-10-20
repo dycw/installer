@@ -51,13 +51,21 @@ def apt_install(*packages: str, env: Mapping[str, str | None] | None = None) -> 
     desc = ", ".join(map(repr, packages))
     _LOGGER.info("Installing %s...", desc)
     joined = " ".join(packages)
-    run_commands(f"apt -y install {joined}", env=env)
+    parts: list[str] = []
+    if is_not_root():
+        parts.append("sudo")
+    parts.append(f"apt -y install {joined}")
+    run_commands(" ".join(parts), env=env)
 
 
 def apt_update() -> None:
     check_for_commands("apt")
     _LOGGER.info("Updating 'apt'...")
-    run_commands("apt -y update")
+    parts: list[str] = []
+    if is_not_root():
+        parts.append("sudo")
+    parts.append("apt -y update")
+    run_commands(" ".join(parts))
 
 
 def brew_install(*packages: str, cask: bool = False) -> None:
@@ -201,8 +209,12 @@ def is_root() -> bool:
     return geteuid() == 0
 
 
+def is_not_root() -> bool:
+    return not is_root()
+
+
 def log_installer_version() -> None:
-    _LOGGER.info("'installer' version: 0.2.62")
+    _LOGGER.info("'installer' version: 0.2.63")
 
 
 def luarocks_install(package: str, /) -> None:
@@ -484,6 +496,7 @@ __all__ = [
     "get_output",
     "git_pull",
     "have_command",
+    "is_not_root",
     "is_root",
     "log_installer_version",
     "luarocks_install",
