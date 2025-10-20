@@ -46,6 +46,7 @@ from .utilities import (
     dpkg_install,
     full_path,
     have_command,
+    is_root,
     luarocks_install,
     mac_app_exists,
     replace_lines,
@@ -862,6 +863,17 @@ def install_stylua() -> None:
             assert_never(never)
 
 
+def install_sudo() -> None:
+    if is_root():
+        _LOGGER.debug("'sudo' is not needed for 'root'")
+        return
+    if have_command("sudo"):
+        _LOGGER.debug("'sudo' is already installed")
+        return
+    _LOGGER.info("Installing 'sudo'...")
+    apt_install("sudo")
+
+
 def install_syncthing() -> None:
     if have_command("syncthing"):
         _LOGGER.debug("'syncthing' is already installed")
@@ -1228,6 +1240,7 @@ __all__ = [
     "install_spotify",
     "install_starship",
     "install_stylua",
+    "install_sudo",
     "install_syncthing",
     "install_tailscale",
     "install_tmux",
