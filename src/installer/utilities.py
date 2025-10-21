@@ -13,7 +13,7 @@ from pwd import getpwuid
 from re import search
 from stat import S_IXUSR
 from string import Template
-from subprocess import check_call, check_output
+from subprocess import check_output
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -51,31 +51,33 @@ def apt_install(*packages: str, env: Mapping[str, str | None] | None = None) -> 
     desc = ", ".join(map(repr, packages))
     _LOGGER.info("Installing %s...", desc)
     joined = " ".join(packages)
-    run_commands(f"sudo apt -y install {joined}", env=env)
+    cmd = f"sudo apt -y install {joined}"
+    _ = run_command(cmd, env=env)
 
 
 def apt_update() -> None:
     check_for_commands("apt")
     _LOGGER.info("Updating 'apt'...")
-    run_commands("sudo apt -y update")
+    _ = run_command("sudo apt -y update")
 
 
 def brew_install(*packages: str, cask: bool = False) -> None:
     check_for_commands("brew")
     _LOGGER.info("Updating 'brew'...")
-    run_commands("brew update")
+    _ = run_command("brew update")
     desc = ", ".join(map(repr, packages))
     _LOGGER.info("Installing %s...", desc)
     cmd = "brew install"
     if cask:
         cmd = f"{cmd} --cask"
     joined = " ".join(packages)
-    run_commands(f"{cmd} {joined}")
+    cmd = f"{cmd} {joined}"
+    _ = run_command(cmd)
 
 
 def brew_installed(package: str, /) -> bool:
     check_for_commands("brew")
-    output = get_output("brew list -1")
+    output = run_command("brew list -1")
     return any(p == package for p in output.splitlines())
 
 
@@ -93,7 +95,7 @@ def chmod(path: PathLike, /, *, skip_log: bool = False) -> None:
     mode = path.stat().st_mode
     if mode & S_IXUSR:
         return
-    run_commands(f"sudo chmod u+x {path}", skip_log=skip_log)
+    _ = run_command(f"sudo chmod u+x {path}", skip_log=skip_log)
 
 
 def chown(path: PathLike, /, *, skip_log: bool = False) -> None:
@@ -103,7 +105,7 @@ def chown(path: PathLike, /, *, skip_log: bool = False) -> None:
     file_group, curr_group = [getgrgid(i).gr_name for i in [stat.st_gid, getegid()]]
     if (file_user == curr_user) and (file_group == curr_group):
         return
-    run_commands(f"sudo chown {curr_user}:{curr_group} {path}", skip_log=skip_log)
+    _ = run_command(f"sudo chown {curr_user}:{curr_group} {path}", skip_log=skip_log)
 
 
 def contains_line(path: PathLike, text: str, /, *, flags: int = 0) -> bool:
@@ -130,7 +132,7 @@ def cp(
     rm(path_to, skip_log=skip_log)
     if not skip_log:
         _LOGGER.info("Copying %r -> %r...", str(path_from), str(path_to))
-    run_commands(
+    _ = run_commands(
         f"sudo mkdir -p {path_to.parent}",
         f"sudo cp {path_from} {path_to}",
         skip_log=skip_log,
@@ -138,7 +140,7 @@ def cp(
     if executable:
         chmod(path_to, skip_log=skip_log)
     if immutable:
-        run_commands(f"sudo chattr +i {path_to}", skip_log=skip_log)
+        _ = run_command(f"sudo chattr +i {path_to}", skip_log=skip_log)
     if ownership:
         chown(path_to, skip_log=skip_log)
 
@@ -171,7 +173,7 @@ def download(url: str, path: PathLike, /) -> None:
 
 def dpkg_install(path: PathLike, /) -> None:
     check_for_commands("dpkg")
-    run_commands(f"sudo dpkg -i {path}")
+    _ = run_command(f"sudo dpkg -i {path}")
 
 
 def full_path(*parts: PathLike) -> Path:
@@ -181,18 +183,14 @@ def full_path(*parts: PathLike) -> Path:
 def get_latest_tag(owner: str, repo: str, /) -> str:
     check_for_commands("curl", "jq")
     _LOGGER.info("Getting latest tag '%s/%s'...", owner, repo)
-    return get_output(
+    return run_command(
         f"curl -s https://api.github.com/repos/{owner}/{repo}/releases/latest | jq -r '.tag_name'"
     )
 
 
-def get_output(cmd: str, /) -> str:
-    return check_output(cmd, shell=True, text=True).strip("\n")
-
-
 def git_pull(*, cwd: PathLike | None = None) -> None:
     _LOGGER.info("Pulling 'git'...")
-    run_commands("git pull", cwd=cwd)
+    _ = run_command("git pull", cwd=cwd)
 
 
 def have_command(cmd: str, /) -> bool:
@@ -205,7 +203,7 @@ def is_root() -> bool:
 
 def luarocks_install(package: str, /) -> None:
     check_for_commands("luarocks")
-    run_commands(f"sudo luarocks install {package}")
+    _ = run_command(f"sudo luarocks install {package}")
 
 
 def mac_app_exists(app: str, /) -> bool:
@@ -232,21 +230,10 @@ def rm(path: PathLike, /, *, skip_log: bool = False) -> None:
     path = full_path(path)
     if not path.exists():
         return
-    run_commands(f"sudo rm {path}", skip_log=skip_log)
+    _ = run_command(f"sudo rm {path}", skip_log=skip_log)
 
 
-def run_commands(
-    *cmds: str,
-    direnv: bool = False,
-    env: Mapping[str, str | None] | None = None,
-    cwd: PathLike | None = None,
-    skip_log: bool = False,
-) -> None:
-    for cmd in cmds:
-        run_one_command(cmd, direnv=direnv, env=env, cwd=cwd, skip_log=skip_log)
-
-
-def run_one_command(
+def run_command(
     cmd: str,
     /,
     *,
@@ -254,7 +241,7 @@ def run_one_command(
     env: Mapping[str, str | None] | None = None,
     cwd: PathLike | None = None,
     skip_log: bool = False,
-) -> None:
+) -> str:
     if is_root():
         cmd = cmd.replace("sudo ", "")
     desc = f"Running {cmd!r}"
@@ -268,7 +255,22 @@ def run_one_command(
     if not skip_log:
         _LOGGER.info("%s...", desc)
     with temp_environ(env):
-        _ = check_call(cmd, executable=which("bash"), shell=True, cwd=cwd)
+        return check_output(
+            cmd, executable=which("bash"), shell=True, cwd=cwd, text=True
+        ).rstrip("\n")
+
+
+def run_commands(
+    *cmds: str,
+    direnv: bool = False,
+    env: Mapping[str, str | None] | None = None,
+    cwd: PathLike | None = None,
+    skip_log: bool = False,
+) -> list[str]:
+    return [
+        run_command(cmd, direnv=direnv, env=env, cwd=cwd, skip_log=skip_log)
+        for cmd in cmds
+    ]
 
 
 def symlink(
@@ -281,9 +283,9 @@ def symlink(
     if is_symlink and res_exists_and_correct:
         return
     if (is_symlink and not res_exists_and_correct) or path_from.exists():
-        run_commands(f"sudo unlink {path_from}", skip_log=skip_log)
+        _ = run_command(f"sudo unlink {path_from}", skip_log=skip_log)
     path_from.parent.mkdir(parents=True, exist_ok=True)
-    run_commands(f"ln -s {path_to} {path_from}", skip_log=skip_log)
+    _ = run_command(f"ln -s {path_to} {path_from}", skip_log=skip_log)
 
 
 def symlink_if_given(
@@ -347,27 +349,27 @@ def touch(path: PathLike, /) -> None:
         _LOGGER.debug("%r already exists")
         return
     _LOGGER.debug("Touching %r...", str(path))
-    run_commands(f"sudo mkdir -p {path}", f"sudo touch {path}")
+    _ = run_commands(f"sudo mkdir -p {path}", f"sudo touch {path}")
 
 
 def update_submodules(
     *, cwd: PathLike | None = None, version: str | None = None
 ) -> None:
     _LOGGER.info("Updating submodules...")
-    run_commands(
+    _ = run_commands(
         "git submodule update --init --recursive",
         "git submodule foreach --recursive 'git checkout --force $(git symbolic-ref refs/remotes/origin/HEAD --short | sed ''s#origin/##'') && git pull --ff-only --force --prune --tags'",
         cwd=cwd,
     )
     if version is not None:
-        run_commands(f"git checkout {version}", cwd=cwd)
+        _ = run_command(f"git checkout {version}", cwd=cwd)
 
 
 def uv_tool_install(tool: str, /) -> None:
     if have_command(tool):
         return
     _LOGGER.info("Installing %r...", tool)
-    run_commands(f"uv tool install {tool}")
+    _ = run_command(f"uv tool install {tool}")
 
 
 def which(cmd: str, /) -> Path | None:
@@ -474,7 +476,6 @@ __all__ = [
     "dpkg_install",
     "full_path",
     "get_latest_tag",
-    "get_output",
     "git_pull",
     "have_command",
     "is_root",
@@ -483,8 +484,8 @@ __all__ = [
     "replace_line",
     "replace_lines",
     "rm",
+    "run_command",
     "run_commands",
-    "run_one_command",
     "symlink",
     "symlink_if_given",
     "symlink_many_if_given",

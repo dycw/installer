@@ -49,6 +49,7 @@ from .utilities import (
     luarocks_install,
     mac_app_exists,
     replace_lines,
+    run_command,
     run_commands,
     symlink,
     symlink_if_given,
@@ -73,7 +74,7 @@ def add_to_known_hosts() -> None:
         return
     _LOGGER.info("Adding 'github.com' to known hosts...")
     KNOWN_HOSTS.parent.mkdir(parents=True, exist_ok=True)
-    run_commands(f"ssh-keyscan github.com >> {KNOWN_HOSTS}")
+    _ = run_command(f"ssh-keyscan github.com >> {KNOWN_HOSTS}")
 
 
 def install_age() -> None:
@@ -192,7 +193,7 @@ def install_brew() -> None:
         return
     _LOGGER.info("Installing 'brew'...")
     check_for_commands("curl")
-    run_commands(
+    _ = run_command(
         "curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash",
         env={"NONINTERACTIVE": "1"},
     )
@@ -236,7 +237,7 @@ def install_direnv(
             case System.linux:
                 check_for_commands("curl")
                 LOCAL_BIN.mkdir(parents=True, exist_ok=True)
-                run_commands(
+                _ = run_command(
                     "curl -sfL https://direnv.net/install.sh | bash",
                     env={"bin_path": str(LOCAL_BIN)},
                 )
@@ -266,9 +267,9 @@ def install_docker() -> None:
                     "containerd",
                     "runc",
                 ]
-                run_commands(*(f"sudo apt-get remove {p}" for p in packages))
+                _ = run_commands(*(f"sudo apt-get remove {p}" for p in packages))
                 apt_install("ca-certificates", "curl")
-                run_commands(
+                _ = run_commands(
                     "sudo install -m 0755 -d /etc/apt/keyrings",
                     "sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc",
                     "sudo chmod a+r /etc/apt/keyrings/docker.asc",
@@ -283,7 +284,7 @@ def install_docker() -> None:
                 )
             case never:
                 assert_never(never)
-    run_commands("sudo usermod -aG docker $USER")
+    _ = run_command("sudo usermod -aG docker $USER")
 
 
 def install_dropbox() -> None:
@@ -358,7 +359,7 @@ def install_fish(
                 brew_install("fish")
             case System.linux:
                 check_for_commands("curl")
-                run_commands(
+                _ = run_commands(
                     "echo 'deb http://download.opensuse.org/repositories/shells:/fish/Debian_13/ /' | sudo tee /etc/apt/sources.list.d/shells:fish.list",
                     "curl -fsSL https://download.opensuse.org/repositories/shells:fish/Debian_13/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/shells_fish.gpg > /dev/null",
                 )
@@ -431,7 +432,7 @@ def install_ghostty() -> None:
             brew_install("ghostty", cask=True)
         case System.linux:
             check_for_commands("curl")
-            run_commands(
+            _ = run_command(
                 'curl -sS https://debian.griffo.io/EA0F721D231FDD3A0A17B9AC7808B4DD62C41256.asc | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/debian.griffo.io.gpg echo "deb https://debian.griffo.io/apt $(lsb_release -sc 2>/dev/null) main" | sudo tee /etc/apt/sources.list.d/debian.griffo.io.list'
             )
             apt_install(
@@ -630,7 +631,7 @@ def install_neovim(*, nvim_dir: PathLike | None = None) -> None:
             case never:
                 assert_never(never)
     symlink_if_given(CONFIG_NVIM, nvim_dir)
-    run_commands("nvim --headless '+Lazy! sync' +qa", direnv=True)
+    _ = run_command("nvim --headless '+Lazy! sync' +qa", direnv=True)
 
 
 def install_neovim_dependencies() -> None:
@@ -810,7 +811,7 @@ def install_spotify() -> None:
                 _LOGGER.debug("'spotify' is already installed")
                 return
             check_for_commands("curl")
-            run_commands(
+            _ = run_commands(
                 "curl -sS https://download.spotify.com/debian/pubkey_C85668DF69375001.gpg | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg",
                 'echo "deb https://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list',
             )
@@ -830,7 +831,7 @@ def install_starship(*, starship_toml: PathLike | None = None) -> None:
             case System.linux:
                 check_for_commands("curl")
                 LOCAL_BIN.mkdir(parents=True, exist_ok=True)
-                run_commands(
+                _ = run_command(
                     f"curl -sS https://starship.rs/install.sh | sh -s -- -b {LOCAL_BIN} -y"
                 )
             case never:
@@ -886,7 +887,7 @@ def install_tailscale(*, auth_key: PathLike | None = None) -> None:
                 brew_install("syncthing")
             case System.linux:
                 check_for_commands("curl")
-                run_commands("curl -fsSL https://tailscale.com/install.sh | sh")
+                _ = run_command("curl -fsSL https://tailscale.com/install.sh | sh")
             case never:
                 assert_never(never)
     try:
@@ -959,7 +960,7 @@ def install_uv() -> None:
             brew_install("uv")
         case System.linux:
             check_for_commands("curl")
-            run_commands(
+            _ = run_command(
                 "curl -LsSf https://astral.sh/uv/install.sh | sh -s",
                 env={"UV_NO_MODIFY_PATH": "1"},
             )
@@ -1029,7 +1030,7 @@ def install_wezterm(*, wezterm_lua: PathLike | None = None) -> None:
                 brew_install("wezterm", cask=True)
             case System.linux:
                 check_for_commands("curl")
-                run_commands(
+                _ = run_commands(
                     "curl -fsSL https://apt.fury.io/wez/gpg.key | sudo gpg --yes --dearmor -o /usr/share/keyrings/wezterm-fury.gpg",
                     "echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' | sudo tee /etc/apt/sources.list.d/wezterm.list",
                     "sudo chmod 644 /usr/share/keyrings/wezterm-fury.gpg",
