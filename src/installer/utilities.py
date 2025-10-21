@@ -13,7 +13,7 @@ from pwd import getpwuid
 from re import search
 from stat import S_IXUSR
 from string import Template
-from subprocess import CalledProcessError, check_call, check_output
+from subprocess import check_call, check_output
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -240,12 +240,9 @@ def run_commands(
     skip_log: bool = False,
     env: Mapping[str, str | None] | None = None,
     cwd: PathLike | None = None,
-    suppress_failure: bool = False,
 ) -> None:
     for cmd in cmds:
-        run_one_command(
-            cmd, skip_log=skip_log, env=env, cwd=cwd, suppress_failure=suppress_failure
-        )
+        run_one_command(cmd, skip_log=skip_log, env=env, cwd=cwd)
 
 
 def run_one_command(
@@ -255,7 +252,6 @@ def run_one_command(
     skip_log: bool = False,
     env: Mapping[str, str | None] | None = None,
     cwd: PathLike | None = None,
-    suppress_failure: bool = False,
 ) -> None:
     if is_root():
         cmd = cmd.replace("sudo ", "")
@@ -266,16 +262,10 @@ def run_one_command(
             desc = f"{desc} [env={env}]"
         if cwd is not None:
             desc = f"{desc} [cwd={cwd}]"
-        if suppress_failure:
-            desc = f"{desc} [suppress]"
         _LOGGER.info("%s...", desc)
     cmd_use = f"{TRY_DIRENV_EXPORT}; {cmd}"
     with temp_environ(env):
-        if suppress_failure:
-            with suppress(CalledProcessError):
-                _ = check_call(cmd_use, executable=executable, shell=True, cwd=cwd)
-        else:
-            _ = check_call(cmd_use, executable=executable, shell=True, cwd=cwd)
+        _ = check_call(cmd_use, executable=executable, shell=True, cwd=cwd)
 
 
 def symlink(
