@@ -237,35 +237,38 @@ def rm(path: PathLike, /, *, skip_log: bool = False) -> None:
 
 def run_commands(
     *cmds: str,
-    skip_log: bool = False,
+    direnv: bool = False,
     env: Mapping[str, str | None] | None = None,
     cwd: PathLike | None = None,
+    skip_log: bool = False,
 ) -> None:
     for cmd in cmds:
-        run_one_command(cmd, skip_log=skip_log, env=env, cwd=cwd)
+        run_one_command(cmd, direnv=direnv, env=env, cwd=cwd, skip_log=skip_log)
 
 
 def run_one_command(
     cmd: str,
     /,
     *,
-    skip_log: bool = False,
+    direnv: bool = False,
     env: Mapping[str, str | None] | None = None,
     cwd: PathLike | None = None,
+    skip_log: bool = False,
 ) -> None:
     if is_root():
         cmd = cmd.replace("sudo ", "")
-    executable = which("bash")
+    desc = f"Running {cmd!r}"
+    if direnv:
+        desc = f"{desc} [direnv]"
+        cmd = f"{TRY_DIRENV_EXPORT}; {cmd}"
+    if env is not None:
+        desc = f"{desc} [env={env}]"
+    if cwd is not None:
+        desc = f"{desc} [cwd={cwd}]"
     if not skip_log:
-        desc = f"Running {cmd!r}"
-        if env is not None:
-            desc = f"{desc} [env={env}]"
-        if cwd is not None:
-            desc = f"{desc} [cwd={cwd}]"
         _LOGGER.info("%s...", desc)
-    cmd_use = f"{TRY_DIRENV_EXPORT}; {cmd}"
     with temp_environ(env):
-        _ = check_call(cmd_use, executable=executable, shell=True, cwd=cwd)
+        _ = check_call(cmd, executable=which("bash"), shell=True, cwd=cwd)
 
 
 def symlink(
