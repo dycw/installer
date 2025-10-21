@@ -13,7 +13,7 @@ from pwd import getpwuid
 from re import search
 from stat import S_IXUSR
 from string import Template
-from subprocess import check_call, check_output
+from subprocess import check_output
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -235,18 +235,7 @@ def rm(path: PathLike, /, *, skip_log: bool = False) -> None:
     run_commands(f"sudo rm {path}", skip_log=skip_log)
 
 
-def run_commands(
-    *cmds: str,
-    direnv: bool = False,
-    env: Mapping[str, str | None] | None = None,
-    cwd: PathLike | None = None,
-    skip_log: bool = False,
-) -> None:
-    for cmd in cmds:
-        run_one_command(cmd, direnv=direnv, env=env, cwd=cwd, skip_log=skip_log)
-
-
-def run_one_command(
+def run_command(
     cmd: str,
     /,
     *,
@@ -254,7 +243,7 @@ def run_one_command(
     env: Mapping[str, str | None] | None = None,
     cwd: PathLike | None = None,
     skip_log: bool = False,
-) -> None:
+) -> str:
     if is_root():
         cmd = cmd.replace("sudo ", "")
     desc = f"Running {cmd!r}"
@@ -268,7 +257,22 @@ def run_one_command(
     if not skip_log:
         _LOGGER.info("%s...", desc)
     with temp_environ(env):
-        _ = check_call(cmd, executable=which("bash"), shell=True, cwd=cwd)
+        return check_output(
+            cmd, executable=which("bash"), shell=True, cwd=cwd, text=True
+        )
+
+
+def run_commands(
+    *cmds: str,
+    direnv: bool = False,
+    env: Mapping[str, str | None] | None = None,
+    cwd: PathLike | None = None,
+    skip_log: bool = False,
+) -> list[str]:
+    return [
+        run_command(cmd, direnv=direnv, env=env, cwd=cwd, skip_log=skip_log)
+        for cmd in cmds
+    ]
 
 
 def symlink(
@@ -483,8 +487,8 @@ __all__ = [
     "replace_line",
     "replace_lines",
     "rm",
+    "run_command",
     "run_commands",
-    "run_one_command",
     "symlink",
     "symlink_if_given",
     "symlink_many_if_given",
