@@ -11,27 +11,23 @@
 
 # project
 [project]
-  authors = [{ name = "Derek Wan", email = "d.wan@icloud.com" }]
+  authors = [{ email = "d.wan@icloud.com", name = "Derek Wan" }]
   dependencies = []
   name = "installer"
   readme = "README.md"
   requires-python = ">= 3.13"
-  version = "0.3.5"
+  version = "0.3.6"
 
 # bump-my-version
 [tool.bumpversion]
   allow_dirty = true
-  current_version = "0.3.5"
+  current_version = "0.3.6"
 
   [[tool.bumpversion.files]]
     filename = "src/installer/__init__.py"
     replace = "__version__ = \"{new_version}\""
     search = "__version__ = \"{current_version}\""
 
-  [[tool.bumpversion.files]]
-    filename = "src/installer/utilities.py"
-    replace = "'installer' version: {new_version}"
-    search = "'installer' version: {current_version}"
 
 # coverage
 [tool.coverage]
