@@ -26,7 +26,10 @@ if TYPE_CHECKING:
 
 
 _LOGGER = getLogger(__name__)
-TRY_DIRENV_EXPORT = 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi; if command -v direnv >/dev/null 2>&1; then eval "$(direnv export bash)" >/dev/null 2>&1; fi'
+SOURCE_BASHRC = "if [ -f ~/.bashrc ]; then source ~/.bashrc; fi"
+EVAL_DIRENV_EXPORT = (
+    'if command -v direnv >/dev/null 2>&1; then eval "$(direnv export bash)"; fi'
+)
 
 
 def append_contents(
@@ -247,7 +250,7 @@ def run_command(
     desc = f"Running {cmd!r}"
     if direnv:
         desc = f"{desc} [direnv]"
-        cmd = f"{TRY_DIRENV_EXPORT}; {cmd}"
+        cmd = f"{SOURCE_BASHRC}; {EVAL_DIRENV_EXPORT}; {cmd}"
     if env is not None:
         desc = f"{desc} [env={env}]"
     if cwd is not None:
@@ -445,7 +448,8 @@ def yield_tar_gz_contents(path: Path, /) -> Iterator[Path]:
 
 
 __all__ = [
-    "TRY_DIRENV_EXPORT",
+    "EVAL_DIRENV_EXPORT",
+    "SOURCE_BASHRC",
     "TemporaryDirectory",
     "append_contents",
     "apt_install",
