@@ -288,20 +288,6 @@ def symlink(
     _ = run_command(f"ln -s {path_to} {path_from}", skip_log=skip_log)
 
 
-def symlink_if_given(
-    path_from: PathLike, path_to: PathLike | None, /, *, skip_log: bool = False
-) -> None:
-    if path_to is not None:
-        symlink(path_from, path_to, skip_log=skip_log)
-
-
-def symlink_many_if_given(
-    *paths: tuple[PathLike, PathLike | None], skip_log: bool = False
-) -> None:
-    for path_from, path_to in paths:
-        symlink_if_given(path_from, path_to, skip_log=skip_log)
-
-
 @contextmanager
 def temp_environ(env: Mapping[str, str | None] | None = None, /) -> Iterator[None]:
     if env is None:
@@ -487,8 +473,6 @@ __all__ = [
     "run_command",
     "run_commands",
     "symlink",
-    "symlink_if_given",
-    "symlink_many_if_given",
     "temp_environ",
     "touch",
     "update_submodules",

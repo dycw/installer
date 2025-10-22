@@ -42,7 +42,6 @@ from .utilities import (
     check_for_commands,
     contains_line,
     cp,
-    cp_if_given,
     dpkg_install,
     full_path,
     have_command,
@@ -52,8 +51,6 @@ from .utilities import (
     run_command,
     run_commands,
     symlink,
-    symlink_if_given,
-    symlink_many_if_given,
     uv_tool_install,
     write_template,
     write_text,
@@ -160,7 +157,8 @@ def install_bottom(*, bottom_toml: PathLike | None = None) -> None:
                     dpkg_install(path)
             case never:
                 assert_never(never)
-    symlink_if_given(CONFIG_BOTTOM_TOML, bottom_toml)
+    if bottom_toml is not None:
+        symlink(CONFIG_BOTTOM_TOML, bottom_toml)
 
 
 def install_build_essential() -> None:
@@ -243,10 +241,10 @@ def install_direnv(
                 )
             case never:
                 assert_never(never)
-    symlink_many_if_given(
-        (CONFIG_DIRENV / "direnv.toml", direnv_toml),
-        (CONFIG_DIRENV / "direnvrc", direnvrc),
-    )
+    if direnv_toml is not None:
+        symlink(CONFIG_DIRENV / "direnv.toml", direnv_toml)
+    if direnvrc is not None:
+        symlink(CONFIG_DIRENV / "direnvrc", direnvrc)
 
 
 def install_docker() -> None:
@@ -340,7 +338,8 @@ def install_fd(*, ignore: PathLike | None = None) -> None:
             msg = "'fdfind' should be installed"
             raise RuntimeError(msg)
         symlink(LOCAL_BIN / "fd", path_to)
-    symlink_if_given(CONFIG_FD_IGNORE, ignore)
+    if ignore is not None:
+        symlink(CONFIG_FD_IGNORE, ignore)
 
 
 def install_fish(
@@ -371,12 +370,14 @@ def install_fish(
     else:
         _LOGGER.info("Setting 'fish' as the default shell...")
         _ = run_commands("chsh -s $(which fish)")
-    symlink_many_if_given(
-        (CONFIG_FISH / "config.fish", config),
-        (CONFIG_FISH_CONF_D / "0-env.fish", env),
-        (CONFIG_FISH_CONF_D / "git.fish", git),
-        (CONFIG_FISH_CONF_D / "work.fish", work),
-    )
+    if config is not None:
+        symlink(CONFIG_FISH / "config.fish", config)
+    if env is not None:
+        symlink(CONFIG_FISH_CONF_D / "0-env.fish", env)
+    if git is not None:
+        symlink(CONFIG_FISH_CONF_D / "git.fish", git)
+    if work is not None:
+        symlink(CONFIG_FISH_CONF_D / "work.fish", work)
 
 
 def install_fzf(*, fzf_fish: PathLike | None = None) -> None:
@@ -466,9 +467,10 @@ def install_git(
                 apt_install("git")
             case never:
                 assert_never(never)
-    symlink_many_if_given(
-        (CONFIG_GIT / "config", config), (CONFIG_GIT / "ignore", ignore)
-    )
+    if config is not None:
+        symlink(CONFIG_GIT / "config", config)
+    if ignore is not None:
+        symlink(CONFIG_GIT / "ignore", ignore)
 
 
 def install_gitweb() -> None:
@@ -501,7 +503,8 @@ def install_glab(*, config_yml: PathLike | None = None) -> None:
                 apt_install("glab")
             case never:
                 assert_never(never)
-    cp_if_given(CONFIG_GLAB_CONFIG_YML, config_yml)
+    if config_yml is not None:
+        cp(CONFIG_GLAB_CONFIG_YML, config_yml)
 
 
 def install_gsed() -> None:
@@ -630,7 +633,8 @@ def install_neovim(*, nvim_dir: PathLike | None = None) -> None:
                     cp(appimage, path_to, executable=True)
             case never:
                 assert_never(never)
-    symlink_if_given(CONFIG_NVIM, nvim_dir)
+    if nvim_dir is not None:
+        symlink(CONFIG_NVIM, nvim_dir)
     _ = run_command("nvim --headless '+Lazy! sync' +qa", direnv=True)
 
 
@@ -713,12 +717,9 @@ def install_ripgrep(*, ripgreprc: PathLike | None = None) -> None:
     else:
         _LOGGER.info("Installing 'ripgrep'...")
         apt_install("ripgrep")
-    try:
-        path_from = environ["RIPGREP_CONFIG_PATH"]
-    except KeyError:
-        pass
-    else:
-        symlink_if_given(path_from, ripgreprc)
+    path_from = environ.get("RIPGREP_CONFIG_PATH")
+    if (path_from is not None) and (ripgreprc is not None):
+        symlink(path_from, ripgreprc)
 
 
 def install_rlwrap() -> None:
@@ -795,7 +796,8 @@ def install_sops(*, age_secret_key: PathLike | None = None) -> None:
                     cp(binary, path_to, executable=True)
             case never:
                 assert_never(never)
-    symlink_if_given(CONFIG_SOPS_AGE, age_secret_key)
+    if age_secret_key is not None:
+        symlink(CONFIG_SOPS_AGE, age_secret_key)
 
 
 def install_spotify() -> None:
@@ -836,7 +838,8 @@ def install_starship(*, starship_toml: PathLike | None = None) -> None:
                 )
             case never:
                 assert_never(never)
-    symlink_if_given(CONFIG_STARSHIP_TOML, starship_toml)
+    if starship_toml is not None:
+        symlink(CONFIG_STARSHIP_TOML, starship_toml)
 
 
 def install_stylua() -> None:
@@ -898,12 +901,12 @@ def install_tailscale(*, auth_key: PathLike | None = None) -> None:
         if isinstance(auth_key, Path) or (
             isinstance(auth_key, str) and full_path(auth_key).exists()
         ):
-            symlink_if_given(path_from, auth_key)
+            symlink(path_from, auth_key)
         elif isinstance(auth_key, str):
             with TemporaryDirectory() as temp_dir:
                 temp_file = temp_dir.joinpath("auth-key.txt")
                 _ = temp_file.write_text(auth_key)
-                symlink_if_given(path_from, temp_dir)
+                symlink(path_from, temp_dir)
 
 
 def install_topgrade() -> None:
@@ -944,10 +947,10 @@ def install_tmux(
                 apt_install("tmux")
             case never:
                 assert_never(never)
-    symlink_many_if_given(
-        (CONFIG_TMUX_CONF_OH_MY_TMUX, tmux_conf_oh_my_tmux),
-        (CONFIG_TMUX_CONF_LOCAL, tmux_conf_local),
-    )
+    if tmux_conf_oh_my_tmux is not None:
+        symlink(CONFIG_TMUX_CONF_OH_MY_TMUX, tmux_conf_oh_my_tmux)
+    if tmux_conf_local is not None:
+        symlink(CONFIG_TMUX_CONF_LOCAL, tmux_conf_local)
 
 
 def install_uv() -> None:
@@ -1038,7 +1041,8 @@ def install_wezterm(*, wezterm_lua: PathLike | None = None) -> None:
                 apt_install("wezterm")
             case never:
                 assert_never(never)
-    symlink_if_given(CONFIG_WEZTERM_LUA, wezterm_lua)
+    if wezterm_lua is not None:
+        symlink(CONFIG_WEZTERM_LUA, wezterm_lua)
 
 
 def install_whatsapp() -> None:
@@ -1111,15 +1115,18 @@ def install_zoom(*, deb_file: PathLike | None = None) -> None:
 
 
 def setup_bashrc(*, bashrc: PathLike | None = None) -> None:
-    symlink_if_given(BASHRC, bashrc)
+    if bashrc is not None:
+        symlink(BASHRC, bashrc)
 
 
 def setup_pdb(*, pdbrc: PathLike | None = None) -> None:
-    symlink_if_given(PDBRC, pdbrc)
+    if pdbrc is not None:
+        symlink(PDBRC, pdbrc)
 
 
 def setup_psql(*, psqlrc: PathLike | None = None) -> None:
-    symlink_if_given(PSQLRC, psqlrc)
+    if psqlrc is not None:
+        symlink(PSQLRC, psqlrc)
 
 
 def setup_ssh(
@@ -1139,8 +1146,8 @@ def setup_ssh(
                 ...
             case never:
                 assert_never(never)
-        path_from = SSH_CONFIG_D / name
-        symlink_if_given(path_from, path_to)
+        if path_to is not None:
+            symlink(SSH_CONFIG_D / name, path_to)
     for tem in templates:
         match tem:
             case Path() | str() as template, Mapping() as kwargs:
