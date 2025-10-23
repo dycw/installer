@@ -14,7 +14,7 @@ from re import search
 from stat import S_IXUSR
 from string import Template
 from subprocess import check_output
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, assert_never
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
@@ -219,6 +219,7 @@ def run_command(
     cmd: str,
     /,
     *,
+    bashrc: bool = False,
     direnv: bool = False,
     env: Mapping[str, str | None] | None = None,
     cwd: PathLike | None = None,
@@ -228,9 +229,17 @@ def run_command(
     if is_root():
         cmd = cmd.replace("sudo ", "")
     desc = f"Running {cmd!r}"
-    if direnv:
-        desc = f"{desc} [direnv]"
-        cmd = f"{SOURCE_BASHRC}; {EVAL_DIRENV_EXPORT}; {cmd}"
+    match bashrc, direnv:
+        case False, False:
+            ...
+        case True, False:
+            desc = f"{desc} [bashrc]"
+            cmd = f"{SOURCE_BASHRC}; {cmd}"
+        case _, True:
+            desc = f"{desc} [direnv]"
+            cmd = f"{SOURCE_BASHRC}; {EVAL_DIRENV_EXPORT}; {cmd}"
+        case never:
+            assert_never(never)
     if env is not None:
         desc = f"{desc} [env={env}]"
     if cwd is not None:
@@ -245,6 +254,7 @@ def run_command(
 
 def run_commands(
     *cmds: str,
+    bashrc: bool = False,
     direnv: bool = False,
     env: Mapping[str, str | None] | None = None,
     cwd: PathLike | None = None,
@@ -253,7 +263,13 @@ def run_commands(
 ) -> list[str]:
     return [
         run_command(
-            cmd, direnv=direnv, env=env, cwd=cwd, input_=input_, skip_log=skip_log
+            cmd,
+            bashrc=bashrc,
+            direnv=direnv,
+            env=env,
+            cwd=cwd,
+            input_=input_,
+            skip_log=skip_log,
         )
         for cmd in cmds
     ]
