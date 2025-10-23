@@ -148,27 +148,6 @@ def cp(
         chown(path_to, skip_log=skip_log)
 
 
-def cp_if_given(
-    path_from: PathLike,
-    path_to: PathLike | None,
-    /,
-    *,
-    skip_log: bool = False,
-    executable: bool = False,
-    immutable: bool = False,
-    ownership: bool = False,
-) -> None:
-    if path_to is not None:
-        cp(
-            path_from,
-            path_to,
-            skip_log=skip_log,
-            executable=executable,
-            immutable=immutable,
-            ownership=ownership,
-        )
-
-
 def download(url: str, path: PathLike, /) -> None:
     with urlopen(url) as response, full_path(path).open(mode="wb") as fh:
         _ = fh.write(response.read())
@@ -461,7 +440,6 @@ __all__ = [
     "chown",
     "contains_line",
     "cp",
-    "cp_if_given",
     "download",
     "dpkg_install",
     "full_path",
