@@ -222,6 +222,7 @@ def run_command(
     direnv: bool = False,
     env: Mapping[str, str | None] | None = None,
     cwd: PathLike | None = None,
+    input_: str | None = None,
     skip_log: bool = False,
 ) -> str:
     if is_root():
@@ -238,7 +239,7 @@ def run_command(
         _LOGGER.info("%s...", desc)
     with temp_environ(env):
         return check_output(
-            cmd, executable=which("bash"), shell=True, cwd=cwd, text=True
+            cmd, executable=which("bash"), shell=True, cwd=cwd, input=input_, text=True
         ).rstrip("\n")
 
 
@@ -247,10 +248,13 @@ def run_commands(
     direnv: bool = False,
     env: Mapping[str, str | None] | None = None,
     cwd: PathLike | None = None,
+    input_: str | None = None,
     skip_log: bool = False,
 ) -> list[str]:
     return [
-        run_command(cmd, direnv=direnv, env=env, cwd=cwd, skip_log=skip_log)
+        run_command(
+            cmd, direnv=direnv, env=env, cwd=cwd, input_=input_, skip_log=skip_log
+        )
         for cmd in cmds
     ]
 
