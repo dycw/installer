@@ -561,6 +561,15 @@ def install_just() -> None:
             assert_never(never)
 
 
+def install_libpq() -> None:
+    if brew_installed("libpq"):
+        _LOGGER.debug("'libpq' is already installed")
+        return
+    _LOGGER.info("Installing 'libpq'...")
+    brew_install("libpq")
+    _ = run_command("brew link --force libpq")
+
+
 def install_luacheck() -> None:
     if have_command("luacheck"):
         _LOGGER.debug("'luacheck' is already installed")
@@ -1215,6 +1224,7 @@ __all__ = [
     "install_iperf3",
     "install_jq",
     "install_just",
+    "install_libpq",
     "install_luacheck",
     "install_luarocks",
     "install_macchanger",
