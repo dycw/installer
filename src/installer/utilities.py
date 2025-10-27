@@ -13,7 +13,7 @@ from pwd import getpwuid
 from re import search
 from stat import S_IXUSR
 from string import Template
-from subprocess import check_output
+from subprocess import CalledProcessError, check_output
 from typing import TYPE_CHECKING, Any, assert_never
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -225,6 +225,7 @@ def run_command(
     bashrc: bool = False,
     direnv: bool = False,
     env: Mapping[str, str | None] | None = None,
+    suppress: bool = False,
     cwd: PathLike | None = None,
     input_: str | None = None,
     skip_log: bool = False,
@@ -249,7 +250,7 @@ def run_command(
         desc = f"{desc} [cwd={cwd}]"
     if not skip_log:
         _LOGGER.info("%s...", desc)
-    with temp_environ(env):
+    with temp_environ(env), suppress_called_process_error(active=suppress):
         return check_output(
             cmd, executable=which("bash"), shell=True, cwd=cwd, input=input_, text=True
         ).rstrip("\n")
@@ -276,6 +277,15 @@ def run_commands(
         )
         for cmd in cmds
     ]
+
+
+@contextmanager
+def suppress_called_process_error(*, active: bool = False) -> Iterator[None]:
+    if not active:
+        yield
+        return
+    with suppress(CalledProcessError):
+        yield
 
 
 def symlink(
@@ -477,6 +487,7 @@ __all__ = [
     "rm",
     "run_command",
     "run_commands",
+    "suppress_called_process_error",
     "symlink",
     "temp_environ",
     "touch",
