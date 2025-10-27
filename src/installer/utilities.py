@@ -261,6 +261,7 @@ def run_commands(
     bashrc: bool = False,
     direnv: bool = False,
     env: Mapping[str, str | None] | None = None,
+    suppress: bool = False,
     cwd: PathLike | None = None,
     input_: str | None = None,
     skip_log: bool = False,
@@ -272,6 +273,7 @@ def run_commands(
             direnv=direnv,
             env=env,
             cwd=cwd,
+            suppress=suppress,
             input_=input_,
             skip_log=skip_log,
         )
