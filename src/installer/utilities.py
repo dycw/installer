@@ -135,11 +135,8 @@ def cp(
     rm(path_to, skip_log=skip_log)
     if not skip_log:
         _LOGGER.info("Copying %r -> %r...", str(path_from), str(path_to))
-    _ = run_commands(
-        f"sudo mkdir -p {path_to.parent}",
-        f"sudo cp {path_from} {path_to}",
-        skip_log=skip_log,
-    )
+    mkdir(path_to.parent, skip_log=skip_log)
+    _ = run_command(f"sudo cp {path_from} {path_to}", skip_log=skip_log)
     if executable:
         chmod(path_to, skip_log=skip_log)
     if immutable:
@@ -190,6 +187,12 @@ def luarocks_install(package: str, /) -> None:
 
 def mac_app_exists(app: str, /) -> bool:
     return full_path(f"/Applications/{app}.app").is_dir()
+
+
+def mkdir(path: PathLike, /, *, skip_log: bool = False) -> None:
+    path = full_path(path)
+    if not path.exists():
+        _ = run_command(f"sudo mkdir -p {path}", skip_log=skip_log)
 
 
 def replace_line(
@@ -286,7 +289,7 @@ def symlink(
         return
     if (is_symlink and not res_exists_and_correct) or path_from.exists():
         _ = run_command(f"sudo unlink {path_from}", skip_log=skip_log)
-    path_from.parent.mkdir(parents=True, exist_ok=True)
+    mkdir(path_from.parent)
     _ = run_command(f"ln -s {path_to} {path_from}", skip_log=skip_log)
 
 
@@ -331,13 +334,12 @@ class TemporaryDirectory:
         self._temp_dir.__exit__(exc, val, tb)
 
 
-def touch(path: PathLike, /) -> None:
+def touch(path: PathLike, /, *, skip_log: bool = False) -> None:
     path = full_path(path)
     if path.exists():
-        _LOGGER.debug("%r already exists")
         return
-    _LOGGER.debug("Touching %r...", str(path))
-    _ = run_commands(f"sudo mkdir -p {path}", f"sudo touch {path}")
+    mkdir(path.parent, skip_log=skip_log)
+    _ = run_command(f"sudo touch {path}", skip_log=skip_log)
 
 
 def update_submodules(
@@ -469,6 +471,7 @@ __all__ = [
     "is_root",
     "luarocks_install",
     "mac_app_exists",
+    "mkdir",
     "replace_line",
     "replace_lines",
     "rm",
