@@ -246,6 +246,8 @@ def run_command(
             assert_never(never)
     if env is not None:
         desc = f"{desc} [env={env}]"
+    if suppress:
+        desc = f"{desc} [suppress]"
     if cwd is not None:
         desc = f"{desc} [cwd={cwd}]"
     if not skip_log:
