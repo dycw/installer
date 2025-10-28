@@ -30,6 +30,7 @@ from .constants import (
     LOCAL_BIN,
     PDBRC,
     PSQLRC,
+    RESOLV_CONF,
     SSH_CONFIG,
     SSH_CONFIG_D,
 )
@@ -1138,6 +1139,13 @@ def setup_psql(*, psqlrc: PathLike | None = None) -> None:
         symlink(PSQLRC, psqlrc)
 
 
+def setup_resolv_conf(
+    *, resolv_conf: PathLike | None = None, immutable: bool = False
+) -> None:
+    if resolv_conf is not None:
+        cp(RESOLV_CONF, resolv_conf, immutable=immutable)
+
+
 def setup_ssh(
     *,
     symlinks: Iterable[PathLike | tuple[PathLike, str]] = (),
@@ -1266,6 +1274,7 @@ __all__ = [
     "setup_bashrc",
     "setup_pdb",
     "setup_psql",
+    "setup_resolv_conf",
     "setup_ssh",
     "setup_ssh_keys",
     "setup_sshd",
