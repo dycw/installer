@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+ETC = Path("/etc")
 HOME = Path("~").expanduser()
 
 
+RESOLV_CONF = ETC / "resolv.conf"
 BASHRC = HOME / ".bashrc"
 LOCAL_BIN = HOME / ".local/bin"
 PDBRC = HOME / ".pdbrc"
@@ -54,11 +56,13 @@ __all__ = [
     "CONFIG_TMUX_CONF_LOCAL",
     "CONFIG_TMUX_CONF_OH_MY_TMUX",
     "CONFIG_WEZTERM_LUA",
+    "ETC",
     "HOME",
     "KNOWN_HOSTS",
     "LOCAL_BIN",
     "PDBRC",
     "PSQLRC",
+    "RESOLV_CONF",
     "SSH",
     "SSH_CONFIG",
     "SSH_CONFIG_D",
