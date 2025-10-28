@@ -40,7 +40,7 @@ def append_contents(
         if text in path.read_text():
             return
         if not skip_log:
-            _LOGGER.info("Appending %r text to %r...", text, str(path))
+            _LOGGER.info("Appending %r to %r...", text, str(path))
         with path.open(mode="a") as fh:
             _ = fh.write(new_lines * "\n")
             _ = fh.write(text)
