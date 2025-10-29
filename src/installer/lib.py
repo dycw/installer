@@ -600,20 +600,6 @@ def install_luarocks() -> None:
             assert_never(never)
 
 
-def install_macchanger() -> None:
-    if have_command("macchanger"):
-        _LOGGER.debug("'macchanger' is already installed")
-        return
-    _LOGGER.info("Installing 'macchanger'...")
-    match System.identify():
-        case System.mac:
-            brew_install("acrogenesis/macchanger/macchanger")
-        case System.linux:
-            apt_install("macchanger")
-        case never:
-            assert_never(never)
-
-
 def install_maturin() -> None:
     if have_command("maturin"):
         _LOGGER.debug("'maturin' is already installed")
@@ -1240,7 +1226,6 @@ __all__ = [
     "install_libpq",
     "install_luacheck",
     "install_luarocks",
-    "install_macchanger",
     "install_maturin",
     "install_neovim",
     "install_neovim_dependencies",
