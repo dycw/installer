@@ -15,10 +15,11 @@ SSH = HOME / ".ssh"
 XDG_CONFIG_HOME = HOME / ".config"
 
 
+SSHD_CONFIG = ETC / "ssh/sshd_config"
 AUTHORIZED_KEYS = SSH / "authorized_keys"
-KNOWN_HOSTS = SSH / "known_hosts"
 SSH_CONFIG = SSH / "config"
 SSH_CONFIG_D = SSH / "config.d"
+KNOWN_HOSTS = SSH / "known_hosts"
 
 
 CONFIG_BOTTOM_TOML = XDG_CONFIG_HOME / "bottom/bottom.toml"
@@ -64,6 +65,7 @@ __all__ = [
     "PSQLRC",
     "RESOLV_CONF",
     "SSH",
+    "SSHD_CONFIG",
     "SSH_CONFIG",
     "SSH_CONFIG_D",
     "XDG_CONFIG_HOME",
