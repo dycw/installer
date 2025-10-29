@@ -192,7 +192,9 @@ def mac_app_exists(app: str, /) -> bool:
 def mkdir(path: PathLike, /, *, skip_log: bool = False) -> None:
     path = full_path(path)
     if not path.exists():
-        _ = run_command(f"sudo mkdir -p {path}", skip_log=skip_log)
+        if not skip_log:
+            _LOGGER.info("Making directory %r...", str(path))
+        path.mkdir(parents=True, exist_ok=True)
 
 
 def replace_line(
