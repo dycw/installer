@@ -189,12 +189,16 @@ def mac_app_exists(app: str, /) -> bool:
     return full_path(f"/Applications/{app}.app").is_dir()
 
 
-def mkdir(path: PathLike, /, *, skip_log: bool = False) -> None:
+def mkdir(
+    path: PathLike, /, *, skip_log: bool = False, ownership: bool = False
+) -> None:
     path = full_path(path)
     if not path.exists():
         if not skip_log:
             _LOGGER.info("Making directory %r...", str(path))
         path.mkdir(parents=True, exist_ok=True)
+    if ownership:
+        chown(path, skip_log=skip_log)
 
 
 def replace_line(
