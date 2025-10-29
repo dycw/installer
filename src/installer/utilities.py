@@ -48,14 +48,17 @@ def append_contents(
     write_text(text, path, skip_log=skip_log)
 
 
-def apt_install(*packages: str, env: Mapping[str, str | None] | None = None) -> None:
+def apt_install(*packages: str, non_interactive: bool = False) -> None:
     check_for_commands("apt")
     apt_update()
     desc = ", ".join(map(repr, packages))
     _LOGGER.info("Installing %s...", desc)
-    joined = " ".join(packages)
-    cmd = f"sudo apt -y install {joined}"
-    _ = run_command(cmd, env=env)
+    parts: list[str] = ["sudo"]
+    if non_interactive:
+        parts.append("DEBIAN_FRONTEND=noninteractive")
+    parts.extend("apt -y instal", *packages)
+    cmd = " ".join(parts)
+    _ = run_command(cmd)
 
 
 def apt_update() -> None:
