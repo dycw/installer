@@ -56,7 +56,7 @@ def apt_install(*packages: str, non_interactive: bool = False) -> None:
     parts: list[str] = ["sudo"]
     if non_interactive:
         parts.append("DEBIAN_FRONTEND=noninteractive")
-    parts.extend("apt -y instal", *packages)
+    parts.extend("apt -y install", *packages)
     cmd = " ".join(parts)
     _ = run_command(cmd)
 
