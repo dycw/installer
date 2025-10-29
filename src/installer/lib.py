@@ -41,6 +41,7 @@ from .utilities import (
     brew_install,
     brew_installed,
     check_for_commands,
+    chown,
     contains_line,
     cp,
     dpkg_install,
@@ -235,7 +236,7 @@ def install_direnv(
                 brew_install("direnv")
             case System.linux:
                 check_for_commands("curl")
-                LOCAL_BIN.mkdir(parents=True, exist_ok=True)
+                setup_local_bin()
                 _ = run_command(
                     "curl -sfL https://direnv.net/install.sh | bash",
                     env={"bin_path": str(LOCAL_BIN)},
@@ -395,7 +396,7 @@ def install_fzf(*, fzf_fish: PathLike | None = None) -> None:
                 assert_never(never)
     if fzf_fish is not None:
         for path in (full_path(fzf_fish) / "functions").iterdir():
-            cp(path, CONFIG_FISH_FUNCTIONS / path.name)
+            cp(path, CONFIG_FISH_FUNCTIONS / path.name, ownership=True)
 
 
 def install_ggrep() -> None:
@@ -505,7 +506,7 @@ def install_glab(*, config_yml: PathLike | None = None) -> None:
             case never:
                 assert_never(never)
     if config_yml is not None:
-        cp(CONFIG_GLAB_CONFIG_YML, config_yml)
+        cp(CONFIG_GLAB_CONFIG_YML, config_yml, ownership=True)
 
 
 def install_gsed() -> None:
@@ -640,7 +641,7 @@ def install_neovim(*, nvim_dir: PathLike | None = None) -> None:
                 with yield_download(
                     "https://github.com/neovim/neovim/releases/download/stable/nvim-linux-x86_64.appimage"
                 ) as appimage:
-                    cp(appimage, path_to, executable=True)
+                    cp(appimage, path_to, executable=True, ownership=True)
             case never:
                 assert_never(never)
     if nvim_dir is not None:
@@ -803,7 +804,7 @@ def install_sops(*, age_secret_key: PathLike | None = None) -> None:
                 with yield_github_latest_download(
                     "getsops", "sops", "sops-${tag}.linux.amd64"
                 ) as binary:
-                    cp(binary, path_to, executable=True)
+                    cp(binary, path_to, executable=True, ownership=True)
             case never:
                 assert_never(never)
     if age_secret_key is not None:
@@ -842,7 +843,7 @@ def install_starship(*, starship_toml: PathLike | None = None) -> None:
                 brew_install("starship")
             case System.linux:
                 check_for_commands("curl")
-                LOCAL_BIN.mkdir(parents=True, exist_ok=True)
+                setup_local_bin()
                 _ = run_command(
                     f"curl -sS https://starship.rs/install.sh | sh -s -- -b {LOCAL_BIN} -y"
                 )
@@ -871,7 +872,7 @@ def install_stylua() -> None:
             ):
                 zfh.extractall(temp_dir)
                 (path_from,) = temp_dir.iterdir()
-                cp(path_from, path_to, executable=True)
+                cp(path_from, path_to, executable=True, ownership=True)
         case never:
             assert_never(never)
 
@@ -1084,7 +1085,7 @@ def install_yq() -> None:
             with yield_github_latest_download(
                 "mikefarah", "yq", "yq_linux_amd64"
             ) as binary:
-                cp(binary, path_to, executable=True)
+                cp(binary, path_to, executable=True, ownership=True)
         case never:
             assert_never(never)
 
@@ -1127,6 +1128,11 @@ def install_zoom(*, deb_file: PathLike | None = None) -> None:
 def setup_bashrc(*, bashrc: PathLike | None = None) -> None:
     if bashrc is not None:
         symlink(BASHRC, bashrc)
+
+
+def setup_local_bin() -> None:
+    LOCAL_BIN.mkdir(parents=True, exist_ok=True)
+    chown(LOCAL_BIN)
 
 
 def setup_pdb(*, pdbrc: PathLike | None = None) -> None:
@@ -1272,6 +1278,7 @@ __all__ = [
     "install_zoom",
     "install_zoxide",
     "setup_bashrc",
+    "setup_local_bin",
     "setup_pdb",
     "setup_psql",
     "setup_resolv_conf",
