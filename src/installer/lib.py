@@ -41,7 +41,6 @@ from .utilities import (
     brew_install,
     brew_installed,
     check_for_commands,
-    chown,
     contains_line,
     cp,
     dpkg_install,
@@ -49,6 +48,7 @@ from .utilities import (
     have_command,
     luarocks_install,
     mac_app_exists,
+    mkdir,
     replace_lines,
     run_command,
     run_commands,
@@ -72,7 +72,7 @@ def add_to_known_hosts() -> None:
         _LOGGER.debug("Known hosts already contains 'github.com'")
         return
     _LOGGER.info("Adding 'github.com' to known hosts...")
-    KNOWN_HOSTS.parent.mkdir(parents=True, exist_ok=True)
+    mkdir(KNOWN_HOSTS.parent, ownership=True)
     _ = run_command(f"ssh-keyscan github.com >> {KNOWN_HOSTS}")
 
 
@@ -1131,8 +1131,7 @@ def setup_bashrc(*, bashrc: PathLike | None = None) -> None:
 
 
 def setup_local_bin() -> None:
-    LOCAL_BIN.mkdir(parents=True, exist_ok=True)
-    chown(LOCAL_BIN)
+    mkdir(LOCAL_BIN, ownership=True)
 
 
 def setup_pdb(*, pdbrc: PathLike | None = None) -> None:
@@ -1160,7 +1159,7 @@ def setup_ssh(
     ] = (),
 ) -> None:
     write_text("Include config.d/*", SSH_CONFIG)
-    SSH_CONFIG_D.mkdir(parents=True, exist_ok=True)
+    mkdir(SSH_CONFIG_D, ownership=True)
     for sym in symlinks:
         match sym:
             case Path() | str() as path_to:
