@@ -11,7 +11,7 @@ from os import environ, getegid, getenv, geteuid
 from pathlib import Path
 from pwd import getpwuid
 from re import search
-from stat import S_IXGRP, S_IXOTH, S_IXUSR
+from stat import S_IXUSR
 from string import Template
 from subprocess import CalledProcessError, check_output
 from typing import TYPE_CHECKING, Any, assert_never
@@ -96,18 +96,12 @@ def check_for_commands(*cmds: str) -> None:
         raise RuntimeError(msg)
 
 
-def chmod(path: PathLike, /, *, all_: bool = False, skip_log: bool = False) -> None:
+def chmod(path: PathLike, /, *, skip_log: bool = False) -> None:
     path = full_path(path)
     mode = path.stat().st_mode
-    if ((not all_) and (mode & S_IXUSR)) or (
-        all_ and (mode & S_IXUSR & S_IXGRP & S_IXOTH)
-    ):
+    if mode & S_IXUSR:
         return
-    parts: list[str] = ["u"]
-    if all_:
-        parts.extend(["g", "o"])
-    perms = ",".join(f"{p}+x" for p in parts)
-    _ = run_command(f"sudo chmod {perms} {path}", skip_log=skip_log)
+    _ = run_command(f"sudo chmod u+x {path}", skip_log=skip_log)
 
 
 def chown(path: PathLike, /, *, skip_log: bool = False) -> None:
@@ -135,7 +129,6 @@ def cp(
     *,
     skip_log: bool = False,
     executable: bool = False,
-    executable_all: bool = False,
     immutable: bool = False,
     ownership: bool = False,
 ) -> None:
@@ -148,7 +141,7 @@ def cp(
     mkdir(path_to.parent, skip_log=skip_log)
     _ = run_command(f"sudo cp {path_from} {path_to}", skip_log=skip_log)
     if executable:
-        chmod(path_to, all_=executable_all, skip_log=skip_log)
+        chmod(path_to, skip_log=skip_log)
     if immutable:
         _ = run_command(f"sudo chattr +i {path_to}", skip_log=skip_log)
     if ownership:
