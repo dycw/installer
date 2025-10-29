@@ -371,7 +371,7 @@ def install_fish(
         _LOGGER.debug("'fish' is already the default shell")
     else:
         _LOGGER.info("Setting 'fish' as the default shell...")
-        _ = run_commands("chsh -s $(which fish)")
+        _ = run_commands("sudo chsh -s $(which fish)")
     if config is not None:
         symlink(CONFIG_FISH / "config.fish", config)
     if env is not None:
