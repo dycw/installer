@@ -33,7 +33,7 @@ EVAL_DIRENV_EXPORT = (
 
 
 def append_contents(
-    path: PathLike, text: str, /, *, skip_log: bool = False, new_lines: int = 1
+    path: PathLike, text: str, /, *, new_lines: int = 1, skip_log: bool = False
 ) -> None:
     path = full_path(path)
     if path.exists():
@@ -110,20 +110,24 @@ def check_for_commands(*cmds: str) -> None:
         raise RuntimeError(msg)
 
 
-def chmod(path: PathLike, /, *, skip_log: bool = False) -> None:
+def chmod(
+    path: PathLike, /, *, recursive: bool = False, skip_log: bool = False
+) -> None:
     path = full_path(path)
     mode = path.stat().st_mode
     if mode & S_IXUSR:
         return
     parts: list[str] = ["sudo chmod"]
-    if path.is_dir():
+    if recursive:
         parts.append("-R")
     parts.extend(["u+x", str(path)])
     cmd = " ".join(parts)
     _ = run_command(cmd, skip_log=skip_log)
 
 
-def chown(path: PathLike, /, *, skip_log: bool = False) -> None:
+def chown(
+    path: PathLike, /, *, recursive: bool = False, skip_log: bool = False
+) -> None:
     path = full_path(path)
     stat = path.stat()
     file_user, curr_user = [getpwuid(i).pw_name for i in [stat.st_uid, geteuid()]]
@@ -131,7 +135,7 @@ def chown(path: PathLike, /, *, skip_log: bool = False) -> None:
     if (file_user == curr_user) and (file_group == curr_group):
         return
     parts: list[str] = ["sudo chown"]
-    if path.is_dir():
+    if recursive:
         parts.append("-R")
     parts.extend([f"{curr_user}:{curr_group}", str(path)])
     cmd = " ".join(parts)
@@ -151,10 +155,10 @@ def cp(
     path_to: PathLike,
     /,
     *,
-    skip_log: bool = False,
     executable: bool = False,
     immutable: bool = False,
     ownership: bool = False,
+    skip_log: bool = False,
 ) -> None:
     path_from, path_to = map(full_path, [path_from, path_to])
     if are_equal(path_from, path_to):
@@ -162,7 +166,7 @@ def cp(
     rm(path_to, skip_log=skip_log)
     if not skip_log:
         _LOGGER.info("Copying %r -> %r...", str(path_from), str(path_to))
-    mkdir(path_to.parent, skip_log=skip_log)
+    mkdir(path_to.parent, ownership=ownership, skip_log=skip_log)
     parts: list[str] = ["sudo cp"]
     if path_from.is_dir():
         parts.append("-R")
@@ -225,12 +229,17 @@ def mkdir(
     path: PathLike, /, *, skip_log: bool = False, ownership: bool = False
 ) -> None:
     path = full_path(path)
-    if not path.exists():
-        if not skip_log:
-            _LOGGER.info("Making directory %r...", str(path))
-        path.mkdir(parents=True, exist_ok=True)
+    if path.is_file():
+        raise NotADirectoryError(path)
+    if path.is_dir():
+        return
+    if not skip_log:
+        _LOGGER.info("Making directory %r...", str(path))
+    new = [p for p in [path, *path.parents] if not p.is_dir()]
+    path.mkdir(parents=True, exist_ok=True)
     if ownership:
-        chown(path, skip_log=skip_log)
+        for p in new:
+            chown(p, skip_log=skip_log)
 
 
 def replace_line(
@@ -436,10 +445,10 @@ def write_template(
     write_text(
         text,
         path_to,
-        skip_log=skip_log,
         executable=executable,
         immutable=immutable,
         ownership=ownership,
+        skip_log=skip_log,
     )
 
 
@@ -448,10 +457,10 @@ def write_text(
     path: PathLike,
     /,
     *,
-    skip_log: bool = False,
     executable: bool = False,
     immutable: bool = False,
     ownership: bool = False,
+    skip_log: bool = False,
 ) -> None:
     path_to = full_path(path)
     if path_to.exists() and (path_to.read_text() == text):
@@ -466,10 +475,10 @@ def write_text(
         cp(
             path_from,
             path_to,
-            skip_log=True,
             executable=executable,
             immutable=immutable,
             ownership=ownership,
+            skip_log=True,
         )
 
 
