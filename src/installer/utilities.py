@@ -67,6 +67,20 @@ def apt_update() -> None:
     _ = run_command("sudo apt -y update")
 
 
+def are_equal(path1: PathLike, path2: PathLike, /) -> bool:
+    path1, path2 = map(full_path, [path1, path2])
+    return (
+        path1.is_file()
+        and path2.is_file()
+        and (path1.read_bytes() == path2.read_bytes())
+    ) or (
+        path1.is_dir()
+        and path2.is_dir()
+        and ({p.name for p in path1.iterdir()} == {p.name for p in path2.iterdir()})
+        and all(are_equal(path1 / p.name, path2 / p.name) for p in path1.iterdir())
+    )
+
+
 def brew_install(*packages: str, cask: bool = False) -> None:
     check_for_commands("brew")
     _LOGGER.info("Updating 'brew'...")
@@ -101,7 +115,12 @@ def chmod(path: PathLike, /, *, skip_log: bool = False) -> None:
     mode = path.stat().st_mode
     if mode & S_IXUSR:
         return
-    _ = run_command(f"sudo chmod u+x {path}", skip_log=skip_log)
+    parts: list[str] = ["sudo chmod"]
+    if path.is_dir():
+        parts.append("-R")
+    parts.extend(["u+x", str(path)])
+    cmd = " ".join(parts)
+    _ = run_command(cmd, skip_log=skip_log)
 
 
 def chown(path: PathLike, /, *, skip_log: bool = False) -> None:
@@ -111,7 +130,12 @@ def chown(path: PathLike, /, *, skip_log: bool = False) -> None:
     file_group, curr_group = [getgrgid(i).gr_name for i in [stat.st_gid, getegid()]]
     if (file_user == curr_user) and (file_group == curr_group):
         return
-    _ = run_command(f"sudo chown {curr_user}:{curr_group} {path}", skip_log=skip_log)
+    parts: list[str] = ["sudo chown"]
+    if path.is_dir():
+        parts.append("-R")
+    parts.extend([f"{curr_user}:{curr_group}", str(path)])
+    cmd = " ".join(parts)
+    _ = run_command(cmd, skip_log=skip_log)
 
 
 def contains_line(path: PathLike, text: str, /, *, flags: int = 0) -> bool:
@@ -133,13 +157,18 @@ def cp(
     ownership: bool = False,
 ) -> None:
     path_from, path_to = map(full_path, [path_from, path_to])
-    if path_to.exists() and (path_to.read_bytes() == path_from.read_bytes()):
+    if are_equal(path_from, path_to):
         return
     rm(path_to, skip_log=skip_log)
     if not skip_log:
         _LOGGER.info("Copying %r -> %r...", str(path_from), str(path_to))
     mkdir(path_to.parent, skip_log=skip_log)
-    _ = run_command(f"sudo cp {path_from} {path_to}", skip_log=skip_log)
+    parts: list[str] = ["sudo cp"]
+    if path_from.is_dir():
+        parts.append("-R")
+    parts.extend([str(path_from), str(path_to)])
+    cmd = " ".join(parts)
+    _ = run_command(cmd, skip_log=skip_log)
     if executable:
         chmod(path_to, skip_log=skip_log)
     if immutable:
@@ -222,9 +251,10 @@ def replace_lines(
 
 def rm(path: PathLike, /, *, skip_log: bool = False) -> None:
     path = full_path(path)
-    if not path.exists():
-        return
-    _ = run_command(f"sudo rm {path}", skip_log=skip_log)
+    if path.is_file():
+        _ = run_command(f"sudo rm {path}", skip_log=skip_log)
+    elif path.is_dir():
+        _ = run_command(f"sudo rm -r {path}", skip_log=skip_log)
 
 
 def run_command(
@@ -478,6 +508,7 @@ __all__ = [
     "append_contents",
     "apt_install",
     "apt_update",
+    "are_equal",
     "brew_install",
     "brew_installed",
     "check_for_commands",
