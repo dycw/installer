@@ -36,7 +36,7 @@ def append_contents(
     path: PathLike, text: str, /, *, new_lines: int = 1, skip_log: bool = False
 ) -> None:
     path = full_path(path)
-    if path.exists():
+    if path.is_file():
         if text in path.read_text():
             return
         if not skip_log:
@@ -45,6 +45,8 @@ def append_contents(
             _ = fh.write(new_lines * "\n")
             _ = fh.write(text)
         return
+    if path.is_dir():
+        raise IsADirectoryError(path)
     write_text(text, path, skip_log=skip_log)
 
 
@@ -155,6 +157,8 @@ def cp(
     path_to: PathLike,
     /,
     *,
+    recursive_rm: bool = False,
+    recursive_cp: bool = False,
     executable: bool = False,
     immutable: bool = False,
     ownership: bool = False,
@@ -163,12 +167,12 @@ def cp(
     path_from, path_to = map(full_path, [path_from, path_to])
     if are_equal(path_from, path_to):
         return
-    rm(path_to, skip_log=skip_log)
+    rm(path_to, recursive=recursive_rm, skip_log=skip_log)
     if not skip_log:
         _LOGGER.info("Copying %r -> %r...", str(path_from), str(path_to))
     mkdir(path_to.parent, ownership=ownership, skip_log=skip_log)
     parts: list[str] = ["sudo cp"]
-    if path_from.is_dir():
+    if recursive_cp:
         parts.append("-R")
     parts.extend([str(path_from), str(path_to)])
     cmd = " ".join(parts)
@@ -258,12 +262,14 @@ def replace_lines(
     write_text(text, path, skip_log=skip_log)
 
 
-def rm(path: PathLike, /, *, skip_log: bool = False) -> None:
+def rm(path: PathLike, /, *, recursive: bool = False, skip_log: bool = False) -> None:
     path = full_path(path)
-    if path.is_file():
-        _ = run_command(f"sudo rm {path}", skip_log=skip_log)
-    elif path.is_dir():
-        _ = run_command(f"sudo rm -r {path}", skip_log=skip_log)
+    parts: list[str] = ["sudo rm"]
+    if recursive:
+        parts.append("-r")
+    parts.append(str(path))
+    cmd = " ".join(parts)
+    _ = run_command(cmd, skip_log=skip_log)
 
 
 def run_command(
@@ -405,8 +411,10 @@ def touch(
     path: PathLike, /, *, ownership: bool = False, skip_log: bool = False
 ) -> None:
     path = full_path(path)
-    if path.exists():
+    if path.is_file():
         return
+    if path.is_dir():
+        raise IsADirectoryError(path)
     mkdir(path.parent, ownership=ownership, skip_log=skip_log)
     _ = run_command(f"sudo touch {path}", skip_log=skip_log)
 
@@ -470,8 +478,10 @@ def write_text(
     skip_log: bool = False,
 ) -> None:
     path_to = full_path(path)
-    if path_to.exists() and (path_to.read_text() == text):
+    if path_to.is_file() and (path_to.read_text() == text):
         return
+    if path_to.is_dir():
+        raise IsADirectoryError(path_to)
     if not skip_log:
         lines = text.splitlines()
         desc = "\n".join(lines[:3]) + "..." if len(lines) >= 3 else text
