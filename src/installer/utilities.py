@@ -341,7 +341,12 @@ def suppress_called_process_error(*, active: bool = False) -> Iterator[None]:
 
 
 def symlink(
-    path_from: PathLike, path_to: PathLike, /, *, skip_log: bool = False
+    path_from: PathLike,
+    path_to: PathLike,
+    /,
+    *,
+    ownership: bool = False,
+    skip_log: bool = False,
 ) -> None:
     path_from, path_to = map(full_path, [path_from, path_to])
     is_symlink = path_from.is_symlink()
@@ -351,7 +356,7 @@ def symlink(
         return
     if (is_symlink and not res_exists_and_correct) or path_from.exists():
         _ = run_command(f"sudo unlink {path_from}", skip_log=skip_log)
-    mkdir(path_from.parent)
+    mkdir(path_from.parent, ownership=ownership)
     _ = run_command(f"ln -s {path_to} {path_from}", skip_log=skip_log)
 
 
@@ -396,11 +401,13 @@ class TemporaryDirectory:
         self._temp_dir.__exit__(exc, val, tb)
 
 
-def touch(path: PathLike, /, *, skip_log: bool = False) -> None:
+def touch(
+    path: PathLike, /, *, ownership: bool = False, skip_log: bool = False
+) -> None:
     path = full_path(path)
     if path.exists():
         return
-    mkdir(path.parent, skip_log=skip_log)
+    mkdir(path.parent, ownership=ownership, skip_log=skip_log)
     _ = run_command(f"sudo touch {path}", skip_log=skip_log)
 
 
