@@ -263,6 +263,8 @@ def replace_lines(
 
 def rm(path: PathLike, /, *, recursive: bool = False, skip_log: bool = False) -> None:
     path = full_path(path)
+    if not path.exists():
+        return
     parts: list[str] = ["sudo rm"]
     if recursive:
         parts.append("-r")
