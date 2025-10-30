@@ -33,10 +33,10 @@ EVAL_DIRENV_EXPORT = (
 
 
 def append_contents(
-    path: PathLike, text: str, /, *, skip_log: bool = False, new_lines: int = 1
+    path: PathLike, text: str, /, *, new_lines: int = 1, skip_log: bool = False
 ) -> None:
     path = full_path(path)
-    if path.exists():
+    if path.is_file():
         if text in path.read_text():
             return
         if not skip_log:
@@ -45,6 +45,8 @@ def append_contents(
             _ = fh.write(new_lines * "\n")
             _ = fh.write(text)
         return
+    if path.is_dir():
+        raise IsADirectoryError(path)
     write_text(text, path, skip_log=skip_log)
 
 
@@ -65,6 +67,20 @@ def apt_update() -> None:
     check_for_commands("apt")
     _LOGGER.info("Updating 'apt'...")
     _ = run_command("sudo apt -y update")
+
+
+def are_equal(path1: PathLike, path2: PathLike, /) -> bool:
+    path1, path2 = map(full_path, [path1, path2])
+    return (
+        path1.is_file()
+        and path2.is_file()
+        and (path1.read_bytes() == path2.read_bytes())
+    ) or (
+        path1.is_dir()
+        and path2.is_dir()
+        and ({p.name for p in path1.iterdir()} == {p.name for p in path2.iterdir()})
+        and all(are_equal(path1 / p.name, path2 / p.name) for p in path1.iterdir())
+    )
 
 
 def brew_install(*packages: str, cask: bool = False) -> None:
@@ -96,22 +112,36 @@ def check_for_commands(*cmds: str) -> None:
         raise RuntimeError(msg)
 
 
-def chmod(path: PathLike, /, *, skip_log: bool = False) -> None:
+def chmod(
+    path: PathLike, /, *, recursive: bool = False, skip_log: bool = False
+) -> None:
     path = full_path(path)
     mode = path.stat().st_mode
     if mode & S_IXUSR:
         return
-    _ = run_command(f"sudo chmod u+x {path}", skip_log=skip_log)
+    parts: list[str] = ["sudo chmod"]
+    if recursive:
+        parts.append("-R")
+    parts.extend(["u+x", str(path)])
+    cmd = " ".join(parts)
+    _ = run_command(cmd, skip_log=skip_log)
 
 
-def chown(path: PathLike, /, *, skip_log: bool = False) -> None:
+def chown(
+    path: PathLike, /, *, recursive: bool = False, skip_log: bool = False
+) -> None:
     path = full_path(path)
     stat = path.stat()
     file_user, curr_user = [getpwuid(i).pw_name for i in [stat.st_uid, geteuid()]]
     file_group, curr_group = [getgrgid(i).gr_name for i in [stat.st_gid, getegid()]]
     if (file_user == curr_user) and (file_group == curr_group):
         return
-    _ = run_command(f"sudo chown {curr_user}:{curr_group} {path}", skip_log=skip_log)
+    parts: list[str] = ["sudo chown"]
+    if recursive:
+        parts.append("-R")
+    parts.extend([f"{curr_user}:{curr_group}", str(path)])
+    cmd = " ".join(parts)
+    _ = run_command(cmd, skip_log=skip_log)
 
 
 def contains_line(path: PathLike, text: str, /, *, flags: int = 0) -> bool:
@@ -127,19 +157,26 @@ def cp(
     path_to: PathLike,
     /,
     *,
-    skip_log: bool = False,
+    recursive_rm: bool = False,
+    recursive_cp: bool = False,
     executable: bool = False,
     immutable: bool = False,
     ownership: bool = False,
+    skip_log: bool = False,
 ) -> None:
     path_from, path_to = map(full_path, [path_from, path_to])
-    if path_to.exists() and (path_to.read_bytes() == path_from.read_bytes()):
+    if are_equal(path_from, path_to):
         return
-    rm(path_to, skip_log=skip_log)
+    rm(path_to, recursive=recursive_rm, skip_log=skip_log)
     if not skip_log:
         _LOGGER.info("Copying %r -> %r...", str(path_from), str(path_to))
-    mkdir(path_to.parent, skip_log=skip_log)
-    _ = run_command(f"sudo cp {path_from} {path_to}", skip_log=skip_log)
+    mkdir(path_to.parent, ownership=ownership, skip_log=skip_log)
+    parts: list[str] = ["sudo cp"]
+    if recursive_cp:
+        parts.append("-R")
+    parts.extend([str(path_from), str(path_to)])
+    cmd = " ".join(parts)
+    _ = run_command(cmd, skip_log=skip_log)
     if executable:
         chmod(path_to, skip_log=skip_log)
     if immutable:
@@ -193,15 +230,20 @@ def mac_app_exists(app: str, /) -> bool:
 
 
 def mkdir(
-    path: PathLike, /, *, skip_log: bool = False, ownership: bool = False
+    path: PathLike, /, *, ownership: bool = False, skip_log: bool = False
 ) -> None:
     path = full_path(path)
-    if not path.exists():
-        if not skip_log:
-            _LOGGER.info("Making directory %r...", str(path))
-        path.mkdir(parents=True, exist_ok=True)
+    if path.is_file():
+        raise NotADirectoryError(path)
+    if path.is_dir():
+        return
+    if not skip_log:
+        _LOGGER.info("Making directory %r...", str(path))
+    new = [p for p in [path, *path.parents] if not p.is_dir()]
+    path.mkdir(parents=True, exist_ok=True)
     if ownership:
-        chown(path, skip_log=skip_log)
+        for p in new:
+            chown(p, skip_log=skip_log)
 
 
 def replace_line(
@@ -220,11 +262,14 @@ def replace_lines(
     write_text(text, path, skip_log=skip_log)
 
 
-def rm(path: PathLike, /, *, skip_log: bool = False) -> None:
+def rm(path: PathLike, /, *, recursive: bool = False, skip_log: bool = False) -> None:
     path = full_path(path)
-    if not path.exists():
-        return
-    _ = run_command(f"sudo rm {path}", skip_log=skip_log)
+    parts: list[str] = ["sudo rm"]
+    if recursive:
+        parts.append("-r")
+    parts.append(str(path))
+    cmd = " ".join(parts)
+    _ = run_command(cmd, skip_log=skip_log)
 
 
 def run_command(
@@ -302,7 +347,12 @@ def suppress_called_process_error(*, active: bool = False) -> Iterator[None]:
 
 
 def symlink(
-    path_from: PathLike, path_to: PathLike, /, *, skip_log: bool = False
+    path_from: PathLike,
+    path_to: PathLike,
+    /,
+    *,
+    ownership: bool = False,
+    skip_log: bool = False,
 ) -> None:
     path_from, path_to = map(full_path, [path_from, path_to])
     is_symlink = path_from.is_symlink()
@@ -312,7 +362,7 @@ def symlink(
         return
     if (is_symlink and not res_exists_and_correct) or path_from.exists():
         _ = run_command(f"sudo unlink {path_from}", skip_log=skip_log)
-    mkdir(path_from.parent)
+    mkdir(path_from.parent, ownership=ownership)
     _ = run_command(f"ln -s {path_to} {path_from}", skip_log=skip_log)
 
 
@@ -357,11 +407,15 @@ class TemporaryDirectory:
         self._temp_dir.__exit__(exc, val, tb)
 
 
-def touch(path: PathLike, /, *, skip_log: bool = False) -> None:
+def touch(
+    path: PathLike, /, *, ownership: bool = False, skip_log: bool = False
+) -> None:
     path = full_path(path)
-    if path.exists():
+    if path.is_file():
         return
-    mkdir(path.parent, skip_log=skip_log)
+    if path.is_dir():
+        raise IsADirectoryError(path)
+    mkdir(path.parent, ownership=ownership, skip_log=skip_log)
     _ = run_command(f"sudo touch {path}", skip_log=skip_log)
 
 
@@ -406,10 +460,10 @@ def write_template(
     write_text(
         text,
         path_to,
-        skip_log=skip_log,
         executable=executable,
         immutable=immutable,
         ownership=ownership,
+        skip_log=skip_log,
     )
 
 
@@ -418,14 +472,16 @@ def write_text(
     path: PathLike,
     /,
     *,
-    skip_log: bool = False,
     executable: bool = False,
     immutable: bool = False,
     ownership: bool = False,
+    skip_log: bool = False,
 ) -> None:
     path_to = full_path(path)
-    if path_to.exists() and (path_to.read_text() == text):
+    if path_to.is_file() and (path_to.read_text() == text):
         return
+    if path_to.is_dir():
+        raise IsADirectoryError(path_to)
     if not skip_log:
         lines = text.splitlines()
         desc = "\n".join(lines[:3]) + "..." if len(lines) >= 3 else text
@@ -436,10 +492,10 @@ def write_text(
         cp(
             path_from,
             path_to,
-            skip_log=True,
             executable=executable,
             immutable=immutable,
             ownership=ownership,
+            skip_log=True,
         )
 
 
@@ -478,6 +534,7 @@ __all__ = [
     "append_contents",
     "apt_install",
     "apt_update",
+    "are_equal",
     "brew_install",
     "brew_installed",
     "check_for_commands",
