@@ -226,7 +226,7 @@ def mac_app_exists(app: str, /) -> bool:
 
 
 def mkdir(
-    path: PathLike, /, *, skip_log: bool = False, ownership: bool = False
+    path: PathLike, /, *, ownership: bool = False, skip_log: bool = False
 ) -> None:
     path = full_path(path)
     if path.is_file():
