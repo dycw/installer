@@ -157,8 +157,7 @@ def cp(
     path_to: PathLike,
     /,
     *,
-    recursive_rm: bool = False,
-    recursive_cp: bool = False,
+    recursive: bool = False,
     executable: bool = False,
     immutable: bool = False,
     ownership: bool = False,
@@ -167,22 +166,22 @@ def cp(
     path_from, path_to = map(full_path, [path_from, path_to])
     if are_equal(path_from, path_to):
         return
-    rm(path_to, recursive=recursive_rm, skip_log=skip_log)
+    rm(path_to, recursive=recursive, skip_log=skip_log)
     if not skip_log:
         _LOGGER.info("Copying %r -> %r...", str(path_from), str(path_to))
     mkdir(path_to.parent, ownership=ownership, skip_log=skip_log)
     parts: list[str] = ["sudo cp"]
-    if recursive_cp:
+    if recursive:
         parts.append("-R")
     parts.extend([str(path_from), str(path_to)])
     cmd = " ".join(parts)
     _ = run_command(cmd, skip_log=skip_log)
     if executable:
-        chmod(path_to, skip_log=skip_log)
+        chmod(path_to, recursive=recursive, skip_log=skip_log)
     if immutable:
         _ = run_command(f"sudo chattr +i {path_to}", skip_log=skip_log)
     if ownership:
-        chown(path_to, skip_log=skip_log)
+        chown(path_to, recursive=recursive, skip_log=skip_log)
 
 
 def download(url: str, path: PathLike, /) -> None:
