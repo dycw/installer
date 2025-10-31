@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import gzip
 from collections.abc import Iterable, Mapping
 from logging import getLogger
 from os import environ
 from pathlib import Path
 from re import search
-from shutil import which
+from shutil import copyfileobj, which
 from typing import TYPE_CHECKING, Any, assert_never
 from zipfile import ZipFile
 
@@ -155,8 +156,8 @@ def install_bottom(*, bottom_toml: PathLike | None = None) -> None:
             case System.linux:
                 with yield_github_latest_download(
                     "ClementTsang", "bottom", "bottom_${tag}-1_amd64.deb"
-                ) as path:
-                    dpkg_install(path)
+                ) as dpkg:
+                    dpkg_install(dpkg)
             case never:
                 assert_never(never)
     if bottom_toml is not None:
@@ -218,8 +219,8 @@ def install_delta() -> None:
         case System.linux:
             with yield_github_latest_download(
                 "dandavison", "delta", "git-delta_${tag}_amd64.deb"
-            ) as path:
-                dpkg_install(path)
+            ) as dpkg:
+                dpkg_install(dpkg)
         case never:
             assert_never(never)
 
@@ -915,7 +916,15 @@ def install_taplo() -> None:
         case System.mac:
             brew_install("taplo")
         case System.linux:
-            _LOGGER.warning("\n\n\n\ntaplo: not implemented\n\n\n\n")
+            path_to = LOCAL_BIN / "taplo"
+            with (
+                yield_github_latest_download(
+                    "tamasfe", "taplo", "taplo-linux-x86_64.gz"
+                ) as binary_gz,
+                gzip.open(binary_gz) as fh_in,
+                path_to.open(mode="wb") as fh_out,
+            ):
+                copyfileobj(fh_in, fh_out)
         case never:
             assert_never(never)
 
