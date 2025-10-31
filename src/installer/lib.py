@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import gzip
 from collections.abc import Iterable, Mapping
 from logging import getLogger
 from os import environ
 from pathlib import Path
 from re import search
-from shutil import which
+from shutil import copyfileobj, which
 from typing import TYPE_CHECKING, Any, assert_never
 from zipfile import ZipFile
 
@@ -155,8 +156,8 @@ def install_bottom(*, bottom_toml: PathLike | None = None) -> None:
             case System.linux:
                 with yield_github_latest_download(
                     "ClementTsang", "bottom", "bottom_${tag}-1_amd64.deb"
-                ) as path:
-                    dpkg_install(path)
+                ) as dpkg:
+                    dpkg_install(dpkg)
             case never:
                 assert_never(never)
     if bottom_toml is not None:
@@ -218,8 +219,8 @@ def install_delta() -> None:
         case System.linux:
             with yield_github_latest_download(
                 "dandavison", "delta", "git-delta_${tag}_amd64.deb"
-            ) as path:
-                dpkg_install(path)
+            ) as dpkg:
+                dpkg_install(dpkg)
         case never:
             assert_never(never)
 
@@ -906,26 +907,26 @@ def install_tailscale(*, auth_key: PathLike | None = None) -> None:
                 symlink(path_from, temp_dir)
 
 
-def install_topgrade() -> None:
-    if have_command("topgrade"):
-        _LOGGER.debug("'topgrade' is already installed")
+def install_taplo() -> None:
+    if have_command("taplo"):
+        _LOGGER.debug("'taplo' is already installed")
         return
-    _LOGGER.info("Installing 'tailscale'...")
+    _LOGGER.info("Installing 'taplo'...")
     match System.identify():
         case System.mac:
-            brew_install("topgrade")
+            brew_install("taplo")
         case System.linux:
-            _LOGGER.warning("\n\n\n\ntopgrade: not implemented\n\n\n\n")
+            path_to = LOCAL_BIN / "taplo"
+            with (
+                yield_github_latest_download(
+                    "tamasfe", "taplo", "taplo-linux-x86_64.gz"
+                ) as binary_gz,
+                gzip.open(binary_gz) as fh_in,
+                path_to.open(mode="wb") as fh_out,
+            ):
+                copyfileobj(fh_in, fh_out)
         case never:
             assert_never(never)
-
-
-def install_transmission() -> None:
-    if brew_installed("transmission"):
-        _LOGGER.debug("'transmission' is already installed")
-        return
-    _LOGGER.info("Installing 'transmission'...")
-    brew_install("transmission", cask=True)
 
 
 def install_tmux(
@@ -948,6 +949,28 @@ def install_tmux(
         symlink(CONFIG_TMUX_CONF_OH_MY_TMUX, tmux_conf_oh_my_tmux)
     if tmux_conf_local is not None:
         symlink(CONFIG_TMUX_CONF_LOCAL, tmux_conf_local)
+
+
+def install_topgrade() -> None:
+    if have_command("topgrade"):
+        _LOGGER.debug("'topgrade' is already installed")
+        return
+    _LOGGER.info("Installing 'topgrade'...")
+    match System.identify():
+        case System.mac:
+            brew_install("topgrade")
+        case System.linux:
+            _LOGGER.warning("\n\n\n\ntopgrade: not implemented\n\n\n\n")
+        case never:
+            assert_never(never)
+
+
+def install_transmission() -> None:
+    if brew_installed("transmission"):
+        _LOGGER.debug("'transmission' is already installed")
+        return
+    _LOGGER.info("Installing 'transmission'...")
+    brew_install("transmission", cask=True)
 
 
 def install_uv() -> None:
@@ -1246,6 +1269,7 @@ __all__ = [
     "install_stylua",
     "install_syncthing",
     "install_tailscale",
+    "install_taplo",
     "install_tmux",
     "install_topgrade",
     "install_transmission",
