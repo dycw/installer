@@ -42,6 +42,7 @@ from .utilities import (
     brew_install,
     brew_installed,
     check_for_commands,
+    chmod,
     contains_line,
     cp,
     dpkg_install,
@@ -925,6 +926,7 @@ def install_taplo() -> None:
                 path_to.open(mode="wb") as fh_out,
             ):
                 copyfileobj(fh_in, fh_out)
+            chmod(path_to)
         case never:
             assert_never(never)
 
