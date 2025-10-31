@@ -906,26 +906,18 @@ def install_tailscale(*, auth_key: PathLike | None = None) -> None:
                 symlink(path_from, temp_dir)
 
 
-def install_topgrade() -> None:
-    if have_command("topgrade"):
-        _LOGGER.debug("'topgrade' is already installed")
+def install_taplo() -> None:
+    if have_command("taplo"):
+        _LOGGER.debug("'taplo' is already installed")
         return
-    _LOGGER.info("Installing 'tailscale'...")
+    _LOGGER.info("Installing 'taplo'...")
     match System.identify():
         case System.mac:
-            brew_install("topgrade")
+            brew_install("taplo")
         case System.linux:
-            _LOGGER.warning("\n\n\n\ntopgrade: not implemented\n\n\n\n")
+            _LOGGER.warning("\n\n\n\ntaplo: not implemented\n\n\n\n")
         case never:
             assert_never(never)
-
-
-def install_transmission() -> None:
-    if brew_installed("transmission"):
-        _LOGGER.debug("'transmission' is already installed")
-        return
-    _LOGGER.info("Installing 'transmission'...")
-    brew_install("transmission", cask=True)
 
 
 def install_tmux(
@@ -948,6 +940,28 @@ def install_tmux(
         symlink(CONFIG_TMUX_CONF_OH_MY_TMUX, tmux_conf_oh_my_tmux)
     if tmux_conf_local is not None:
         symlink(CONFIG_TMUX_CONF_LOCAL, tmux_conf_local)
+
+
+def install_topgrade() -> None:
+    if have_command("topgrade"):
+        _LOGGER.debug("'topgrade' is already installed")
+        return
+    _LOGGER.info("Installing 'topgrade'...")
+    match System.identify():
+        case System.mac:
+            brew_install("topgrade")
+        case System.linux:
+            _LOGGER.warning("\n\n\n\ntopgrade: not implemented\n\n\n\n")
+        case never:
+            assert_never(never)
+
+
+def install_transmission() -> None:
+    if brew_installed("transmission"):
+        _LOGGER.debug("'transmission' is already installed")
+        return
+    _LOGGER.info("Installing 'transmission'...")
+    brew_install("transmission", cask=True)
 
 
 def install_uv() -> None:
@@ -1246,6 +1260,7 @@ __all__ = [
     "install_stylua",
     "install_syncthing",
     "install_tailscale",
+    "install_taplo",
     "install_tmux",
     "install_topgrade",
     "install_transmission",
