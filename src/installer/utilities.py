@@ -515,7 +515,9 @@ def yield_github_latest_download(
     owner: str, repo: str, filename_template: str, /
 ) -> Iterator[Path]:
     tag = get_latest_tag(owner, repo)
-    filename = Template(filename_template).substitute(tag=tag)
+    filename = Template(filename_template).substitute(
+        tag=tag, tag_without_v=tag.lstrip("v")
+    )
     url = f"https://github.com/{owner}/{repo}/releases/download/{tag}/{filename}"
     with yield_download(url) as temp_file:
         yield temp_file

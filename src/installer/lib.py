@@ -963,7 +963,7 @@ def install_topgrade() -> None:
             brew_install("topgrade")
         case System.linux:
             with yield_github_latest_download(
-                "topgrade-rs", "topgrade", "topgrade_${tag}-1_amd64.deb"
+                "topgrade-rs", "topgrade", "topgrade_${tag_without_v}-1_amd64.deb"
             ) as dpkg:
                 dpkg_install(dpkg)
         case never:
