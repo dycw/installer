@@ -156,7 +156,7 @@ def install_bottom(*, bottom_toml: PathLike | None = None) -> None:
                 brew_install("bottom")
             case System.linux:
                 with yield_github_latest_download(
-                    "ClementTsang", "bottom", "bottom_${tag}-1_amd64.deb"
+                    "clementtsang", "bottom", "bottom_${tag}-1_amd64.deb"
                 ) as dpkg:
                     dpkg_install(dpkg)
             case never:
@@ -962,7 +962,10 @@ def install_topgrade() -> None:
         case System.mac:
             brew_install("topgrade")
         case System.linux:
-            _LOGGER.warning("\n\n\n\ntopgrade: not implemented\n\n\n\n")
+            with yield_github_latest_download(
+                "topgrade-rs", "topgrade", "topgrade_${tag}-1_amd64.deb"
+            ) as dpkg:
+                dpkg_install(dpkg)
         case never:
             assert_never(never)
 
