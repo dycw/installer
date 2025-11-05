@@ -6,6 +6,10 @@ ETC = Path("/etc")
 HOME = Path("~").expanduser()
 
 
+CRON_D = ETC / "cron.d"
+ETC_DOCKER = ETC / "docker"
+ETC_SSH = ETC / "ssh"
+LOGROTATE_D = ETC / "logrotate.d"
 RESOLV_CONF = ETC / "resolv.conf"
 BASHRC = HOME / ".bashrc"
 LOCAL_BIN = HOME / ".local/bin"
@@ -15,7 +19,8 @@ SSH = HOME / ".ssh"
 XDG_CONFIG_HOME = HOME / ".config"
 
 
-SSHD_CONFIG = ETC / "ssh/sshd_config"
+CERTS_D = ETC_DOCKER / "certs.d"
+SSHD_CONFIG = ETC_SSH / "sshd_config"
 AUTHORIZED_KEYS = SSH / "authorized_keys"
 SSH_CONFIG = SSH / "config"
 SSH_CONFIG_D = SSH / "config.d"
@@ -42,6 +47,7 @@ CONFIG_WEZTERM_LUA = XDG_CONFIG_HOME / "wezterm/wezterm.lua"
 __all__ = [
     "AUTHORIZED_KEYS",
     "BASHRC",
+    "CERTS_D",
     "CONFIG_BOTTOM_TOML",
     "CONFIG_DIRENV",
     "CONFIG_FD_IGNORE",
@@ -57,10 +63,14 @@ __all__ = [
     "CONFIG_TMUX_CONF_LOCAL",
     "CONFIG_TMUX_CONF_OH_MY_TMUX",
     "CONFIG_WEZTERM_LUA",
+    "CRON_D",
     "ETC",
+    "ETC_DOCKER",
+    "ETC_SSH",
     "HOME",
     "KNOWN_HOSTS",
     "LOCAL_BIN",
+    "LOGROTATE_D",
     "PDBRC",
     "PSQLRC",
     "RESOLV_CONF",
