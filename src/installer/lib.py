@@ -625,6 +625,7 @@ def install_neovim(*, nvim_dir: PathLike | None = None) -> None:
             case System.mac:
                 brew_install("neovim")
             case System.linux:
+                apt_install("fuse")
                 path_to = LOCAL_BIN / "nvim"
                 with yield_download(
                     "https://github.com/neovim/neovim/releases/download/stable/nvim-linux-x86_64.appimage"
