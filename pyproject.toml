@@ -14,7 +14,7 @@
   name = "installer"
   readme = "README.md"
   requires-python = ">= 3.13"
-  version = "0.3.41"
+  version = "0.3.42"
 
 # tool
 [tool]
@@ -22,7 +22,7 @@
   # bump-my-version
   [tool.bumpversion]
     allow_dirty = true
-    current_version = "0.3.41"
+    current_version = "0.3.42"
 
     [[tool.bumpversion.files]]
       filename = "src/installer/__init__.py"
@@ -82,16 +82,17 @@
 
   # pytest
   [tool.pytest]
-
-    [tool.pytest.ini_options]
-      addopts = ["-ra", "-vv", "--color=auto", "--strict-markers"]
-      asyncio_default_fixture_loop_scope = "function"
-      asyncio_mode = "auto"
-      collect_imported_tests = false
-      filterwarnings = ["error"]
-      minversion = "8.0"
-      testpaths = ["src/tests"]
-      xfail_strict = true
+    addopts = ["-ra", "-vv", "--color=auto"]
+    asyncio_default_fixture_loop_scope = "function"
+    asyncio_mode = "auto"
+    collect_imported_tests = false
+    empty_parameter_set_mark = "fail_at_collect"
+    filterwarnings = ["error"]
+    minversion = "9.0"
+    strict = true
+    testpaths = ["src/tests"]
+    timeout = "600"
+    xfail_strict = true
 
   # ruff
   [tool.ruff]
