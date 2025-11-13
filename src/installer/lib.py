@@ -1167,7 +1167,7 @@ def setup_resolv_conf(
 
 
 def setup_ssh(
-    *, symlinks: Iterable[SSHSymlink] = (), templates: Iterable[SSHTemplate,] = ()
+    *, symlinks: Iterable[SSHSymlink] = (), templates: Iterable[SSHTemplate] = ()
 ) -> None:
     write_text("Include config.d/*", SSH_CONFIG)
     mkdir(SSH_CONFIG_D, ownership=True)

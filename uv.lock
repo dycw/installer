@@ -223,7 +223,7 @@ wheels = [
 
 [[package]]
 name = "installer"
-version = "0.3.42"
+version = "0.3.43"
 source = { editable = "." }
 
 [package.dev-dependencies]
