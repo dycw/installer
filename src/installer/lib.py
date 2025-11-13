@@ -7,7 +7,7 @@ from os import environ
 from pathlib import Path
 from re import search
 from shutil import copyfileobj, which
-from typing import TYPE_CHECKING, Any, assert_never
+from typing import TYPE_CHECKING, assert_never
 from zipfile import ZipFile
 
 from .constants import (
@@ -63,7 +63,7 @@ from .utilities import (
 )
 
 if TYPE_CHECKING:
-    from .types import PathLike
+    from .types import PathLike, SSHSymlink, SSHTemplate
 
 
 _LOGGER = getLogger(__name__)
@@ -1167,11 +1167,7 @@ def setup_resolv_conf(
 
 
 def setup_ssh(
-    *,
-    symlinks: Iterable[PathLike | tuple[PathLike, str]] = (),
-    templates: Iterable[
-        tuple[PathLike, Mapping[str, Any]] | tuple[PathLike, Mapping[str, Any], str]
-    ] = (),
+    *, symlinks: Iterable[SSHSymlink] = (), templates: Iterable[SSHTemplate,] = ()
 ) -> None:
     write_text("Include config.d/*", SSH_CONFIG)
     mkdir(SSH_CONFIG_D, ownership=True)
