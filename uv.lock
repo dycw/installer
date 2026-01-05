@@ -296,12 +296,13 @@ wheels = [
 
 [[package]]
 name = "dycw-github-downloader"
-version = "0.1.3"
+version = "0.1.4"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
     { name = "dycw-utilities" },
     { name = "pygithub" },
+    { name = "rich" },
     { name = "typed-settings", extra = ["attrs", "click"] },
 ]
 
@@ -317,6 +318,7 @@ requires-dist = [
     { name = "click", specifier = ">=8.3.1,<9" },
     { name = "dycw-utilities", specifier = ">=0.176.1,<1" },
     { name = "pygithub", specifier = ">=2.8.1,<3" },
+    { name = "rich", specifier = ">=14.2.0,<15" },
     { name = "typed-settings", extras = ["attrs", "click"], specifier = ">=25.3.0,<26" },
 ]
 
