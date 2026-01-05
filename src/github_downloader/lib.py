@@ -71,6 +71,31 @@ def setup_asset(
     LOGGER.info("Downloaded to %r", str(path_bin))
 
 
+def setup_age(
+    *,
+    binary_name: str = SOPS_SETTINGS.binary_name,
+    token: Secret[str] | None = SOPS_SETTINGS.token,
+    timeout: int = SOPS_SETTINGS.timeout,
+    path_binaries: Path = SOPS_SETTINGS.path_binaries,
+    chunk_size: int = SOPS_SETTINGS.chunk_size,
+    permissions: str = SOPS_SETTINGS.permissions,
+) -> None:
+    """Download 'sops'."""
+    setup_asset(
+        "getsops",
+        "sops",
+        binary_name,
+        token=token,
+        match_system=True,
+        match_machine=True,
+        not_endswith=["json"],
+        timeout=timeout,
+        path_binaries=path_binaries,
+        chunk_size=chunk_size,
+        permissions=permissions,
+    )
+
+
 def setup_sops(
     *,
     binary_name: str = SOPS_SETTINGS.binary_name,
