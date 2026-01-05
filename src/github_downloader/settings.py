@@ -17,10 +17,12 @@ class Settings:
     repo: str = option(help="Repository name")
     binary_name: str = option(help="Binary name")
     token: Secret[str] | None = secret(default=None, help="The GitHub token")
-    match_system: bool = option(default=False, help="Match the system name")
-    system_name: str = option(default=SYSTEM_NAME, help="System name")
-    match_machine: bool = option(default=False, help="Match the machine type")
-    machine_type: str = option(default=MACHINE_TYPE, help="Machine type")
+    match_system: bool = option(
+        default=False, help=f"Match the system name {SYSTEM_NAME!r}"
+    )
+    match_machine: bool = option(
+        default=False, help=f"Match the machine type {MACHINE_TYPE!r}"
+    )
     not_endswith: list[str] = option(factory=list, help="Asset name endings to exclude")
     timeout: int = option(default=60, help="Download timeout")
     path_binaries: Path = option(
@@ -45,13 +47,7 @@ class SopsSettings:
     token: Secret[str] | None = secret(
         default=SETTINGS.token, help=_get_help(Settings.token)
     )
-    system_name: str = option(
-        default=SETTINGS.system_name, help=_get_help(Settings.system_name)
-    )
     timeout: int = option(default=SETTINGS.timeout, help=_get_help(Settings.timeout))
-    machine_type: str = option(
-        default=SETTINGS.machine_type, help=_get_help(Settings.machine_type)
-    )
     path_binaries: Path = option(
         default=SETTINGS.path_binaries, help=_get_help(Settings.path_binaries)
     )

@@ -10,6 +10,7 @@ from typed_settings import Secret
 from utilities.iterables import one
 from utilities.subprocess import chmod
 
+from github_downloader.constants import MACHINE_TYPE, SYSTEM_NAME
 from github_downloader.settings import SETTINGS, SOPS_SETTINGS
 
 if TYPE_CHECKING:
@@ -26,9 +27,7 @@ def download_release(
     *,
     token: Secret[str] | None = SETTINGS.token,
     match_system: bool = SETTINGS.match_system,
-    system_name: str = SETTINGS.system_name,
     match_machine: bool = SETTINGS.match_machine,
-    machine_type: str = SETTINGS.machine_type,
     not_endswith: list[str] = SETTINGS.not_endswith,
     timeout: int = SETTINGS.timeout,
     path_binaries: Path = SETTINGS.path_binaries,
@@ -39,14 +38,14 @@ def download_release(
     gh = Github(auth=None if token is None else Token(token.get_secret_value()))
     repository = gh.get_repo(f"{owner}/{repo}")
     release = repository.get_latest_release()
-    if system_name not in {"Darwin", "Linux"}:
-        msg = f"Invalid system {system_name!r}"
+    if SYSTEM_NAME not in {"Darwin", "Linux"}:
+        msg = f"Invalid system {SYSTEM_NAME!r}"
         raise ValueError(msg)
     assets = list(release.get_assets())
     if match_system:
-        assets = [a for a in assets if search(system_name, a.name, flags=IGNORECASE)]
+        assets = [a for a in assets if search(SYSTEM_NAME, a.name, flags=IGNORECASE)]
     if match_machine:
-        assets = [a for a in assets if search(machine_type, a.name, flags=IGNORECASE)]
+        assets = [a for a in assets if search(MACHINE_TYPE, a.name, flags=IGNORECASE)]
     assets = [
         a for a in assets if all(e for e in not_endswith if not a.name.endswith(e))
     ]
@@ -69,8 +68,6 @@ def download_sops(
     *,
     binary_name: str = SOPS_SETTINGS.binary_name,
     token: Secret[str] | None = SOPS_SETTINGS.token,
-    system_name: str = SOPS_SETTINGS.system_name,
-    machine_type: str = SOPS_SETTINGS.machine_type,
     timeout: int = SOPS_SETTINGS.timeout,
     path_binaries: Path = SOPS_SETTINGS.path_binaries,
     chunk_size: int = SOPS_SETTINGS.chunk_size,
@@ -83,9 +80,7 @@ def download_sops(
         binary_name,
         token=token,
         match_system=True,
-        system_name=system_name,
         match_machine=True,
-        machine_type=machine_type,
         not_endswith=["json"],
         timeout=timeout,
         path_binaries=path_binaries,
