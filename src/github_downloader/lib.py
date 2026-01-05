@@ -1,19 +1,20 @@
 from __future__ import annotations
 
 from re import IGNORECASE, search
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
+from github import Github
 from github.Auth import Token
 from requests import get
 from typed_settings import Secret
 from utilities.iterables import one
+from utilities.subprocess import chmod
 
 from github_downloader.settings import SETTINGS
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from actions.types import StrDict
     from typed_settings import Secret
 
 
@@ -26,7 +27,7 @@ def download_release(
     timeout: int = SETTINGS.timeout,
     chunk_size: int = SETTINGS.chunk_size,
 ) -> None:
-    gh = GitHub(auth=None if token is None else Token(token.get_secret_value()))
+    gh = Github(auth=None if token is None else Token(token.get_secret_value()))
     repo = gh.get_repo("getsops/sops")
     release = repo.get_latest_release()
     if system not in {"Darwin", "Linux"}:
@@ -39,7 +40,7 @@ def download_release(
         and search(machine, a.name, flags=IGNORECASE)
         and not a.name.endswith("json")
     )
-    headers: StrDict = {}
+    headers: dict[str, Any] = {}
     if token is not None:
         headers["Authorization"] = f"Bearer {token.get_secret_value()}"
     with get(
@@ -49,4 +50,7 @@ def download_release(
         path_binary.parent.mkdir(parents=True, exist_ok=True)
         with path_binary.open(mode="wb") as fh:
             fh.writelines(resp.iter_content(chunk_size=chunk_size))
-    path_binary.chmod(0o755)
+    chmod(path_binary, "u=rwx,g=rx,o=rx")
+
+
+__all__ = ["download_release"]

@@ -316,7 +316,7 @@ dev = [
 requires-dist = [
     { name = "click", specifier = ">=8.3.1,<9" },
     { name = "dycw-utilities", specifier = ">=0.176.1,<1" },
-    { name = "pygithub", specifier = ">=2.8.1" },
+    { name = "pygithub", specifier = ">=2.8.1,<3" },
     { name = "typed-settings", extras = ["attrs", "click"], specifier = ">=25.3.0,<26" },
 ]
 
@@ -341,7 +341,7 @@ wheels = [
 
 [[package]]
 name = "dycw-utilities"
-version = "0.176.2"
+version = "0.176.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "atomicwrites" },
@@ -350,7 +350,7 @@ dependencies = [
     { name = "whenever" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/de/0c/053a86c84684b9ff01d42d4a8ac7c33be5c87bbb92764b2a43c12766e0e1/dycw_utilities-0.176.2-py3-none-any.whl", hash = "sha256:b7c286c0ba9838ebf6d7e510ef76228574e57afc8c79b142a5ca69f99608f023", size = 205360, upload-time = "2026-01-05T06:27:41.508Z" },
+    { url = "https://files.pythonhosted.org/packages/b9/de/99720b98bc4f3a34dfc5be9dc500d40fa88e84e05558d134f727602505f1/dycw_utilities-0.176.3-py3-none-any.whl", hash = "sha256:c1e47bde316cd57df05076298a167bebf103be3c91bf5458c08cadc6c1c9cdf2", size = 205360, upload-time = "2026-01-05T09:19:11.021Z" },
 ]
 
 [package.optional-dependencies]
