@@ -12,7 +12,7 @@ from utilities.subprocess import chmod
 
 from github_downloader.constants import MACHINE_TYPE, SYSTEM_NAME
 from github_downloader.logging import LOGGER
-from github_downloader.settings import SETTINGS, SOPS_SETTINGS
+from github_downloader.settings import AGE_SETTINGS, SETTINGS, SOPS_SETTINGS
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from typed_settings import Secret
 
 
-def download_release(
+def setup_asset(
     owner: str,
     repo: str,
     binary_name: str,
@@ -71,7 +71,32 @@ def download_release(
     LOGGER.info("Downloaded to %r", str(path_bin))
 
 
-def download_sops(
+def setup_age(
+    *,
+    binary_name: str = AGE_SETTINGS.binary_name,
+    token: Secret[str] | None = AGE_SETTINGS.token,
+    timeout: int = AGE_SETTINGS.timeout,
+    path_binaries: Path = AGE_SETTINGS.path_binaries,
+    chunk_size: int = AGE_SETTINGS.chunk_size,
+    permissions: str = AGE_SETTINGS.permissions,
+) -> None:
+    """Download 'age'."""
+    setup_asset(
+        "FiloSottile",
+        "age",
+        binary_name,
+        token=token,
+        match_system=True,
+        match_machine=True,
+        not_endswith=["proof"],
+        timeout=timeout,
+        path_binaries=path_binaries,
+        chunk_size=chunk_size,
+        permissions=permissions,
+    )
+
+
+def setup_sops(
     *,
     binary_name: str = SOPS_SETTINGS.binary_name,
     token: Secret[str] | None = SOPS_SETTINGS.token,
@@ -81,7 +106,7 @@ def download_sops(
     permissions: str = SOPS_SETTINGS.permissions,
 ) -> None:
     """Download 'sops'."""
-    download_release(
+    setup_asset(
         "getsops",
         "sops",
         binary_name,
@@ -96,4 +121,4 @@ def download_sops(
     )
 
 
-__all__ = ["download_release"]
+__all__ = ["setup_age", "setup_asset", "setup_sops"]
