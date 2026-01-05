@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+from pathlib import Path
 from re import IGNORECASE, search
-from typing import TYPE_CHECKING, Any, override
+from typing import TYPE_CHECKING, Any
 
 from github import Github
 from github.Auth import Token
@@ -10,7 +11,7 @@ from requests import get
 from typed_settings import Secret
 from utilities.inflect import counted_noun
 from utilities.iterables import OneNonUniqueError, one
-from utilities.subprocess import chmod, cp
+from utilities.subprocess import cp
 from utilities.tempfile import TemporaryDirectory
 from utilities.text import strip_and_dedent
 
@@ -19,14 +20,14 @@ from github_downloader.constants import MACHINE_TYPE_GROUP, SYSTEM_NAME
 from github_downloader.logging import LOGGER
 from github_downloader.settings import (
     AGE_SETTINGS,
-    SETTINGS,
+    COMMON_SETTINGS,
+    PATH_BINARIES_SETTINGS,
+    PERM_SETTINGS,
     SOPS_SETTINGS,
-    YIELD_ASSET_SETTINGS,
 )
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
-    from pathlib import Path
 
     from typed_settings import Secret
     from utilities.permissions import PermissionsLike
@@ -39,12 +40,12 @@ def yield_asset(
     repo: str,
     /,
     *,
-    token: Secret[str] | None = YIELD_ASSET_SETTINGS.token,
-    match_system: bool = YIELD_ASSET_SETTINGS.match_system,
-    match_machine: bool = YIELD_ASSET_SETTINGS.match_machine,
-    not_endswith: list[str] | None = YIELD_ASSET_SETTINGS.not_endswith,
-    timeout: int = YIELD_ASSET_SETTINGS.timeout,
-    chunk_size: int = YIELD_ASSET_SETTINGS.chunk_size,
+    token: Secret[str] | None = COMMON_SETTINGS.token,
+    match_system: bool = COMMON_SETTINGS.match_system,
+    match_machine: bool = COMMON_SETTINGS.match_machine,
+    not_endswith: list[str] | None = COMMON_SETTINGS.not_endswith,
+    timeout: int = COMMON_SETTINGS.timeout,
+    chunk_size: int = COMMON_SETTINGS.chunk_size,
 ) -> Iterator[Path]:
     """Yield a GitHub asset."""
     LOGGER.info(
@@ -136,16 +137,16 @@ def setup_asset(
     path: PathLike,
     /,
     *,
-    token: Secret[str] | None = None,
-    match_system: bool = False,
-    match_machine: bool = False,
-    not_endswith: list[str] | None = None,
-    timeout: int = DOWNLOAD_TIMEOUT,
-    chunk_size: int = DOWNLOAD_CHUNK_SIZE,
-    sudo: bool = False,
-    perms: PermissionsLike | None = None,
-    owner: str | int | None = None,
-    group: str | int | None = None,
+    token: Secret[str] | None = COMMON_SETTINGS.token,
+    match_system: bool = COMMON_SETTINGS.match_system,
+    match_machine: bool = COMMON_SETTINGS.match_machine,
+    not_endswith: list[str] | None = COMMON_SETTINGS.not_endswith,
+    timeout: int = COMMON_SETTINGS.timeout,
+    chunk_size: int = COMMON_SETTINGS.chunk_size,
+    sudo: bool = PERM_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERM_SETTINGS.perms,
+    owner: str | int | None = PERM_SETTINGS.owner,
+    group: str | int | None = PERM_SETTINGS.group,
 ) -> None:
     """Setup a GitHub asset."""
     LOGGER.info(
@@ -201,11 +202,14 @@ def setup_asset(
 def setup_age(
     *,
     binary_name: str = AGE_SETTINGS.binary_name,
-    token: Secret[str] | None = AGE_SETTINGS.token,
-    timeout: int = AGE_SETTINGS.timeout,
-    path_binaries: Path = AGE_SETTINGS.path_binaries,
-    chunk_size: int = AGE_SETTINGS.chunk_size,
-    permissions: str = AGE_SETTINGS.permissions,
+    token: Secret[str] | None = COMMON_SETTINGS.token,
+    timeout: int = COMMON_SETTINGS.timeout,
+    path_binaries: Path = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = COMMON_SETTINGS.chunk_size,
+    sudo: bool = PERM_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERM_SETTINGS.perms,
+    owner: str | int | None = PERM_SETTINGS.owner,
+    group: str | int | None = PERM_SETTINGS.group,
 ) -> None:
     """Setup 'age'."""
     LOGGER.info(
@@ -216,7 +220,10 @@ def setup_age(
              - timeout       = %s
              - path_binaries = %s
              - chunk_size    = %s
-             - permissions   = %s
+             - sudo          = %s
+             - perms         = %s
+             - owner         = %s
+             - group         = %s
         """),
         setup_age.__name__,
         __version__,
@@ -225,7 +232,10 @@ def setup_age(
         timeout,
         path_binaries,
         chunk_size,
-        permissions,
+        sudo,
+        perms,
+        owner,
+        group,
     )
     setup_asset(
         "FiloSottile",
@@ -245,11 +255,14 @@ def setup_age(
 def setup_sops(
     *,
     binary_name: str = SOPS_SETTINGS.binary_name,
-    token: Secret[str] | None = SOPS_SETTINGS.token,
-    timeout: int = SOPS_SETTINGS.timeout,
-    path_binaries: Path = SOPS_SETTINGS.path_binaries,
-    chunk_size: int = SOPS_SETTINGS.chunk_size,
-    permissions: str = SOPS_SETTINGS.permissions,
+    token: Secret[str] | None = COMMON_SETTINGS.token,
+    timeout: int = COMMON_SETTINGS.timeout,
+    path_binaries: Path = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = COMMON_SETTINGS.chunk_size,
+    sudo: bool = PERM_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERM_SETTINGS.perms,
+    owner: str | int | None = PERM_SETTINGS.owner,
+    group: str | int | None = PERM_SETTINGS.group,
 ) -> None:
     """Setup 'sops'."""
     LOGGER.info(
@@ -260,7 +273,10 @@ def setup_sops(
              - timeout       = %s
              - path_binaries = %s
              - chunk_size    = %s
-             - permissions   = %s
+             - sudo          = %s
+             - perms         = %s
+             - owner         = %s
+             - group         = %s
         """),
         setup_sops.__name__,
         __version__,
@@ -269,21 +285,26 @@ def setup_sops(
         timeout,
         path_binaries,
         chunk_size,
-        permissions,
+        sudo,
+        perms,
+        owner,
+        group,
     )
     setup_asset(
         "getsops",
         "sops",
-        binary_name,
+        Path(path_binaries / binary_name),
         token=token,
         match_system=True,
         match_machine=True,
         not_endswith=["json"],
         timeout=timeout,
-        path_binaries=path_binaries,
         chunk_size=chunk_size,
-        permissions=permissions,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
-__all__ = ["setup_age", "setup_asset", "setup_sops"]
+__all__ = ["setup_age", "setup_asset", "setup_sops", "yield_asset"]

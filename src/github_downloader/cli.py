@@ -11,12 +11,7 @@ from utilities.text import strip_and_dedent
 from github_downloader import __version__
 from github_downloader.lib import setup_age, setup_asset, setup_sops
 from github_downloader.logging import LOGGER
-from github_downloader.settings import (
-    LOADER,
-    AgeSettings,
-    SetupAssetSettings,
-    SopsSettings,
-)
+from github_downloader.settings import LOADER, AgeSettings, PermSettings, SopsSettings
 
 
 @group(**CONTEXT_SETTINGS)
@@ -27,14 +22,9 @@ def _main() -> None: ...
 @argument("asset-owner", type=str)
 @argument("asset-repo", type=str)
 @argument("binary-name", type=str)
-@click_options(SetupAssetSettings, [LOADER], show_envvars_in_help=True)
+@click_options(PermSettings, [LOADER], show_envvars_in_help=True)
 def run_sub_cmd(
-    settings: SetupAssetSettings,
-    /,
-    *,
-    asset_owner: str,
-    asset_repo: str,
-    binary_name: str,
+    settings: PermSettings, /, *, asset_owner: str, asset_repo: str, binary_name: str
 ) -> None:
     if is_pytest():
         return
