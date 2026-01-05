@@ -11,7 +11,12 @@ from utilities.text import strip_and_dedent
 from github_downloader import __version__
 from github_downloader.lib import setup_age, setup_asset, setup_sops
 from github_downloader.logging import LOGGER
-from github_downloader.settings import LOADER, AgeSettings, Settings, SopsSettings
+from github_downloader.settings import (
+    LOADER,
+    AgeSettings,
+    SetupAssetSettings,
+    SopsSettings,
+)
 
 
 @group(**CONTEXT_SETTINGS)
@@ -19,12 +24,17 @@ def _main() -> None: ...
 
 
 @_main.command(name="run", **CONTEXT_SETTINGS)
-@argument("owner", type=str)
-@argument("repo", type=str)
+@argument("asset-owner", type=str)
+@argument("asset-repo", type=str)
 @argument("binary-name", type=str)
-@click_options(Settings, [LOADER], show_envvars_in_help=True)
+@click_options(SetupAssetSettings, [LOADER], show_envvars_in_help=True)
 def run_sub_cmd(
-    settings: Settings, /, *, owner: str, repo: str, binary_name: str
+    settings: SetupAssetSettings,
+    /,
+    *,
+    asset_owner: str,
+    asset_repo: str,
+    binary_name: str,
 ) -> None:
     if is_pytest():
         return
@@ -39,17 +49,19 @@ def run_sub_cmd(
         pretty_repr(settings),
     )
     setup_asset(
-        owner,
-        repo,
+        asset_owner,
+        asset_repo,
         binary_name,
         token=settings.token,
         match_system=settings.match_system,
         match_machine=settings.match_machine,
         not_endswith=settings.not_endswith,
         timeout=settings.timeout,
-        path_binaries=settings.path_binaries,
         chunk_size=settings.chunk_size,
-        permissions=settings.permissions,
+        sudo=settings.sudo,
+        perms=settings.perms,
+        owner=settings.owner,
+        group=settings.group,
     )
 
 

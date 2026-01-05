@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
 from re import IGNORECASE, search
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, override
 
 from github import Github
 from github.Auth import Token
@@ -9,64 +10,65 @@ from requests import get
 from typed_settings import Secret
 from utilities.inflect import counted_noun
 from utilities.iterables import OneNonUniqueError, one
-from utilities.subprocess import chmod
+from utilities.subprocess import chmod, cp
+from utilities.tempfile import TemporaryDirectory
 from utilities.text import strip_and_dedent
 
 from github_downloader import __version__
 from github_downloader.constants import MACHINE_TYPE_GROUP, SYSTEM_NAME
 from github_downloader.logging import LOGGER
-from github_downloader.settings import AGE_SETTINGS, SETTINGS, SOPS_SETTINGS
+from github_downloader.settings import (
+    AGE_SETTINGS,
+    SETTINGS,
+    SOPS_SETTINGS,
+    YIELD_ASSET_SETTINGS,
+)
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from pathlib import Path
 
     from typed_settings import Secret
+    from utilities.permissions import PermissionsLike
+    from utilities.types import PathLike
 
 
-def setup_asset(
+@contextmanager
+def yield_asset(
     owner: str,
     repo: str,
-    binary_name: str,
     /,
     *,
-    token: Secret[str] | None = SETTINGS.token,
-    match_system: bool = SETTINGS.match_system,
-    match_machine: bool = SETTINGS.match_machine,
-    not_endswith: list[str] = SETTINGS.not_endswith,
-    timeout: int = SETTINGS.timeout,
-    path_binaries: Path = SETTINGS.path_binaries,
-    chunk_size: int = SETTINGS.chunk_size,
-    permissions: str = SETTINGS.permissions,
-) -> None:
-    """Download a GitHub release."""
+    token: Secret[str] | None = YIELD_ASSET_SETTINGS.token,
+    match_system: bool = YIELD_ASSET_SETTINGS.match_system,
+    match_machine: bool = YIELD_ASSET_SETTINGS.match_machine,
+    not_endswith: list[str] | None = YIELD_ASSET_SETTINGS.not_endswith,
+    timeout: int = YIELD_ASSET_SETTINGS.timeout,
+    chunk_size: int = YIELD_ASSET_SETTINGS.chunk_size,
+) -> Iterator[Path]:
+    """Yield a GitHub asset."""
     LOGGER.info(
         strip_and_dedent("""
             Running '%s' (version %s) with settings:
              - owner         = %s
              - repo          = %s
-             - binary_name   = %s
              - token         = %s
              - match_system  = %s
              - match_machine = %s
              - not_endswith  = %s
-             - timeout       = %s
-             - path_binaries = %s
-             - chunk_size    = %s
-             - permissions   = %s
+             - timeout       = %d
+             - chunk_size    = %d
         """),
-        setup_asset.__name__,
+        yield_asset.__name__,
         __version__,
         owner,
         repo,
-        binary_name,
         token,
         match_system,
         match_machine,
         not_endswith,
         timeout,
-        path_binaries,
         chunk_size,
-        permissions,
     )
     gh = Github(auth=None if token is None else Token(token.get_secret_value()))
     repository = gh.get_repo(f"{owner}/{repo}")
@@ -93,7 +95,7 @@ def setup_asset(
             counted_noun(assets, "asset"),
             [a.name for a in assets],
         )
-    if len(not_endswith) >= 1:
+    if not_endswith is not None:
         assets = [
             a for a in assets if all(not a.name.endswith(e) for e in not_endswith)
         ]
@@ -113,16 +115,87 @@ def setup_asset(
     headers: dict[str, Any] = {}
     if token is not None:
         headers["Authorization"] = f"Bearer {token.get_secret_value()}"
-    with get(
-        asset.browser_download_url, headers=headers, timeout=timeout, stream=True
-    ) as resp:
-        resp.raise_for_status()
-        path_binaries.mkdir(parents=True, exist_ok=True)
-        path_bin = path_binaries / binary_name
-        with path_bin.open(mode="wb") as fh:
-            fh.writelines(resp.iter_content(chunk_size=chunk_size))
-    chmod(path_bin, permissions)
-    LOGGER.info("Downloaded to %r", str(path_bin))
+    with TemporaryDirectory() as temp_dir:
+        with get(
+            asset.browser_download_url, headers=headers, timeout=timeout, stream=True
+        ) as resp:
+            resp.raise_for_status()
+            dest = temp_dir / asset.name
+            with dest.open(mode="wb") as fh:
+                fh.writelines(resp.iter_content(chunk_size=chunk_size))
+        LOGGER.info("Yielding %r...", str(dest))
+        yield dest
+
+
+##
+
+
+def setup_asset(
+    asset_owner: str,
+    asset_repo: str,
+    path: PathLike,
+    /,
+    *,
+    token: Secret[str] | None = None,
+    match_system: bool = False,
+    match_machine: bool = False,
+    not_endswith: list[str] | None = None,
+    timeout: int = DOWNLOAD_TIMEOUT,
+    chunk_size: int = DOWNLOAD_CHUNK_SIZE,
+    sudo: bool = False,
+    perms: PermissionsLike | None = None,
+    owner: str | int | None = None,
+    group: str | int | None = None,
+) -> None:
+    """Setup a GitHub asset."""
+    LOGGER.info(
+        strip_and_dedent("""
+            Running '%s' (version %s) with settings:
+             - asset_owner   = %s
+             - asset_repo    = %s
+             - path          = %s
+             - token         = %s
+             - match_system  = %s
+             - match_machine = %s
+             - not_endswith  = %s
+             - timeout       = %d
+             - chunk_size    = %d
+             - sudo          = %s
+             - perms         = %s
+             - owner         = %s
+             - group         = %s
+        """),
+        setup_asset.__name__,
+        __version__,
+        asset_owner,
+        asset_repo,
+        path,
+        token,
+        match_system,
+        match_machine,
+        not_endswith,
+        timeout,
+        chunk_size,
+        sudo,
+        perms,
+        owner,
+        group,
+    )
+    with yield_asset(
+        asset_owner,
+        asset_repo,
+        token=token,
+        match_system=match_system,
+        match_machine=match_machine,
+        not_endswith=not_endswith,
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as src:
+        cp(src, path, sudo=sudo, perms=perms, owner=owner, group=group)
+        LOGGER.info("Downloaded to %r", str(path))
+
+
+##
 
 
 def setup_age(
@@ -134,7 +207,7 @@ def setup_age(
     chunk_size: int = AGE_SETTINGS.chunk_size,
     permissions: str = AGE_SETTINGS.permissions,
 ) -> None:
-    """Download 'age'."""
+    """Setup 'age'."""
     LOGGER.info(
         strip_and_dedent("""
             Running '%s' (version %s) with settings:
@@ -178,7 +251,7 @@ def setup_sops(
     chunk_size: int = SOPS_SETTINGS.chunk_size,
     permissions: str = SOPS_SETTINGS.permissions,
 ) -> None:
-    """Download 'sops'."""
+    """Setup 'sops'."""
     LOGGER.info(
         strip_and_dedent("""
             Running '%s' (version %s) with settings:

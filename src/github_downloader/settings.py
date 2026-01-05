@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from attrs import fields_dict
 from typed_settings import EnvLoader, Secret, load_settings, option, secret, settings
@@ -9,11 +8,20 @@ from typed_settings import EnvLoader, Secret, load_settings, option, secret, set
 from github_downloader.constants import MACHINE_TYPE, SYSTEM_NAME
 from github_downloader.utilities import convert_token
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
 LOADER = EnvLoader("")
 
 
+def _get_help(cls: type[Any], member_descriptor: Any, /) -> None:
+    return fields_dict(cls)[member_descriptor.__name__].metadata["typed-settings"][
+        "help"
+    ]
+
+
 @settings
-class Settings:
+class YieldAssetSettings:
     token: Secret[str] | None = secret(
         default=None, converter=convert_token, help="The GitHub token"
     )
@@ -25,37 +33,72 @@ class Settings:
     )
     not_endswith: list[str] = option(factory=list, help="Asset name endings to exclude")
     timeout: int = option(default=60, help="Download timeout")
-    path_binaries: Path = option(
-        default=Path("/usr/local/bin"), help="Path to all binaries"
+    chunk_size: int = option(default=8196, help="Streaming chunk size")
+
+
+YIELD_ASSET_SETTINGS = load_settings(YieldAssetSettings, [LOADER])
+
+
+@settings
+class SetupAssetSettings:
+    token: Secret[str] | None = secret(
+        default=YIELD_ASSET_SETTINGS.token,
+        converter=convert_token,
+        help=_get_help(YieldAssetSettings, YieldAssetSettings.token),
     )
-    chunk_size: int = option(default=8192, help="Streaming chunk size")
-    permissions: str = option(default="u=rwx,g=rx,o=rx", help="Binary permissions")
+    match_system: bool = option(
+        default=YIELD_ASSET_SETTINGS.match_system,
+        help=_get_help(YieldAssetSettings, YieldAssetSettings.match_system),
+    )
+    match_machine: bool = option(
+        default=YIELD_ASSET_SETTINGS.match_machine,
+        help=_get_help(YieldAssetSettings, YieldAssetSettings.match_machine),
+    )
+    not_endswith: list[str] = option(
+        default=YIELD_ASSET_SETTINGS.not_endswith,
+        help=_get_help(YieldAssetSettings, YieldAssetSettings.not_endswith),
+    )
+    timeout: int = option(
+        default=YIELD_ASSET_SETTINGS.timeout,
+        help=_get_help(YieldAssetSettings, YieldAssetSettings.timeout),
+    )
+    chunk_size: int = option(
+        default=YIELD_ASSET_SETTINGS.chunk_size,
+        help=_get_help(YieldAssetSettings, YieldAssetSettings.chunk_size),
+    )
+    sudo: bool = option(default=False, help="Call 'mv' with 'sudo'")
+    perms: str | None = option(default=None, help="Change permissions")
+    owner: str | None = option(default=None, help="Change owner")
+    group: str | None = option(default=None, help="Change group")
 
 
-SETTINGS = load_settings(Settings, [LOADER])
-
-
-def _get_help(member_descriptor: Any, /) -> None:
-    return fields_dict(Settings)[member_descriptor.__name__].metadata["typed-settings"][
-        "help"
-    ]
+SETTINGS = load_settings(SetupAssetSettings, [LOADER])
 
 
 @settings
 class AgeSettings:
     binary_name: str = option(default="age", help="Binary name")
     token: Secret[str] | None = secret(
-        default=SETTINGS.token, converter=convert_token, help=_get_help(Settings.token)
+        default=YIELD_ASSET_SETTINGS.token,
+        converter=convert_token,
+        help=_get_help(YieldAssetSettings, YieldAssetSettings.token),
     )
-    timeout: int = option(default=SETTINGS.timeout, help=_get_help(Settings.timeout))
-    path_binaries: Path = option(
-        default=SETTINGS.path_binaries, help=_get_help(Settings.path_binaries)
+    timeout: int = option(
+        default=YIELD_ASSET_SETTINGS.timeout,
+        help=_get_help(YieldAssetSettings, YieldAssetSettings.timeout),
     )
     chunk_size: int = option(
-        default=SETTINGS.chunk_size, help=_get_help(Settings.chunk_size)
+        default=YIELD_ASSET_SETTINGS.chunk_size,
+        help=_get_help(YieldAssetSettings, YieldAssetSettings.chunk_size),
+    )
+    timeout: int = option(
+        default=SETTINGS.timeout, help=_get_help(SetupAssetSettings.timeout)
+    )
+    path_binaries: Path = option(
+        default=SETTINGS.path_binaries, help=_get_help(SetupAssetSettings.path_binaries)
     )
     permissions: str = option(
-        default=SETTINGS.permissions, help=_get_help(Settings.permissions)
+        default=SETTINGS.perms, help=_get_help(SetupAssetSettings.perms)
     )
 
 
@@ -66,17 +109,21 @@ AGE_SETTINGS = load_settings(AgeSettings, [LOADER])
 class SopsSettings:
     binary_name: str = option(default="sops", help="Binary name")
     token: Secret[str] | None = secret(
-        default=SETTINGS.token, converter=convert_token, help=_get_help(Settings.token)
+        default=SETTINGS.token,
+        converter=convert_token,
+        help=_get_help(SetupAssetSettings.token),
     )
-    timeout: int = option(default=SETTINGS.timeout, help=_get_help(Settings.timeout))
+    timeout: int = option(
+        default=SETTINGS.timeout, help=_get_help(SetupAssetSettings.timeout)
+    )
     path_binaries: Path = option(
-        default=SETTINGS.path_binaries, help=_get_help(Settings.path_binaries)
+        default=SETTINGS.path_binaries, help=_get_help(SetupAssetSettings.path_binaries)
     )
     chunk_size: int = option(
-        default=SETTINGS.chunk_size, help=_get_help(Settings.chunk_size)
+        default=SETTINGS.chunk_size, help=_get_help(SetupAssetSettings.chunk_size)
     )
     permissions: str = option(
-        default=SETTINGS.permissions, help=_get_help(Settings.permissions)
+        default=SETTINGS.perms, help=_get_help(SetupAssetSettings.perms)
     )
 
 
@@ -88,7 +135,9 @@ __all__ = [
     "LOADER",
     "SETTINGS",
     "SOPS_SETTINGS",
+    "YIELD_ASSET_SETTINGS",
     "AgeSettings",
-    "Settings",
+    "SetupAssetSettings",
     "SopsSettings",
+    "YieldAssetSettings",
 ]
