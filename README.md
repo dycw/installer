@@ -1,3 +1,3 @@
-# `template-python`
+# `github-downloader`
 
-Template for Python packages
+GitHub release downloader

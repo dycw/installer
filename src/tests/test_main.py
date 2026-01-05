@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dycw_template_python import __version__
+from github_downloader import __version__
 
 
 class TestMain:
