@@ -7,7 +7,7 @@ from github import Github
 from github.Auth import Token
 from requests import get
 from typed_settings import Secret
-from utilities.iterables import OneNonUniqueError, one
+from utilities.iterables import OneEmptyError, OneNonUniqueError, one
 from utilities.subprocess import chmod
 
 from github_downloader.constants import MACHINE_TYPE, SYSTEM_NAME
@@ -50,6 +50,9 @@ def setup_asset(
     assets = [a for a in assets if all(not a.name.endswith(e) for e in not_endswith)]
     try:
         asset = one(assets)
+    except OneEmptyError:
+        msg = f"No assets found amongst {[a.name for a in release.get_assets()]}"
+        raise ValueError(msg) from None
     except OneNonUniqueError as error:
         raise OneNonUniqueError(
             iterables=([a.name for a in assets],),

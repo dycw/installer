@@ -38,8 +38,6 @@ def run_sub_cmd(
         __version__,
         pretty_repr(settings),
     )
-    if settings.token is not None:
-        LOGGER.info("Token = %r", settings.token.get_secret_value())
     setup_asset(
         owner,
         repo,
@@ -70,8 +68,6 @@ def age_sub_cmd(settings: AgeSettings, /) -> None:
         __version__,
         pretty_repr(settings),
     )
-    if settings.token is not None:
-        LOGGER.info("Token = %r", settings.token.get_secret_value())
     setup_age(
         binary_name=settings.binary_name,
         token=settings.token,
@@ -97,8 +93,6 @@ def sops_sub_cmd(settings: SopsSettings, /) -> None:
         __version__,
         pretty_repr(settings),
     )
-    if settings.token is not None:
-        LOGGER.info("Token = %r", settings.token.get_secret_value())
     setup_sops(
         binary_name=settings.binary_name,
         token=settings.token,
