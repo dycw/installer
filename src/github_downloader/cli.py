@@ -29,9 +29,7 @@ def run_sub_cmd(settings: Settings, /) -> None:
         settings.binary_name,
         token=settings.token,
         match_system=settings.match_system,
-        system_name=settings.system_name,
         match_machine=settings.match_machine,
-        machine_type=settings.machine_type,
         not_endswith=settings.not_endswith,
         timeout=settings.timeout,
         path_binaries=settings.path_binaries,
@@ -50,8 +48,6 @@ def sops_sub_cmd(settings: SopsSettings, /) -> None:
     download_sops(
         binary_name=settings.binary_name,
         token=settings.token,
-        system_name=settings.system_name,
-        machine_type=settings.machine_type,
         timeout=settings.timeout,
         path_binaries=settings.path_binaries,
         chunk_size=settings.chunk_size,
