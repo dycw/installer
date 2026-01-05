@@ -23,6 +23,7 @@ repos:
           - --pyright
           - --pytest
           - --python-package-name=github_downloader
+          - --python-version=3.12
           - --readme
           - --repo-name=github-downloader
           - --ruff

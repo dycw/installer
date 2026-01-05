@@ -29,6 +29,14 @@ jobs:
           python-version: "3.14"
           resolution: highest
           prerelease: disallow
+      - name: Run 'pyright'
+        uses: dycw/action-pyright@latest
+        with:
+          token-checkout: ${{github.token}}
+          token-uv: ${{github.token}}
+          python-version: "3.12"
+          resolution: highest
+          prerelease: disallow
   pytest:
     env:
       CI: "1"
@@ -52,6 +60,8 @@ jobs:
           - ubuntu-latest
         python-version:
           - "3.14"
+          - "3.12"
+          - "3.13"
         resolution:
           - highest
           - lowest-direct
