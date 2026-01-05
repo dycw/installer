@@ -2,7 +2,7 @@ name: push
 on:
   push:
     branches:
-    - master
+      - master
 jobs:
   publish:
     environment:
@@ -11,18 +11,18 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     steps:
-    - name: Build and publish package
-      uses: dycw/action-publish@latest
-      with:
-        token-checkout: ${{github.token}}
-        token-uv: ${{github.token}}
+      - name: Build and publish package
+        uses: dycw/action-publish@latest
+        with:
+          token-checkout: ${{github.token}}
+          token-uv: ${{github.token}}
   tag:
     runs-on: ubuntu-latest
     steps:
-    - name: Tag latest commit
-      uses: dycw/action-tag@latest
-      with:
-        token-checkout: ${{github.token}}
-        token-uv: ${{github.token}}
-        user-name: github-actions-bot
-        user-email: noreply@github.com
+      - name: Tag latest commit
+        uses: dycw/action-tag@latest
+        with:
+          token-checkout: ${{github.token}}
+          token-uv: ${{github.token}}
+          user-name: github-actions-bot
+          user-email: noreply@github.com
