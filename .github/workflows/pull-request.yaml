@@ -51,9 +51,9 @@ jobs:
           - macos-latest
           - ubuntu-latest
         python-version:
-          - "3.14"
           - "3.12"
           - "3.13"
+          - "3.14"
         resolution:
           - highest
           - lowest-direct
