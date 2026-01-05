@@ -7,9 +7,9 @@ from utilities.click import CONTEXT_SETTINGS
 from utilities.logging import basic_config
 from utilities.os import is_pytest
 
-from github_downloader.lib import download_release, download_sops
+from github_downloader.lib import setup_age, setup_asset, setup_sops
 from github_downloader.logging import LOGGER
-from github_downloader.settings import LOADER, Settings, SopsSettings
+from github_downloader.settings import LOADER, AgeSettings, Settings, SopsSettings
 
 
 @group(**CONTEXT_SETTINGS)
@@ -28,7 +28,7 @@ def run_sub_cmd(
         return
     basic_config(obj=LOGGER)
     LOGGER.info("Settings = %s", pretty_repr(settings))
-    download_release(
+    setup_asset(
         owner,
         repo,
         binary_name,
@@ -43,6 +43,23 @@ def run_sub_cmd(
     )
 
 
+@_main.command(name="age", **CONTEXT_SETTINGS)
+@click_options(AgeSettings, [LOADER], show_envvars_in_help=True)
+def age_sub_cmd(settings: AgeSettings, /) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    LOGGER.info("Settings = %s", pretty_repr(settings))
+    setup_age(
+        binary_name=settings.binary_name,
+        token=settings.token,
+        timeout=settings.timeout,
+        path_binaries=settings.path_binaries,
+        chunk_size=settings.chunk_size,
+        permissions=settings.permissions,
+    )
+
+
 @_main.command(name="sops", **CONTEXT_SETTINGS)
 @click_options(SopsSettings, [LOADER], show_envvars_in_help=True)
 def sops_sub_cmd(settings: SopsSettings, /) -> None:
@@ -50,7 +67,7 @@ def sops_sub_cmd(settings: SopsSettings, /) -> None:
         return
     basic_config(obj=LOGGER)
     LOGGER.info("Settings = %s", pretty_repr(settings))
-    download_sops(
+    setup_sops(
         binary_name=settings.binary_name,
         token=settings.token,
         timeout=settings.timeout,

@@ -39,6 +39,27 @@ def _get_help(member_descriptor: Any, /) -> None:
 
 
 @settings
+class AgeSettings:
+    binary_name: str = option(default="age", help="Binary name")
+    token: Secret[str] | None = secret(
+        default=SETTINGS.token, help=_get_help(Settings.token)
+    )
+    timeout: int = option(default=SETTINGS.timeout, help=_get_help(Settings.timeout))
+    path_binaries: Path = option(
+        default=SETTINGS.path_binaries, help=_get_help(Settings.path_binaries)
+    )
+    chunk_size: int = option(
+        default=SETTINGS.chunk_size, help=_get_help(Settings.chunk_size)
+    )
+    permissions: str = option(
+        default=SETTINGS.permissions, help=_get_help(Settings.permissions)
+    )
+
+
+AGE_SETTINGS = load_settings(AgeSettings, [LOADER])
+
+
+@settings
 class SopsSettings:
     binary_name: str = option(default="sops", help="Binary name")
     token: Secret[str] | None = secret(
@@ -59,4 +80,12 @@ class SopsSettings:
 SOPS_SETTINGS = load_settings(SopsSettings, [LOADER])
 
 
-__all__ = ["LOADER", "SETTINGS", "SOPS_SETTINGS", "Settings", "SopsSettings"]
+__all__ = [
+    "AGE_SETTINGS",
+    "LOADER",
+    "SETTINGS",
+    "SOPS_SETTINGS",
+    "AgeSettings",
+    "Settings",
+    "SopsSettings",
+]

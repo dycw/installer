@@ -12,7 +12,7 @@ from utilities.subprocess import chmod
 
 from github_downloader.constants import MACHINE_TYPE, SYSTEM_NAME
 from github_downloader.logging import LOGGER
-from github_downloader.settings import SETTINGS, SOPS_SETTINGS
+from github_downloader.settings import AGE_SETTINGS, SETTINGS, SOPS_SETTINGS
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -73,22 +73,22 @@ def setup_asset(
 
 def setup_age(
     *,
-    binary_name: str = SOPS_SETTINGS.binary_name,
-    token: Secret[str] | None = SOPS_SETTINGS.token,
-    timeout: int = SOPS_SETTINGS.timeout,
-    path_binaries: Path = SOPS_SETTINGS.path_binaries,
-    chunk_size: int = SOPS_SETTINGS.chunk_size,
-    permissions: str = SOPS_SETTINGS.permissions,
+    binary_name: str = AGE_SETTINGS.binary_name,
+    token: Secret[str] | None = AGE_SETTINGS.token,
+    timeout: int = AGE_SETTINGS.timeout,
+    path_binaries: Path = AGE_SETTINGS.path_binaries,
+    chunk_size: int = AGE_SETTINGS.chunk_size,
+    permissions: str = AGE_SETTINGS.permissions,
 ) -> None:
-    """Download 'sops'."""
+    """Download 'age'."""
     setup_asset(
-        "getsops",
-        "sops",
+        "FiloSottile",
+        "age",
         binary_name,
         token=token,
         match_system=True,
         match_machine=True,
-        not_endswith=["json"],
+        not_endswith=["proof"],
         timeout=timeout,
         path_binaries=path_binaries,
         chunk_size=chunk_size,
@@ -121,4 +121,4 @@ def setup_sops(
     )
 
 
-__all__ = ["setup_asset", "setup_sops"]
+__all__ = ["setup_age", "setup_asset", "setup_sops"]
