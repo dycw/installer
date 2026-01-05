@@ -45,7 +45,7 @@ def _get_help(member_descriptor: Any, /) -> None:
 class AgeSettings:
     binary_name: str = option(default="age", help="Binary name")
     token: Secret[str] | None = secret(
-        default=SETTINGS.token, help=_get_help(Settings.token)
+        default=SETTINGS.token, converter=convert_token, help=_get_help(Settings.token)
     )
     timeout: int = option(default=SETTINGS.timeout, help=_get_help(Settings.timeout))
     path_binaries: Path = option(
@@ -66,7 +66,7 @@ AGE_SETTINGS = load_settings(AgeSettings, [LOADER])
 class SopsSettings:
     binary_name: str = option(default="sops", help="Binary name")
     token: Secret[str] | None = secret(
-        default=SETTINGS.token, help=_get_help(Settings.token)
+        default=SETTINGS.token, converter=convert_token, help=_get_help(Settings.token)
     )
     timeout: int = option(default=SETTINGS.timeout, help=_get_help(Settings.timeout))
     path_binaries: Path = option(
