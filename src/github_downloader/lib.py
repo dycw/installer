@@ -10,7 +10,7 @@ from typed_settings import Secret
 from utilities.iterables import one
 from utilities.subprocess import chmod
 
-from github_downloader.settings import SETTINGS
+from github_downloader.settings import SETTINGS, SOPS_SETTINGS
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -35,6 +35,7 @@ def download_release(
     chunk_size: int = SETTINGS.chunk_size,
     permissions: str = SETTINGS.permissions,
 ) -> None:
+    """Download a GitHub release."""
     gh = Github(auth=None if token is None else Token(token.get_secret_value()))
     repository = gh.get_repo(f"{owner}/{repo}")
     release = repository.get_latest_release()
@@ -62,6 +63,35 @@ def download_release(
         with path_bin.open(mode="wb") as fh:
             fh.writelines(resp.iter_content(chunk_size=chunk_size))
     chmod(path_binaries, permissions)
+
+
+def download_sops(
+    *,
+    binary_name: str = SOPS_SETTINGS.binary_name,
+    token: Secret[str] | None = SOPS_SETTINGS.token,
+    system_name: str = SOPS_SETTINGS.system_name,
+    machine_type: str = SOPS_SETTINGS.machine_type,
+    timeout: int = SOPS_SETTINGS.timeout,
+    path_binaries: Path = SOPS_SETTINGS.path_binaries,
+    chunk_size: int = SOPS_SETTINGS.chunk_size,
+    permissions: str = SOPS_SETTINGS.permissions,
+) -> None:
+    """Download 'sops'."""
+    download_release(
+        "get-sops",
+        "sops",
+        binary_name,
+        token=token,
+        match_system=True,
+        system_name=system_name,
+        match_machine=True,
+        machine_type=machine_type,
+        not_endswith=["json"],
+        timeout=timeout,
+        path_binaries=path_binaries,
+        chunk_size=chunk_size,
+        permissions=permissions,
+    )
 
 
 __all__ = ["download_release"]

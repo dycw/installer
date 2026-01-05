@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
+from attrs import fields_dict
 from typed_settings import EnvLoader, Secret, load_settings, option, secret, settings
 
 from github_downloader.constants import MACHINE_TYPE, SYSTEM_NAME
@@ -31,4 +33,37 @@ class Settings:
 SETTINGS = load_settings(Settings, [LOADER])
 
 
-__all__ = ["LOADER", "SETTINGS", "Settings"]
+def _get_help(member_descriptor: Any, /) -> None:
+    return fields_dict(Settings)[member_descriptor.__name__].metadata["typed-settings"][
+        "help"
+    ]
+
+
+@settings
+class SopsSettings:
+    binary_name: str = option(default="sops", help=_get_help(Settings.binary_name))
+    token: Secret[str] | None = secret(
+        default=SETTINGS.token, help=_get_help(Settings.token)
+    )
+    system_name: str = option(
+        default=SETTINGS.system_name, help=_get_help(Settings.system_name)
+    )
+    timeout: int = option(default=SETTINGS.timeout, help=_get_help(Settings.timeout))
+    machine_type: str = option(
+        default=SETTINGS.machine_type, help=_get_help(Settings.machine_type)
+    )
+    path_binaries: Path = option(
+        default=SETTINGS.path_binaries, help=_get_help(Settings.path_binaries)
+    )
+    chunk_size: int = option(
+        default=SETTINGS.chunk_size, help=_get_help(Settings.chunk_size)
+    )
+    permissions: str = option(
+        default=SETTINGS.permissions, help=_get_help(Settings.permissions)
+    )
+
+
+SOPS_SETTINGS = load_settings(SopsSettings, [LOADER])
+
+
+__all__ = ["LOADER", "SETTINGS", "SOPS_SETTINGS", "Settings", "SopsSettings"]

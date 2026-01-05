@@ -16,7 +16,7 @@ from github_downloader.settings import LOADER, Settings
 def _main() -> None: ...
 
 
-@_main.command(name="download", **CONTEXT_SETTINGS)
+@_main.command(name="run", **CONTEXT_SETTINGS)
 @click_options(Settings, [LOADER], show_envvars_in_help=True)
 def run_sub_cmd(settings: Settings, /) -> None:
     if is_pytest():
