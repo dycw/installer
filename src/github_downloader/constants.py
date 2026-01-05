@@ -10,8 +10,8 @@ if (SYSTEM_NAME := system()) not in SYSTEM_NAMES:
     raise ValueError(msg)
 MACHINE_TYPE = machine()
 MACHINE_TYPE_GROUPS: set[frozenset[str]] = {
-    frozenset(["x86_64", "x64", "intel64"]),
-    frozenset(["arm64", "aarch64"]),
+    frozenset(["amd64", "intel64", "x64", "x86_64"]),
+    frozenset(["aarch64", "arm64"]),
 }
 try:
     MACHINE_TYPE_GROUP = one(g for g in MACHINE_TYPE_GROUPS if MACHINE_TYPE in g)
