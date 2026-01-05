@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from typed_settings import Secret
 
 
-def download_release(
+def setup_asset(
     owner: str,
     repo: str,
     binary_name: str,
@@ -71,7 +71,7 @@ def download_release(
     LOGGER.info("Downloaded to %r", str(path_bin))
 
 
-def download_sops(
+def setup_sops(
     *,
     binary_name: str = SOPS_SETTINGS.binary_name,
     token: Secret[str] | None = SOPS_SETTINGS.token,
@@ -81,7 +81,7 @@ def download_sops(
     permissions: str = SOPS_SETTINGS.permissions,
 ) -> None:
     """Download 'sops'."""
-    download_release(
+    setup_asset(
         "getsops",
         "sops",
         binary_name,
@@ -96,4 +96,4 @@ def download_sops(
     )
 
 
-__all__ = ["download_release"]
+__all__ = ["setup_asset", "setup_sops"]
