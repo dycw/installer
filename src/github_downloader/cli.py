@@ -7,9 +7,9 @@ from utilities.click import CONTEXT_SETTINGS
 from utilities.logging import basic_config
 from utilities.os import is_pytest
 
-from github_downloader.lib import download_release
+from github_downloader.lib import download_release, download_sops
 from github_downloader.logging import LOGGER
-from github_downloader.settings import LOADER, Settings
+from github_downloader.settings import LOADER, Settings, SopsSettings
 
 
 @group(**CONTEXT_SETTINGS)
@@ -33,6 +33,25 @@ def run_sub_cmd(settings: Settings, /) -> None:
         match_machine=settings.match_machine,
         machine_type=settings.machine_type,
         not_endswith=settings.not_endswith,
+        timeout=settings.timeout,
+        path_binaries=settings.path_binaries,
+        chunk_size=settings.chunk_size,
+        permissions=settings.permissions,
+    )
+
+
+@_main.command(name="sops", **CONTEXT_SETTINGS)
+@click_options(SopsSettings, [LOADER], show_envvars_in_help=True)
+def sops_sub_cmd(settings: SopsSettings, /) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    LOGGER.info("Settings = %s", pretty_repr(settings))
+    download_sops(
+        binary_name=settings.binary_name,
+        token=settings.token,
+        system_name=settings.system_name,
+        machine_type=settings.machine_type,
         timeout=settings.timeout,
         path_binaries=settings.path_binaries,
         chunk_size=settings.chunk_size,
