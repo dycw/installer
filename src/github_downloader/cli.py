@@ -28,6 +28,8 @@ def run_sub_cmd(
         return
     basic_config(obj=LOGGER)
     LOGGER.info("Settings = %s", pretty_repr(settings))
+    if settings.token is not None:
+        LOGGER.info("Token = %r", settings.token.get_secret_value())
     setup_asset(
         owner,
         repo,
