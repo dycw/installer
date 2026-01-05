@@ -2,8 +2,28 @@ from __future__ import annotations
 
 from platform import machine, system
 
-SYSTEM_NAME = system()
+from utilities.iterables import OneEmptyError, one
+
+SYSTEM_NAMES = {"Darwin", "Linux"}
+if (SYSTEM_NAME := system()) not in SYSTEM_NAMES:
+    msg = f"Invalid system name; must be in {SYSTEM_NAMES} but got {SYSTEM_NAME!r}"
+    raise ValueError(msg)
 MACHINE_TYPE = machine()
+MACHINE_TYPE_GROUPS: set[frozenset[str]] = {
+    frozenset(["x86_64", "x64", "intel64"]),
+    frozenset(["arm64", "aarch64"]),
+}
+try:
+    MACHINE_TYPE_GROUP = one(g for g in MACHINE_TYPE_GROUPS if MACHINE_TYPE in g)
+except OneEmptyError:
+    msg = f"Invalid machine type; must be in {MACHINE_TYPE_GROUPS} but got {MACHINE_TYPE!r}"
+    raise ValueError(msg) from None
 
 
-__all__ = ["MACHINE_TYPE", "SYSTEM_NAME"]
+__all__ = [
+    "MACHINE_TYPE",
+    "MACHINE_TYPE_GROUP",
+    "MACHINE_TYPE_GROUPS",
+    "SYSTEM_NAME",
+    "SYSTEM_NAMES",
+]
