@@ -6,19 +6,23 @@ from typed_settings import Secret
 
 
 def convert_token(x: str | None, /) -> Secret[str] | None:
-    empty = {None, ""}
     match x:
         case Secret():
             match x.get_secret_value():
                 case None:
                     return None
-                case str():
-                    return None if x.strip("\n") in empty else x.strip("\n")
+                case str() as inner:
+                    y = inner.strip("\n")
+                    return None if y == "" else Secret(y)
                 case never:
                     assert_never(never)
         case str():
-            return None if x.strip("\n") in empty else Secret(x.strip("\n"))
+            y = x.strip("\n")
+            return None if y == "" else Secret(y)
         case None:
             return None
         case never:
             assert_never(never)
+
+
+__all__ = ["convert_token"]
