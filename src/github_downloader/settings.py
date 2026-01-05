@@ -13,9 +13,6 @@ LOADER = EnvLoader("")
 
 @settings
 class Settings:
-    owner: str = option(help="Repository owner")
-    repo: str = option(help="Repository name")
-    binary_name: str = option(help="Binary name")
     token: Secret[str] | None = secret(default=None, help="The GitHub token")
     match_system: bool = option(
         default=False, help=f"Match the system name {SYSTEM_NAME!r}"
@@ -43,7 +40,7 @@ def _get_help(member_descriptor: Any, /) -> None:
 
 @settings
 class SopsSettings:
-    binary_name: str = option(default="sops", help=_get_help(Settings.binary_name))
+    binary_name: str = option(default="sops", help="Binary name")
     token: Secret[str] | None = secret(
         default=SETTINGS.token, help=_get_help(Settings.token)
     )

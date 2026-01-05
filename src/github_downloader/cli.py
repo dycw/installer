@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from click import group
+from click import argument, group
 from rich.pretty import pretty_repr
 from typed_settings import click_options
 from utilities.click import CONTEXT_SETTINGS
@@ -17,16 +17,21 @@ def _main() -> None: ...
 
 
 @_main.command(name="run", **CONTEXT_SETTINGS)
+@argument("owner", type=str)
+@argument("repo", type=str)
+@argument("binary-name", type=str)
 @click_options(Settings, [LOADER], show_envvars_in_help=True)
-def run_sub_cmd(settings: Settings, /) -> None:
+def run_sub_cmd(
+    settings: Settings, /, *, owner: str, repo: str, binary_name: str
+) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
     LOGGER.info("Settings = %s", pretty_repr(settings))
     download_release(
-        settings.owner,
-        settings.repo,
-        settings.binary_name,
+        owner,
+        repo,
+        binary_name,
         token=settings.token,
         match_system=settings.match_system,
         match_machine=settings.match_machine,
