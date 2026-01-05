@@ -7,7 +7,12 @@
 
 [project]
   authors = [{ email = "d.wan@icloud.com", name = "Derek Wan" }]
-  dependencies = ["dycw-utilities >=0.176.1, <1"]
+  dependencies = [
+    "click >=8.3.1, <9",
+    "dycw-utilities >=0.176.1, <1",
+    "pygithub >=2.8.1",
+    "typed-settings[attrs,click] >=25.3.0, <26",
+  ]
   description = "GitHub release downloader"
   name = "dycw-github-downloader"
   readme = "README.md"
