@@ -21,28 +21,35 @@ if TYPE_CHECKING:
 def download_release(
     owner: str,
     repo: str,
+    binary_name: str,
     /,
     *,
     token: Secret[str] | None = SETTINGS.token,
-    system: str = SETTINGS.system,
-    machine: str = SETTINGS.machine,
-    binaries: Path = SETTINGS.binaries,
+    match_system: bool = SETTINGS.match_system,
+    system_name: str = SETTINGS.system_name,
+    match_machine: bool = SETTINGS.match_machine,
+    machine_type: str = SETTINGS.machine_type,
+    not_endswith: list[str] = SETTINGS.not_endswith,
     timeout: int = SETTINGS.timeout,
+    path_binaries: Path = SETTINGS.path_binaries,
     chunk_size: int = SETTINGS.chunk_size,
+    permissions: str = SETTINGS.permissions,
 ) -> None:
     gh = Github(auth=None if token is None else Token(token.get_secret_value()))
     repository = gh.get_repo(f"{owner}/{repo}")
     release = repository.get_latest_release()
-    if system not in {"Darwin", "Linux"}:
-        msg = f"Invalid system {system!r}"
+    if system_name not in {"Darwin", "Linux"}:
+        msg = f"Invalid system {system_name!r}"
         raise ValueError(msg)
-    asset = one(
-        a
-        for a in release.get_assets()
-        if search(system, a.name, flags=IGNORECASE)
-        and search(machine, a.name, flags=IGNORECASE)
-        and not a.name.endswith("json")
-    )
+    assets = list(release.get_assets())
+    if match_system:
+        assets = [a for a in assets if search(system_name, a.name, flags=IGNORECASE)]
+    if match_machine:
+        assets = [a for a in assets if search(machine_type, a.name, flags=IGNORECASE)]
+    assets = [
+        a for a in assets if all(e for e in not_endswith if not a.name.endswith(e))
+    ]
+    asset = one(assets)
     headers: dict[str, Any] = {}
     if token is not None:
         headers["Authorization"] = f"Bearer {token.get_secret_value()}"
@@ -50,10 +57,11 @@ def download_release(
         asset.browser_download_url, headers=headers, timeout=timeout, stream=True
     ) as resp:
         resp.raise_for_status()
-        binaries.parent.mkdir(parents=True, exist_ok=True)
-        with binaries.open(mode="wb") as fh:
+        path_binaries.mkdir(parents=True, exist_ok=True)
+        path_bin = path_binaries / binary_name
+        with path_bin.open(mode="wb") as fh:
             fh.writelines(resp.iter_content(chunk_size=chunk_size))
-    chmod(binaries, "u=rwx,g=rx,o=rx")
+    chmod(path_binaries, permissions)
 
 
 __all__ = ["download_release"]
