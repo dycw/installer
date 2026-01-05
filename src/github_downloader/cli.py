@@ -20,10 +20,12 @@ def _main(settings: Settings, /) -> None:
     basic_config(obj=LOGGER)
     LOGGER.info("Settings = %s", pretty_repr(settings))
     download_release(
+        settings.owner,
+        settings.repo,
         token=settings.token,
         system=settings.system,
         machine=settings.machine,
-        path_binary=settings.path_binary,
+        binaries=settings.binaries,
         timeout=settings.timeout,
         chunk_size=settings.chunk_size,
     )

@@ -19,17 +19,20 @@ if TYPE_CHECKING:
 
 
 def download_release(
+    owner: str,
+    repo: str,
+    /,
     *,
     token: Secret[str] | None = SETTINGS.token,
     system: str = SETTINGS.system,
     machine: str = SETTINGS.machine,
-    path_binary: Path = SETTINGS.path_binary,
+    binaries: Path = SETTINGS.binaries,
     timeout: int = SETTINGS.timeout,
     chunk_size: int = SETTINGS.chunk_size,
 ) -> None:
     gh = Github(auth=None if token is None else Token(token.get_secret_value()))
-    repo = gh.get_repo("getsops/sops")
-    release = repo.get_latest_release()
+    repository = gh.get_repo(f"{owner}/{repo}")
+    release = repository.get_latest_release()
     if system not in {"Darwin", "Linux"}:
         msg = f"Invalid system {system!r}"
         raise ValueError(msg)
@@ -47,10 +50,10 @@ def download_release(
         asset.browser_download_url, headers=headers, timeout=timeout, stream=True
     ) as resp:
         resp.raise_for_status()
-        path_binary.parent.mkdir(parents=True, exist_ok=True)
-        with path_binary.open(mode="wb") as fh:
+        binaries.parent.mkdir(parents=True, exist_ok=True)
+        with binaries.open(mode="wb") as fh:
             fh.writelines(resp.iter_content(chunk_size=chunk_size))
-    chmod(path_binary, "u=rwx,g=rx,o=rx")
+    chmod(binaries, "u=rwx,g=rx,o=rx")
 
 
 __all__ = ["download_release"]
