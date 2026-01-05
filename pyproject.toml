@@ -8,8 +8,12 @@
 [project]
   authors = [{ email = "d.wan@icloud.com", name = "Derek Wan" }]
   dependencies = ["dycw-utilities >=0.176.1, <1"]
-  description = "Template for Python packages"
-  name = "dycw-template-python"
+  description = "GitHub release downloader"
+  name = "dycw-github-downloader"
   readme = "README.md"
   requires-python = ">= 3.14"
-  version = "0.1.0"
+  version = "0.1.1"
+
+[tool.uv.build-backend]
+  module-name = "github_downloader"
+  module-root = "src"
