@@ -13,7 +13,7 @@ from utilities.subprocess import chmod
 from utilities.text import strip_and_dedent
 
 from github_downloader import __version__
-from github_downloader.constants import MACHINE_TYPE, SYSTEM_NAME
+from github_downloader.constants import MACHINE_TYPE_GROUP, SYSTEM_NAME
 from github_downloader.logging import LOGGER
 from github_downloader.settings import AGE_SETTINGS, SETTINGS, SOPS_SETTINGS
 
@@ -68,9 +68,6 @@ def setup_asset(
         chunk_size,
         permissions,
     )
-    if SYSTEM_NAME not in {"Darwin", "Linux"}:
-        msg = f"Invalid system {SYSTEM_NAME!r}"
-        raise ValueError(msg)
     gh = Github(auth=None if token is None else Token(token.get_secret_value()))
     repository = gh.get_repo(f"{owner}/{repo}")
     release = repository.get_latest_release()
@@ -79,14 +76,20 @@ def setup_asset(
     if match_system:
         assets = [a for a in assets if search(SYSTEM_NAME, a.name, flags=IGNORECASE)]
         LOGGER.info(
-            "Post system name, got %s: %s",
+            "Post system name %r, got %s: %s",
+            SYSTEM_NAME,
             counted_noun(assets, "asset"),
             [a.name for a in assets],
         )
     if match_machine:
-        assets = [a for a in assets if search(MACHINE_TYPE, a.name, flags=IGNORECASE)]
+        assets = [
+            a
+            for a in assets
+            if any(search(mt, a.name, flags=IGNORECASE) for mt in MACHINE_TYPE_GROUP)
+        ]
         LOGGER.info(
-            "Post machine type %r, got %s: %s",
+            "Post machine type group %s, got %s: %s",
+            MACHINE_TYPE_GROUP,
             counted_noun(assets, "asset"),
             [a.name for a in assets],
         )
