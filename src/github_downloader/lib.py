@@ -7,10 +7,11 @@ from github import Github
 from github.Auth import Token
 from requests import get
 from typed_settings import Secret
-from utilities.iterables import one
+from utilities.iterables import OneNonUniqueError, one
 from utilities.subprocess import chmod
 
 from github_downloader.constants import MACHINE_TYPE, SYSTEM_NAME
+from github_downloader.logging import LOGGER
 from github_downloader.settings import SETTINGS, SOPS_SETTINGS
 
 if TYPE_CHECKING:
@@ -46,10 +47,15 @@ def download_release(
         assets = [a for a in assets if search(SYSTEM_NAME, a.name, flags=IGNORECASE)]
     if match_machine:
         assets = [a for a in assets if search(MACHINE_TYPE, a.name, flags=IGNORECASE)]
-    assets = [
-        a for a in assets if all(e for e in not_endswith if not a.name.endswith(e))
-    ]
-    asset = one(assets)
+    assets = [a for a in assets if all(not a.name.endswith(e) for e in not_endswith)]
+    try:
+        asset = one(assets)
+    except OneNonUniqueError as error:
+        raise OneNonUniqueError(
+            iterables=([a.name for a in assets],),
+            first=error.first.name,
+            second=error.second.name,
+        ) from None
     headers: dict[str, Any] = {}
     if token is not None:
         headers["Authorization"] = f"Bearer {token.get_secret_value()}"
@@ -61,7 +67,8 @@ def download_release(
         path_bin = path_binaries / binary_name
         with path_bin.open(mode="wb") as fh:
             fh.writelines(resp.iter_content(chunk_size=chunk_size))
-    chmod(path_binaries, permissions)
+    chmod(path_bin, permissions)
+    LOGGER.info("Downloaded to %r", str(path_bin))
 
 
 def download_sops(
@@ -75,7 +82,7 @@ def download_sops(
 ) -> None:
     """Download 'sops'."""
     download_release(
-        "get-sops",
+        "getsops",
         "sops",
         binary_name,
         token=token,
