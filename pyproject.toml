@@ -1,0 +1,15 @@
+[build-system]
+  build-backend = "uv_build"
+  requires = ["uv_build"]
+
+[dependency-groups]
+  dev = ["dycw-utilities[test]", "pyright", "rich"]
+
+[project]
+  authors = [{ email = "d.wan@icloud.com", name = "Derek Wan" }]
+  dependencies = ["dycw-utilities >=0.176.1, <1"]
+  description = "Template for Python packages"
+  name = "dycw-template-python"
+  readme = "README.md"
+  requires-python = ">= 3.14"
+  version = "0.1.0"

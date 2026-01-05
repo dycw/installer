@@ -1,0 +1,87 @@
+repos:
+  - repo: https://github.com/dycw/conformalize
+    rev: 0.13.6
+    hooks:
+      - args:
+          - --description=Template for Python packages
+          - --envrc
+          - --envrc--uv
+          - --github--pull-request--pre-commit
+          - --github--pull-request--pyright
+          - --github--pull-request--pytest--macos
+          - --github--pull-request--pytest--ubuntu
+          - --github--pull-request--ruff
+          - --github--push--tag
+          - --gitignore
+          - --package-name=dycw-template-python
+          - --pre-commit--dycw
+          - --pre-commit--prettier
+          - --pre-commit--ruff
+          - --pre-commit--taplo
+          - --pre-commit--uv
+          - --pyproject
+          - --pyright
+          - --pytest
+          - --readme
+          - --repo-name=template-python
+          - --ruff
+        id: conformalize
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: destroyed-symlinks
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args:
+          - --fix=lf
+      - id: no-commit-to-branch
+      - id: pretty-format-json
+        args:
+          - --autofix
+      - id: trailing-whitespace
+  - repo: https://github.com/dycw/actions
+    rev: 0.3.40
+    hooks:
+      - id: format-requirements
+      - id: replace-sequence-strs
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: npx prettier --write
+        language: system
+        types_or:
+          - markdown
+          - yaml
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.10
+    hooks:
+      - id: ruff-check
+        args:
+          - --fix
+      - id: ruff-format
+  - repo: https://github.com/compwa/taplo-pre-commit
+    rev: v0.9.3
+    hooks:
+      - id: taplo-format
+        args:
+          - --option
+          - indent_tables=true
+          - --option
+          - indent_entries=true
+          - --option
+          - reorder_keys=true
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.9.21
+    hooks:
+      - id: uv-lock
+        args:
+          - --upgrade
+          - --resolution
+          - highest
+          - --prerelease
+          - disallow
