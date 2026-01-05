@@ -7,13 +7,16 @@ from attrs import fields_dict
 from typed_settings import EnvLoader, Secret, load_settings, option, secret, settings
 
 from github_downloader.constants import MACHINE_TYPE, SYSTEM_NAME
+from github_downloader.utilities import convert_token
 
 LOADER = EnvLoader("")
 
 
 @settings
 class Settings:
-    token: Secret[str] | None = secret(default=None, help="The GitHub token")
+    token: Secret[str] | None = secret(
+        default=None, converter=convert_token, help="The GitHub token"
+    )
     match_system: bool = option(
         default=False, help=f"Match the system name {SYSTEM_NAME!r}"
     )
