@@ -264,6 +264,69 @@ def setup_age(
         LOGGER.info("Downloaded to %s", ", ".join(map(repr_str, downloads)))
 
 
+##
+
+
+def setup_ripgrep(
+    *,
+    binary_name: str = SOPS_SETTINGS.binary_name,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = PERMS_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'sops'."""
+    LOGGER.info(
+        strip_and_dedent("""
+            Running '%s' (version %s) with settings:
+             - binary_name   = %s
+             - token         = %s
+             - timeout       = %s
+             - path_binaries = %s
+             - chunk_size    = %s
+             - sudo          = %s
+             - perms         = %s
+             - owner         = %s
+             - group         = %s
+        """),
+        setup_sops.__name__,
+        __version__,
+        binary_name,
+        token,
+        timeout,
+        path_binaries,
+        chunk_size,
+        sudo,
+        perms,
+        owner,
+        group,
+    )
+    dest = Path(path_binaries, binary_name)
+    setup_asset(
+        "getsops",
+        "sops",
+        dest,
+        token=token,
+        match_system=True,
+        match_machine=True,
+        not_endswith=["json"],
+        timeout=timeout,
+        chunk_size=chunk_size,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+    )
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
 def setup_sops(
     *,
     binary_name: str = SOPS_SETTINGS.binary_name,
@@ -321,4 +384,4 @@ def setup_sops(
     LOGGER.info("Downloaded to %r", str(dest))
 
 
-__all__ = ["setup_age", "setup_asset", "setup_sops", "yield_asset"]
+__all__ = ["setup_age", "setup_asset", "setup_ripgrep", "setup_sops", "yield_asset"]
