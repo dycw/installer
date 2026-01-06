@@ -135,7 +135,7 @@ def yield_tar_asset(
         tarfile.open(temp1, "r:gz") as tar,
         TemporaryDirectory() as temp2,
     ):
-        tar.extractall(temp2)
+        tar.extractall(temp2, filter="data")
         yield one(temp2.iterdir())
 
 
@@ -222,24 +222,18 @@ def setup_age(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'age'."""
-    with (
-        yield_asset(
-            "FiloSottile",
-            "age",
-            token=token,
-            match_system=True,
-            match_machine=True,
-            not_endswith=["proof"],
-            timeout=timeout,
-            chunk_size=chunk_size,
-        ) as temp1,
-        tarfile.open(temp1, "r:gz") as tar,
-        TemporaryDirectory() as temp2,
-    ):
-        tar.extractall(temp2)
-        temp3 = one(temp2.iterdir())
+    with yield_tar_asset(
+        "FiloSottile",
+        "age",
+        token=token,
+        match_system=True,
+        match_machine=True,
+        not_endswith=["proof"],
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as temp:
         downloads: list[Path] = []
-        for src in temp3.iterdir():
+        for src in temp.iterdir():
             if src.name.startswith("age"):
                 dest = Path(path_binaries, src.name)
                 cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
