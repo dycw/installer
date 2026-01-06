@@ -14,7 +14,7 @@ from utilities.inflect import counted_noun
 from utilities.iterables import OneNonUniqueError, one
 from utilities.subprocess import cp
 from utilities.tempfile import TemporaryDirectory
-from utilities.text import strip_and_dedent
+from utilities.text import repr_str, strip_and_dedent
 
 from github_downloader import __version__
 from github_downloader.constants import MACHINE_TYPE_GROUP, SYSTEM_NAME
@@ -254,10 +254,14 @@ def setup_age(
         TemporaryDirectory() as temp2,
     ):
         tar.extractall(temp2)
-        src = one(temp2.iterdir())
-        dest = Path(path_binaries, binary_name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        LOGGER.info("Downloaded to %r", str(dest))
+        temp3 = one(temp2.iterdir())
+        downloads: list[Path] = []
+        for src in temp3.iterdir():
+            if src.name.startswith("age"):
+                dest = Path(path_binaries, src.name)
+                cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+                downloads.append(dest)
+        LOGGER.info("Downloaded to %s", ", ".join(map(repr_str, downloads)))
 
 
 def setup_sops(

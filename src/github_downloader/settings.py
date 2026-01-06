@@ -39,7 +39,7 @@ MATCH_SETTINGS = load_settings(MatchSettings, [LOADER])
 @settings
 class PermsSettings:
     sudo: bool = option(default=False, help="Call 'mv' with 'sudo'")
-    perms: str | None = option(default=None, help="Change permissions")
+    perms: str = option(default="u=rwx,g=rx,o=rx", help="Change permissions")
     owner: str | None = option(default=None, help="Change owner")
     group: str | None = option(default=None, help="Change group")
 
