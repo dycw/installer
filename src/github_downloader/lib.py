@@ -24,8 +24,6 @@ from github_downloader.settings import (
     MATCH_SETTINGS,
     PATH_BINARIES_SETTINGS,
     PERMS_SETTINGS,
-    RIPGREP_SETTINGS,
-    SOPS_SETTINGS,
 )
 
 if TYPE_CHECKING:
@@ -50,29 +48,6 @@ def yield_asset(
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
 ) -> Iterator[Path]:
     """Yield a GitHub asset."""
-    LOGGER.info(
-        strip_and_dedent("""
-            Running '%s' (version %s) with settings:
-             - owner         = %s
-             - repo          = %s
-             - token         = %s
-             - match_system  = %s
-             - match_machine = %s
-             - not_endswith  = %s
-             - timeout       = %d
-             - chunk_size    = %d
-        """),
-        yield_asset.__name__,
-        __version__,
-        owner,
-        repo,
-        token,
-        match_system,
-        match_machine,
-        not_endswith,
-        timeout,
-        chunk_size,
-    )
     gh = Github(auth=None if token is None else Token(token.get_secret_value()))
     repository = gh.get_repo(f"{owner}/{repo}")
     release = repository.get_latest_release()
@@ -128,6 +103,40 @@ def yield_asset(
                 fh.writelines(resp.iter_content(chunk_size=chunk_size))
         LOGGER.info("Yielding %r...", str(dest))
         yield dest
+
+
+##
+
+
+@contextmanager
+def yield_tar_asset(
+    owner: str,
+    repo: str,
+    /,
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    match_system: bool = MATCH_SETTINGS.match_system,
+    match_machine: bool = MATCH_SETTINGS.match_machine,
+    not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+) -> Iterator[Path]:
+    with (
+        yield_asset(
+            owner,
+            repo,
+            token=token,
+            match_system=match_system,
+            match_machine=match_machine,
+            not_endswith=not_endswith,
+            timeout=timeout,
+            chunk_size=chunk_size,
+        ) as temp1,
+        tarfile.open(temp1, "r:gz") as tar,
+        TemporaryDirectory() as temp2,
+    ):
+        tar.extractall(temp2)
+        yield one(temp2.iterdir())
 
 
 ##
@@ -243,7 +252,6 @@ def setup_age(
 
 def setup_ripgrep(
     *,
-    binary_name: str = RIPGREP_SETTINGS.binary_name,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
@@ -254,32 +262,7 @@ def setup_ripgrep(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'ripgrep'."""
-    LOGGER.info(
-        strip_and_dedent("""
-            Running '%s' (version %s) with settings:
-             - binary_name   = %s
-             - token         = %s
-             - timeout       = %s
-             - path_binaries = %s
-             - chunk_size    = %s
-             - sudo          = %s
-             - perms         = %s
-             - owner         = %s
-             - group         = %s
-        """),
-        setup_ripgrep.__name__,
-        __version__,
-        binary_name,
-        token,
-        timeout,
-        path_binaries,
-        chunk_size,
-        sudo,
-        perms,
-        owner,
-        group,
-    )
-    dest = Path(path_binaries, binary_name)
+    dest = Path(path_binaries, "rg")
     setup_asset(
         "burntsushi",
         "ripgrep",
@@ -303,7 +286,6 @@ def setup_ripgrep(
 
 def setup_sops(
     *,
-    binary_name: str = SOPS_SETTINGS.binary_name,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
@@ -314,32 +296,7 @@ def setup_sops(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'sops'."""
-    LOGGER.info(
-        strip_and_dedent("""
-            Running '%s' (version %s) with settings:
-             - binary_name   = %s
-             - token         = %s
-             - timeout       = %s
-             - path_binaries = %s
-             - chunk_size    = %s
-             - sudo          = %s
-             - perms         = %s
-             - owner         = %s
-             - group         = %s
-        """),
-        setup_sops.__name__,
-        __version__,
-        binary_name,
-        token,
-        timeout,
-        path_binaries,
-        chunk_size,
-        sudo,
-        perms,
-        owner,
-        group,
-    )
-    dest = Path(path_binaries, binary_name)
+    dest = Path(path_binaries, "sops")
     setup_asset(
         "getsops",
         "sops",
@@ -358,4 +315,11 @@ def setup_sops(
     LOGGER.info("Downloaded to %r", str(dest))
 
 
-__all__ = ["setup_age", "setup_asset", "setup_ripgrep", "setup_sops", "yield_asset"]
+__all__ = [
+    "setup_age",
+    "setup_asset",
+    "setup_ripgrep",
+    "setup_sops",
+    "yield_asset",
+    "yield_tar_asset",
+]
