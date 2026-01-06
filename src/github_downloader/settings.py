@@ -11,10 +11,19 @@ LOADER = EnvLoader("")
 
 
 @settings
-class CommonSettings:
+class DownloadSettings:
     token: Secret[str] | None = secret(
         default=None, converter=convert_token, help="The GitHub token"
     )
+    timeout: int = option(default=60, help="Download timeout")
+    chunk_size: int = option(default=8196, help="Streaming chunk size")
+
+
+DOWNLOAD_SETTINGS = load_settings(DownloadSettings, [LOADER])
+
+
+@settings
+class MatchSettings:
     match_system: bool = option(
         default=False, help=f"Match the system name {SYSTEM_NAME!r}"
     )
@@ -22,22 +31,20 @@ class CommonSettings:
         default=False, help=f"Match the machine type {MACHINE_TYPE!r}"
     )
     not_endswith: list[str] = option(factory=list, help="Asset name endings to exclude")
-    timeout: int = option(default=60, help="Download timeout")
-    chunk_size: int = option(default=8196, help="Streaming chunk size")
 
 
-COMMON_SETTINGS = load_settings(CommonSettings, [LOADER])
+MATCH_SETTINGS = load_settings(MatchSettings, [LOADER])
 
 
 @settings
-class PermSettings:
+class PermsSettings:
     sudo: bool = option(default=False, help="Call 'mv' with 'sudo'")
     perms: str | None = option(default=None, help="Change permissions")
     owner: str | None = option(default=None, help="Change owner")
     group: str | None = option(default=None, help="Change group")
 
 
-PERM_SETTINGS = load_settings(PermSettings, [LOADER])
+PERMS_SETTINGS = load_settings(PermsSettings, [LOADER])
 
 
 @settings
@@ -68,14 +75,16 @@ SOPS_SETTINGS = load_settings(SopsSettings, [LOADER])
 
 __all__ = [
     "AGE_SETTINGS",
-    "COMMON_SETTINGS",
     "LOADER",
+    "MATCH_SETTINGS",
     "PATH_BINARIES_SETTINGS",
-    "PERM_SETTINGS",
+    "PERMS_SETTINGS",
     "SOPS_SETTINGS",
     "AgeSettings",
-    "CommonSettings",
+    "DownloadSettings",
+    "DownloadSettings",
+    "MatchSettings",
     "PathBinariesSettings",
-    "PermSettings",
+    "PermsSettings",
     "SopsSettings",
 ]

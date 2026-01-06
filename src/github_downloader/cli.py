@@ -11,7 +11,14 @@ from utilities.text import strip_and_dedent
 from github_downloader import __version__
 from github_downloader.lib import setup_age, setup_asset, setup_sops
 from github_downloader.logging import LOGGER
-from github_downloader.settings import LOADER, AgeSettings, PermSettings, SopsSettings
+from github_downloader.settings import (
+    LOADER,
+    AgeSettings,
+    DownloadSettings,
+    MatchSettings,
+    PermsSettings,
+    SopsSettings,
+)
 
 
 @group(**CONTEXT_SETTINGS)
@@ -22,9 +29,19 @@ def _main() -> None: ...
 @argument("asset-owner", type=str)
 @argument("asset-repo", type=str)
 @argument("binary-name", type=str)
-@click_options(PermSettings, [LOADER], show_envvars_in_help=True)
+@click_options(MatchSettings, [LOADER], show_envvars_in_help=True, argname="common")
+@click_options(
+    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
+)
+@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
 def run_sub_cmd(
-    settings: PermSettings, /, *, asset_owner: str, asset_repo: str, binary_name: str
+    *,
+    asset_owner: str,
+    asset_repo: str,
+    binary_name: str,
+    common: MatchSettings,
+    download: DownloadSettings,
+    perms: PermsSettings,
 ) -> None:
     if is_pytest():
         return
@@ -33,31 +50,39 @@ def run_sub_cmd(
         strip_and_dedent("""
             Running '%s' (version %s) with settings:
             %s
+            %s
+            %s
         """),
         setup_asset.__name__,
         __version__,
-        pretty_repr(settings),
+        pretty_repr(common),
+        pretty_repr(download),
+        pretty_repr(perms),
     )
     setup_asset(
         asset_owner,
         asset_repo,
         binary_name,
-        token=settings.token,
-        match_system=settings.match_system,
-        match_machine=settings.match_machine,
-        not_endswith=settings.not_endswith,
-        timeout=settings.timeout,
-        chunk_size=settings.chunk_size,
-        sudo=settings.sudo,
-        perms=settings.perms,
-        owner=settings.owner,
-        group=settings.group,
+        token=common.token,
+        match_system=common.match_system,
+        match_machine=common.match_machine,
+        not_endswith=common.not_endswith,
+        timeout=common.timeout,
+        chunk_size=common.chunk_size,
+        sudo=perms.sudo,
+        perms=perms.perms,
+        owner=perms.owner,
+        group=perms.group,
     )
 
 
 @_main.command(name="age", **CONTEXT_SETTINGS)
-@click_options(AgeSettings, [LOADER], show_envvars_in_help=True)
-def age_sub_cmd(settings: AgeSettings, /) -> None:
+@click_options(MatchSettings, [LOADER], show_envvars_in_help=True, argname="common")
+@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(AgeSettings, [LOADER], show_envvars_in_help=True, argname="age")
+def age_sub_cmd(
+    *, common: MatchSettings, perms: PermsSettings, age: AgeSettings
+) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
@@ -68,15 +93,17 @@ def age_sub_cmd(settings: AgeSettings, /) -> None:
         """),
         setup_age.__name__,
         __version__,
-        pretty_repr(settings),
+        pretty_repr(common),
+        pretty_repr(perms),
+        pretty_repr(age),
     )
     setup_age(
-        binary_name=settings.binary_name,
-        token=settings.token,
-        timeout=settings.timeout,
+        binary_name=common.binary_name,
+        token=common.token,
+        timeout=common.timeout,
         path_binaries=settings.path_binaries,
-        chunk_size=settings.chunk_size,
-        permissions=settings.permissions,
+        chunk_size=common.chunk_size,
+        permissions=common.permissions,
     )
 
 
