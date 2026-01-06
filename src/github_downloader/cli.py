@@ -16,6 +16,7 @@ from github_downloader.settings import (
     AgeSettings,
     DownloadSettings,
     MatchSettings,
+    PathBinariesSettings,
     PermsSettings,
     SopsSettings,
 )
@@ -63,12 +64,12 @@ def run_sub_cmd(
         asset_owner,
         asset_repo,
         binary_name,
-        token=common.token,
+        token=download.token,
         match_system=common.match_system,
         match_machine=common.match_machine,
         not_endswith=common.not_endswith,
-        timeout=common.timeout,
-        chunk_size=common.chunk_size,
+        timeout=download.timeout,
+        chunk_size=download.chunk_size,
         sudo=perms.sudo,
         perms=perms.perms,
         owner=perms.owner,
@@ -77,11 +78,20 @@ def run_sub_cmd(
 
 
 @_main.command(name="age", **CONTEXT_SETTINGS)
-@click_options(MatchSettings, [LOADER], show_envvars_in_help=True, argname="common")
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
 @click_options(AgeSettings, [LOADER], show_envvars_in_help=True, argname="age")
+@click_options(
+    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
+)
+@click_options(
+    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
+)
+@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
 def age_sub_cmd(
-    *, common: MatchSettings, perms: PermsSettings, age: AgeSettings
+    *,
+    age: AgeSettings,
+    download: DownloadSettings,
+    path_binaries: PathBinariesSettings,
+    perms: PermsSettings,
 ) -> None:
     if is_pytest():
         return
@@ -93,17 +103,21 @@ def age_sub_cmd(
         """),
         setup_age.__name__,
         __version__,
-        pretty_repr(common),
-        pretty_repr(perms),
         pretty_repr(age),
+        pretty_repr(download),
+        pretty_repr(path_binaries),
+        pretty_repr(perms),
     )
     setup_age(
-        binary_name=common.binary_name,
-        token=common.token,
-        timeout=common.timeout,
-        path_binaries=settings.path_binaries,
-        chunk_size=common.chunk_size,
-        permissions=common.permissions,
+        binary_name=age.binary_name,
+        token=download.token,
+        timeout=download.timeout,
+        path_binaries=path_binaries.path_binaries,
+        chunk_size=download.chunk_size,
+        sudo=perms.sudo,
+        perms=perms.perms,
+        owner=perms.owner,
+        group=perms.group,
     )
 
 
