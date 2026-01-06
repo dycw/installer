@@ -256,22 +256,19 @@ def setup_ripgrep(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'ripgrep'."""
-    dest = Path(path_binaries, "rg")
-    setup_asset(
+    with yield_tar_asset(
         "burntsushi",
         "ripgrep",
-        dest,
         token=token,
         match_system=True,
         match_machine=True,
         not_endswith=["sha256"],
         timeout=timeout,
         chunk_size=chunk_size,
-        sudo=sudo,
-        perms=perms,
-        owner=owner,
-        group=group,
-    )
+    ) as temp:
+        src = temp / "rg"
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
     LOGGER.info("Downloaded to %r", str(dest))
 
 

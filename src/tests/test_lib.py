@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from re import DOTALL, MULTILINE, escape, search
+from re import escape, search
 from typing import TYPE_CHECKING
 
 from utilities.pytest import throttle
@@ -8,7 +8,7 @@ from utilities.subprocess import run
 from utilities.text import strip_and_dedent
 from utilities.whenever import MINUTE
 
-from github_downloader.lib import setup_age, setup_sops
+from github_downloader.lib import setup_age, setup_ripgrep, setup_sops
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -60,6 +60,28 @@ class TestSetupAge:
         assert search(escape(pattern4), result4.err)
 
 
+class TestSetupRipgrep:
+    @throttle(delta=5 * MINUTE)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_ripgrep(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "rg"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            USAGE:
+                rg [OPTIONS] PATTERN [PATH ...]
+                rg [OPTIONS] -e PATTERN ... [PATH ...]
+                rg [OPTIONS] -f PATTERNFILE ... [PATH ...]
+                rg [OPTIONS] --files [PATH ...]
+                rg [OPTIONS] --type-list
+                command | rg [OPTIONS] PATTERN
+                rg [OPTIONS] --help
+                rg [OPTIONS] --version
+        """)
+        assert search(escape(pattern), result.out)
+
+
 class TestSetupSops:
     @throttle(delta=5 * MINUTE)
     def test_main(
@@ -67,6 +89,9 @@ class TestSetupSops:
     ) -> None:
         setup_sops(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "sops"), "--help", print=True)
-        out = capsys.readouterr().out
-        expected = "sops - sops - encrypted file editor with AWS KMS, GCP KMS, Azure Key Vault, age, and GPG"
-        assert search(expected, out)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            NAME:
+               sops - sops - encrypted file editor with AWS KMS, GCP KMS, Azure Key Vault, age, and GPG support
+        """)
+        assert search(pattern, result.out)
