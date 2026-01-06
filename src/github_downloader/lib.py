@@ -20,11 +20,11 @@ from github_downloader import __version__
 from github_downloader.constants import MACHINE_TYPE_GROUP, SYSTEM_NAME
 from github_downloader.logging import LOGGER
 from github_downloader.settings import (
-    AGE_SETTINGS,
     DOWNLOAD_SETTINGS,
     MATCH_SETTINGS,
     PATH_BINARIES_SETTINGS,
     PERMS_SETTINGS,
+    RIPGREP_SETTINGS,
     SOPS_SETTINGS,
 )
 
@@ -203,7 +203,6 @@ def setup_asset(
 
 def setup_age(
     *,
-    binary_name: str = AGE_SETTINGS.binary_name,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
@@ -214,31 +213,6 @@ def setup_age(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'age'."""
-    LOGGER.info(
-        strip_and_dedent("""
-            Running '%s' (version %s) with settings:
-             - binary_name   = %s
-             - token         = %s
-             - timeout       = %s
-             - path_binaries = %s
-             - chunk_size    = %s
-             - sudo          = %s
-             - perms         = %s
-             - owner         = %s
-             - group         = %s
-        """),
-        setup_age.__name__,
-        __version__,
-        binary_name,
-        token,
-        timeout,
-        path_binaries,
-        chunk_size,
-        sudo,
-        perms,
-        owner,
-        group,
-    )
     with (
         yield_asset(
             "FiloSottile",
@@ -269,7 +243,7 @@ def setup_age(
 
 def setup_ripgrep(
     *,
-    binary_name: str = SOPS_SETTINGS.binary_name,
+    binary_name: str = RIPGREP_SETTINGS.binary_name,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
@@ -279,7 +253,7 @@ def setup_ripgrep(
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
-    """Setup 'sops'."""
+    """Setup 'ripgrep'."""
     LOGGER.info(
         strip_and_dedent("""
             Running '%s' (version %s) with settings:
@@ -293,7 +267,7 @@ def setup_ripgrep(
              - owner         = %s
              - group         = %s
         """),
-        setup_sops.__name__,
+        setup_ripgrep.__name__,
         __version__,
         binary_name,
         token,
@@ -307,13 +281,13 @@ def setup_ripgrep(
     )
     dest = Path(path_binaries, binary_name)
     setup_asset(
-        "getsops",
-        "sops",
+        "burntsushi",
+        "ripgrep",
         dest,
         token=token,
         match_system=True,
         match_machine=True,
-        not_endswith=["json"],
+        not_endswith=["sha256"],
         timeout=timeout,
         chunk_size=chunk_size,
         sudo=sudo,
