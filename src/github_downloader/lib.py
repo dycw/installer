@@ -42,12 +42,12 @@ def yield_asset(
     repo: str,
     /,
     *,
-    token: Secret[str] | None = MATCH_SETTINGS.token,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     match_system: bool = MATCH_SETTINGS.match_system,
     match_machine: bool = MATCH_SETTINGS.match_machine,
     not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
-    timeout: int = MATCH_SETTINGS.timeout,
-    chunk_size: int = MATCH_SETTINGS.chunk_size,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
 ) -> Iterator[Path]:
     """Yield a GitHub asset."""
     LOGGER.info(
@@ -254,9 +254,9 @@ def setup_age(
         TemporaryDirectory() as temp2,
     ):
         tar.extractall(temp2)
-        assert 0, list(temp2.iterdir())
+        src = one(temp2.iterdir())
         dest = Path(path_binaries, binary_name)
-        cp(temp2, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
         LOGGER.info("Downloaded to %r", str(dest))
 
 
@@ -298,10 +298,11 @@ def setup_sops(
         owner,
         group,
     )
+    dest = Path(path_binaries, binary_name)
     setup_asset(
         "getsops",
         "sops",
-        Path(path_binaries, binary_name),
+        dest,
         token=token,
         match_system=True,
         match_machine=True,
@@ -313,6 +314,7 @@ def setup_sops(
         owner=owner,
         group=group,
     )
+    LOGGER.info("Downloaded to %r", str(dest))
 
 
 __all__ = ["setup_age", "setup_asset", "setup_sops", "yield_asset"]

@@ -100,6 +100,9 @@ def age_sub_cmd(
         strip_and_dedent("""
             Running '%s' (version %s) with settings:
             %s
+            %s
+            %s
+            %s
         """),
         setup_age.__name__,
         __version__,
@@ -143,6 +146,9 @@ def sops_sub_cmd(
     LOGGER.info(
         strip_and_dedent("""
             Running '%s' (version %s) with settings:
+            %s
+            %s
+            %s
             %s
         """),
         setup_sops.__name__,
