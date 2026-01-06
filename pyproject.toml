@@ -3,7 +3,7 @@
   requires = ["uv_build"]
 
 [dependency-groups]
-  dev = ["dycw-utilities[test]", "pyright", "rich"]
+  dev = ["dycw-utilities[test]", "orjson >=3.11.5, <4", "pyright", "rich"]
 
 [project]
   authors = [{ email = "d.wan@icloud.com", name = "Derek Wan" }]
@@ -19,7 +19,7 @@
   name = "dycw-github-downloader"
   readme = "README.md"
   requires-python = ">= 3.12"
-  version = "0.1.13"
+  version = "0.1.14"
 
   [project.scripts]
     github-download = "github_downloader.cli:_main"

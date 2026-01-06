@@ -37,25 +37,6 @@ MATCH_SETTINGS = load_settings(MatchSettings, [LOADER])
 
 
 @settings
-class PermsSettings:
-    sudo: bool = option(default=False, help="Call 'mv' with 'sudo'")
-    perms: str = option(default="u=rwx,g=rx,o=rx", help="Change permissions")
-    owner: str | None = option(default=None, help="Change owner")
-    group: str | None = option(default=None, help="Change group")
-
-
-PERMS_SETTINGS = load_settings(PermsSettings, [LOADER])
-
-
-@settings
-class AgeSettings:
-    binary_name: str = option(default="age", help="Binary name")
-
-
-AGE_SETTINGS = load_settings(AgeSettings, [LOADER])
-
-
-@settings
 class PathBinariesSettings:
     path_binaries: Path = option(
         default=Path("/usr/local/bin/"), help="Path to the binaries"
@@ -66,25 +47,24 @@ PATH_BINARIES_SETTINGS = load_settings(PathBinariesSettings, [LOADER])
 
 
 @settings
-class SopsSettings:
-    binary_name: str = option(default="sops", help="Binary name")
+class PermsSettings:
+    sudo: bool = option(default=False, help="Call 'mv' with 'sudo'")
+    perms: str = option(default="u=rwx,g=rx,o=rx", help="Change permissions")
+    owner: str | None = option(default=None, help="Change owner")
+    group: str | None = option(default=None, help="Change group")
 
 
-SOPS_SETTINGS = load_settings(SopsSettings, [LOADER])
+PERMS_SETTINGS = load_settings(PermsSettings, [LOADER])
 
 
 __all__ = [
-    "AGE_SETTINGS",
     "LOADER",
     "MATCH_SETTINGS",
     "PATH_BINARIES_SETTINGS",
     "PERMS_SETTINGS",
-    "SOPS_SETTINGS",
-    "AgeSettings",
     "DownloadSettings",
     "DownloadSettings",
     "MatchSettings",
     "PathBinariesSettings",
     "PermsSettings",
-    "SopsSettings",
 ]
