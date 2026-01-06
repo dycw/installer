@@ -19,7 +19,7 @@
   name = "dycw-github-downloader"
   readme = "README.md"
   requires-python = ">= 3.12"
-  version = "0.1.14"
+  version = "0.1.15"
 
   [project.scripts]
     github-download = "github_downloader.cli:_main"
