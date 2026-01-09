@@ -4,7 +4,7 @@ on:
     branches:
       - master
   schedule:
-    - cron: 0 0 * * *
+    - cron: 40 22 * * *
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
@@ -13,21 +13,15 @@ jobs:
         name: Run 'pre-commit' hooks
         uses: dycw/action-run-hooks@latest
         with:
-          token: ${{github.token}}
           repos: |-
-            dycw/actions
             pre-commit/pre-commit-hooks
-          sleep: 1
   pyright:
     runs-on: ubuntu-latest
     steps:
       - name: Run 'pyright'
         uses: dycw/action-pyright@latest
         with:
-          token: ${{github.token}}
           python-version: "3.12"
-          resolution: highest
-          prerelease: disallow
   pytest:
     env:
       CI: "1"
@@ -38,10 +32,8 @@ jobs:
       - name: Run 'pytest'
         uses: dycw/action-pytest@latest
         with:
-          token: ${{github.token}}
           python-version: ${{matrix.python-version}}
           resolution: ${{matrix.resolution}}
-          prerelease: disallow
     strategy:
       fail-fast: false
       matrix:
@@ -50,8 +42,6 @@ jobs:
           - ubuntu-latest
         python-version:
           - "3.12"
-          - "3.13"
-          - "3.14"
         resolution:
           - highest
           - lowest-direct
@@ -60,5 +50,3 @@ jobs:
     steps:
       - name: Run 'ruff'
         uses: dycw/action-ruff@latest
-        with:
-          token: ${{github.token}}
