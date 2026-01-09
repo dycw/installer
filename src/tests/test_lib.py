@@ -3,7 +3,7 @@ from __future__ import annotations
 from re import escape, search
 from typing import TYPE_CHECKING
 
-from utilities.pytest import throttle
+from utilities.pytest import throttle_test
 from utilities.subprocess import run
 from utilities.text import strip_and_dedent
 from utilities.whenever import MINUTE
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 class TestSetupAge:
-    @throttle(delta=5 * MINUTE)
+    @throttle_test(delta=5 * MINUTE)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -61,7 +61,7 @@ class TestSetupAge:
 
 
 class TestSetupRipgrep:
-    @throttle(delta=5 * MINUTE)
+    @throttle_test(delta=5 * MINUTE)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -83,7 +83,7 @@ class TestSetupRipgrep:
 
 
 class TestSetupSops:
-    @throttle(delta=5 * MINUTE)
+    @throttle_test(delta=5 * MINUTE)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
