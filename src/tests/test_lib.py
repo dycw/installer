@@ -78,7 +78,7 @@ class TestSetupBottom:
         setup_bottom(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "btm"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern1 = strip_and_dedent("""
             Clement Tsang <cjhtsang@uwaterloo.ca>
 
             A customizable cross-platform graphical process/system monitor for the terminal. Supports Linux,
@@ -86,7 +86,15 @@ class TestSetupBottom:
 
             Usage: btm [OPTIONS]
         """)
-        assert search(escape(pattern), result.out)
+        pattern2 = strip_and_dedent("""
+            Clement Tsang <cjhtsang@uwaterloo.ca>
+
+            A customizable cross-platform graphical process/system monitor for the terminal.
+            Supports Linux, macOS, and Windows.
+
+            Usage: btm [OPTIONS]
+        """)
+        assert any(search(escape(p), result.out) for p in [pattern1, pattern2])
 
 
 class TestSetupDirenv:
