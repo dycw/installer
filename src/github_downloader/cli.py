@@ -10,6 +10,8 @@ from github_downloader.lib import (
     setup_age,
     setup_asset,
     setup_direnv,
+    setup_fzf,
+    setup_just,
     setup_ripgrep,
     setup_sops,
     setup_starship,
@@ -114,6 +116,64 @@ def direnv_sub_cmd(
         return
     basic_config(obj=LOGGER)
     setup_direnv(
+        token=download.token,
+        timeout=download.timeout,
+        path_binaries=path_binaries.path_binaries,
+        chunk_size=download.chunk_size,
+        sudo=perms.sudo,
+        perms=perms.perms,
+        owner=perms.owner,
+        group=perms.group,
+    )
+
+
+@_main.command(name="fzf", **CONTEXT_SETTINGS)
+@click_options(
+    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
+)
+@click_options(
+    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
+)
+@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+def fzf_sub_cmd(
+    *,
+    download: DownloadSettings,
+    path_binaries: PathBinariesSettings,
+    perms: PermsSettings,
+) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_fzf(
+        token=download.token,
+        timeout=download.timeout,
+        path_binaries=path_binaries.path_binaries,
+        chunk_size=download.chunk_size,
+        sudo=perms.sudo,
+        perms=perms.perms,
+        owner=perms.owner,
+        group=perms.group,
+    )
+
+
+@_main.command(name="just", **CONTEXT_SETTINGS)
+@click_options(
+    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
+)
+@click_options(
+    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
+)
+@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+def just_sub_cmd(
+    *,
+    download: DownloadSettings,
+    path_binaries: PathBinariesSettings,
+    perms: PermsSettings,
+) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_just(
         token=download.token,
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,
