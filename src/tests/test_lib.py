@@ -8,7 +8,7 @@ from utilities.subprocess import run
 from utilities.text import strip_and_dedent
 from utilities.whenever import MINUTE
 
-from github_downloader.lib import setup_age, setup_ripgrep, setup_sops
+from github_downloader.lib import setup_age, setup_direnv, setup_ripgrep, setup_sops
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -58,6 +58,20 @@ class TestSetupAge:
             passphrase-based encryption and decryption using environment variables.
         """)
         assert search(escape(pattern4), result4.err)
+
+
+class TestSetupDirenv:
+    @throttle_test(delta=5 * MINUTE)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_direnv(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "direnv"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage: direnv COMMAND [...ARGS]
+        """)
+        assert search(escape(pattern), result.out)
 
 
 class TestSetupRipgrep:
