@@ -11,6 +11,7 @@ from utilities.whenever import MINUTE
 from github_downloader.lib import (
     setup_age,
     setup_direnv,
+    setup_fzf,
     setup_ripgrep,
     setup_sops,
     setup_starship,
@@ -80,6 +81,30 @@ class TestSetupDirenv:
         assert search(escape(pattern), result.out)
 
 
+class TestSetupFzf:
+    @throttle_test(delta=5 * MINUTE)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_fzf(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "fzf"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            fzf is an interactive filter program for any kind of list.
+
+            It implements a "fuzzy" matching algorithm, so you can quickly type in patterns
+            with omitted characters and still get the results you want.
+
+            Project URL: https://github.com/junegunn/fzf
+            Author: Junegunn Choi <junegunn.c@gmail.com>
+
+            * See man page for more information: fzf --man
+
+            Usage: fzf [options]
+        """)
+        assert search(escape(pattern), result.out)
+
+
 class TestSetupRipgrep:
     @throttle_test(delta=5 * MINUTE)
     def test_main(
@@ -89,6 +114,14 @@ class TestSetupRipgrep:
         run(str(tmp_path / "rg"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
+            ripgrep (rg) recursively searches the current directory for lines matching
+            a regex pattern. By default, ripgrep will respect gitignore rules and
+            automatically skip hidden files/directories and binary files.
+
+            Use -h for short descriptions and --help for more details.
+
+            Project home page: https://github.com/BurntSushi/ripgrep
+
             USAGE:
                 rg [OPTIONS] PATTERN [PATH ...]
                 rg [OPTIONS] -e PATTERN ... [PATH ...]
@@ -126,6 +159,8 @@ class TestSetupStarship:
         run(str(tmp_path / "starship"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
+            The cross-shell prompt for astronauts. ☄🌌️
+
             Usage: starship <COMMAND>
         """)
         assert search(escape(pattern), result.out)
