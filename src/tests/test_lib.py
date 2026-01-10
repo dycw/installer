@@ -81,8 +81,8 @@ class TestSetupBottom:
         pattern = strip_and_dedent("""
             Clement Tsang <cjhtsang@uwaterloo.ca>
 
-            A customizable cross-platform graphical process/system monitor for the terminal.
-            Supports Linux, macOS, and Windows.
+            A customizable cross-platform graphical process/system monitor for the terminal. Supports Linux,
+            macOS, and Windows.
 
             Usage: btm [OPTIONS]
         """)
