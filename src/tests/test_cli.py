@@ -12,8 +12,8 @@ class TestCLI:
             param(["direnv"]),
             param(["run", "asset-owner", "asset-repo", "binary-name"]),
             param(["ripgrep"]),
-            param(["starship"]),
             param(["sops"]),
+            param(["starship"]),
         ],
     )
     def test_main(self, *, args: list[str]) -> None:
