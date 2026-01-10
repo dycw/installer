@@ -255,7 +255,7 @@ def setup_restic(
         timeout=timeout,
         chunk_size=chunk_size,
     ) as src:
-        dest = Path(path_binaries, src.name)
+        dest = Path(path_binaries, "restic")
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
     LOGGER.info("Downloaded to %r", str(dest))
 
