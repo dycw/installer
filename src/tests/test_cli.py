@@ -9,6 +9,7 @@ class TestCLI:
         "args",
         [
             param(["age"]),
+            param(["direnv"]),
             param(["run", "asset-owner", "asset-repo", "binary-name"]),
             param(["ripgrep"]),
             param(["sops"]),
