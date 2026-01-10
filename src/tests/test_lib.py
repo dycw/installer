@@ -114,6 +114,14 @@ class TestSetupRipgrep:
         run(str(tmp_path / "rg"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
+            ripgrep (rg) recursively searches the current directory for lines matching
+            a regex pattern. By default, ripgrep will respect gitignore rules and
+            automatically skip hidden files/directories and binary files.
+
+            Use -h for short descriptions and --help for more details.
+
+            Project home page: https://github.com/BurntSushi/ripgrep
+
             USAGE:
                 rg [OPTIONS] PATTERN [PATH ...]
                 rg [OPTIONS] -e PATTERN ... [PATH ...]
@@ -151,6 +159,8 @@ class TestSetupStarship:
         run(str(tmp_path / "starship"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
+            The cross-shell prompt for astronauts. ☄🌌️
+
             Usage: starship <COMMAND>
         """)
         assert search(escape(pattern), result.out)
