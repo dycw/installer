@@ -12,6 +12,7 @@ class TestCLI:
             param(["direnv"]),
             param(["run", "asset-owner", "asset-repo", "binary-name"]),
             param(["ripgrep"]),
+            param(["starship"]),
             param(["sops"]),
         ],
     )

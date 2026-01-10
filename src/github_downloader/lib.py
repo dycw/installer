@@ -308,6 +308,36 @@ def setup_ripgrep(
 ##
 
 
+def setup_starship(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = PERMS_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'starship'."""
+    with yield_tar_asset(
+        "starship",
+        "starship",
+        token=token,
+        match_system=True,
+        match_machine=True,
+        not_endswith=["sha256"],
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as src:
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
 def setup_sops(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
@@ -345,6 +375,7 @@ __all__ = [
     "setup_direnv",
     "setup_ripgrep",
     "setup_sops",
+    "setup_starship",
     "yield_asset",
     "yield_tar_asset",
 ]

@@ -8,7 +8,13 @@ from utilities.subprocess import run
 from utilities.text import strip_and_dedent
 from utilities.whenever import MINUTE
 
-from github_downloader.lib import setup_age, setup_direnv, setup_ripgrep, setup_sops
+from github_downloader.lib import (
+    setup_age,
+    setup_direnv,
+    setup_ripgrep,
+    setup_sops,
+    setup_starship,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -92,6 +98,20 @@ class TestSetupRipgrep:
                 command | rg [OPTIONS] PATTERN
                 rg [OPTIONS] --help
                 rg [OPTIONS] --version
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupStarship:
+    @throttle_test(delta=5 * MINUTE)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_starship(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "starship"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage: starship <COMMAND>
         """)
         assert search(escape(pattern), result.out)
 
