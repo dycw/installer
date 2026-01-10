@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Set as AbstractSet
+from os import environ
 from platform import machine, system
 from re import IGNORECASE, search
 from typing import TYPE_CHECKING, Any, cast
@@ -11,7 +12,11 @@ from utilities.subprocess import run
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
-    from github_downloader.types import System
+    from github_downloader.types import Shell, System
+
+
+def _get_shell() -> Shell:
+    environ["SHELL"]
 
 
 def _get_system_name() -> System:
