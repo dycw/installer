@@ -46,6 +46,7 @@ def setup_asset(
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
     match_machine: bool = MATCH_SETTINGS.match_machine,
+    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
     not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
@@ -65,6 +66,7 @@ def setup_asset(
              - match_system    = %s
              - match_c_std_lib = %s
              - match_machine   = %s
+             - not_matches    = %s
              - not_endswith    = %s
              - timeout         = %d
              - chunk_size      = %d
@@ -82,6 +84,7 @@ def setup_asset(
         match_system,
         match_c_std_lib,
         match_machine,
+        not_matches,
         not_endswith,
         timeout,
         chunk_size,
@@ -400,6 +403,7 @@ def _yield_asset(
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
     match_machine: bool = MATCH_SETTINGS.match_machine,
+    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
     not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
@@ -439,6 +443,15 @@ def _yield_asset(
         LOGGER.info(
             "Post machine type group %s, got %s: %s",
             MACHINE_TYPE_GROUP,
+            counted_noun(assets, "asset"),
+            [a.name for a in assets],
+        )
+    if not_matches is not None:
+        assets = [
+            a for a in assets if all(search(p, a.name) is None for p in not_matches)
+        ]
+        LOGGER.info(
+            "Post asset name patterns, got %s: %s",
             counted_noun(assets, "asset"),
             [a.name for a in assets],
         )
@@ -487,6 +500,7 @@ def _yield_bz2_asset(
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
     match_machine: bool = MATCH_SETTINGS.match_machine,
+    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
     not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
@@ -499,6 +513,7 @@ def _yield_bz2_asset(
             match_system=match_system,
             match_c_std_lib=match_c_std_lib,
             match_machine=match_machine,
+            not_matches=not_matches,
             not_endswith=not_endswith,
             timeout=timeout,
             chunk_size=chunk_size,
@@ -524,6 +539,7 @@ def _yield_tar_asset(
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
     match_machine: bool = MATCH_SETTINGS.match_machine,
+    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
     not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
@@ -536,6 +552,7 @@ def _yield_tar_asset(
             match_system=match_system,
             match_c_std_lib=match_c_std_lib,
             match_machine=match_machine,
+            not_matches=not_matches,
             not_endswith=not_endswith,
             timeout=timeout,
             chunk_size=chunk_size,

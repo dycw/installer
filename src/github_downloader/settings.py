@@ -31,6 +31,9 @@ class MatchSettings:
     match_machine: bool = option(
         default=False, help=f"Match the machine type {MACHINE_TYPE!r}"
     )
+    not_matches: list[str] = option(
+        factory=list, help="Asset name patterns to not match again"
+    )
     not_endswith: list[str] = option(factory=list, help="Asset name endings to exclude")
 
 
