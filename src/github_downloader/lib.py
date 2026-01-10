@@ -256,23 +256,22 @@ def setup_direnv(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'direnv'."""
-    with yield_tar_asset(
-        "FiloSottile",
-        "age",
+    dest = Path(path_binaries, "direnv")
+    setup_asset(
+        "direnv",
+        "direnv",
+        dest,
         token=token,
         match_system=True,
         match_machine=True,
-        not_endswith=["proof"],
         timeout=timeout,
         chunk_size=chunk_size,
-    ) as temp:
-        downloads: list[Path] = []
-        for src in temp.iterdir():
-            if src.name.startswith("age"):
-                dest = Path(path_binaries, src.name)
-                cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-                downloads.append(dest)
-        LOGGER.info("Downloaded to %s", ", ".join(map(repr_str, downloads)))
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+    )
+    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
