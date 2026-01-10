@@ -13,6 +13,7 @@ class TestCLI:
             param(["run", "asset-owner", "asset-repo", "binary-name"]),
             param(["ripgrep"]),
             param(["sops"]),
+            param(["starship"]),
         ],
     )
     def test_main(self, *, args: list[str]) -> None:

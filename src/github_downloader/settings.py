@@ -27,6 +27,7 @@ class MatchSettings:
     match_system: bool = option(
         default=False, help=f"Match the system name {SYSTEM_NAME!r}"
     )
+    match_c_std_lib: bool = option(default=False, help="Match the C std. lib.")
     match_machine: bool = option(
         default=False, help=f"Match the machine type {MACHINE_TYPE!r}"
     )

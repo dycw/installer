@@ -17,7 +17,7 @@ from utilities.tempfile import TemporaryDirectory
 from utilities.text import repr_str, strip_and_dedent
 
 from github_downloader import __version__
-from github_downloader.constants import MACHINE_TYPE_GROUP, SYSTEM_NAME
+from github_downloader.constants import C_STD_LIB_GROUP, MACHINE_TYPE_GROUP, SYSTEM_NAME
 from github_downloader.logging import LOGGER
 from github_downloader.settings import (
     DOWNLOAD_SETTINGS,
@@ -42,6 +42,7 @@ def yield_asset(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     match_system: bool = MATCH_SETTINGS.match_system,
+    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
     match_machine: bool = MATCH_SETTINGS.match_machine,
     not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
@@ -61,11 +62,23 @@ def yield_asset(
             counted_noun(assets, "asset"),
             [a.name for a in assets],
         )
+    if match_c_std_lib and (C_STD_LIB_GROUP is not None):
+        assets = [
+            a
+            for a in assets
+            if any(search(c, a.name, flags=IGNORECASE) for c in C_STD_LIB_GROUP)
+        ]
+        LOGGER.info(
+            "Post C std. lib. group %s, got %s: %s",
+            C_STD_LIB_GROUP,
+            counted_noun(assets, "asset"),
+            [a.name for a in assets],
+        )
     if match_machine:
         assets = [
             a
             for a in assets
-            if any(search(mt, a.name, flags=IGNORECASE) for mt in MACHINE_TYPE_GROUP)
+            if any(search(m, a.name, flags=IGNORECASE) for m in MACHINE_TYPE_GROUP)
         ]
         LOGGER.info(
             "Post machine type group %s, got %s: %s",
@@ -116,6 +129,7 @@ def yield_tar_asset(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     match_system: bool = MATCH_SETTINGS.match_system,
+    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
     match_machine: bool = MATCH_SETTINGS.match_machine,
     not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
@@ -127,6 +141,7 @@ def yield_tar_asset(
             repo,
             token=token,
             match_system=match_system,
+            match_c_std_lib=match_c_std_lib,
             match_machine=match_machine,
             not_endswith=not_endswith,
             timeout=timeout,
@@ -150,6 +165,7 @@ def setup_asset(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     match_system: bool = MATCH_SETTINGS.match_system,
+    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
     match_machine: bool = MATCH_SETTINGS.match_machine,
     not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
@@ -163,19 +179,20 @@ def setup_asset(
     LOGGER.info(
         strip_and_dedent("""
             Running '%s' (version %s) with settings:
-             - asset_owner   = %s
-             - asset_repo    = %s
-             - path          = %s
-             - token         = %s
-             - match_system  = %s
-             - match_machine = %s
-             - not_endswith  = %s
-             - timeout       = %d
-             - chunk_size    = %d
-             - sudo          = %s
-             - perms         = %s
-             - owner         = %s
-             - group         = %s
+             - asset_owner     = %s
+             - asset_repo      = %s
+             - path            = %s
+             - token           = %s
+             - match_system    = %s
+             - match_c_std_lib = %s
+             - match_machine   = %s
+             - not_endswith    = %s
+             - timeout         = %d
+             - chunk_size      = %d
+             - sudo            = %s
+             - perms           = %s
+             - owner           = %s
+             - group           = %s
         """),
         setup_asset.__name__,
         __version__,
@@ -184,6 +201,7 @@ def setup_asset(
         path,
         token,
         match_system,
+        match_c_std_lib,
         match_machine,
         not_endswith,
         timeout,
@@ -198,6 +216,7 @@ def setup_asset(
         asset_repo,
         token=token,
         match_system=match_system,
+        match_c_std_lib=match_c_std_lib,
         match_machine=match_machine,
         not_endswith=not_endswith,
         timeout=timeout,
@@ -308,6 +327,37 @@ def setup_ripgrep(
 ##
 
 
+def setup_starship(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = PERMS_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'starship'."""
+    with yield_tar_asset(
+        "starship",
+        "starship",
+        token=token,
+        match_system=True,
+        match_c_std_lib=True,
+        match_machine=True,
+        not_endswith=["sha256"],
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as src:
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
 def setup_sops(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
@@ -345,6 +395,7 @@ __all__ = [
     "setup_direnv",
     "setup_ripgrep",
     "setup_sops",
+    "setup_starship",
     "yield_asset",
     "yield_tar_asset",
 ]
