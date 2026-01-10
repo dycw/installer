@@ -6,10 +6,11 @@ from typing import TYPE_CHECKING
 from utilities.pytest import throttle_test
 from utilities.subprocess import run
 from utilities.text import strip_and_dedent
-from utilities.whenever import MINUTE
+from utilities.whenever import HOUR
 
 from github_downloader.lib import (
     setup_age,
+    setup_bottom,
     setup_direnv,
     setup_fzf,
     setup_just,
@@ -27,7 +28,7 @@ if TYPE_CHECKING:
 
 
 class TestSetupAge:
-    @throttle_test(delta=5 * MINUTE)
+    @throttle_test(delta=HOUR)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -69,8 +70,35 @@ class TestSetupAge:
         assert search(escape(pattern4), result4.err)
 
 
+class TestSetupBottom:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_bottom(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "btm"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern1 = strip_and_dedent("""
+            Clement Tsang <cjhtsang@uwaterloo.ca>
+
+            A customizable cross-platform graphical process/system monitor for the terminal. Supports Linux,
+            macOS, and Windows.
+
+            Usage: btm [OPTIONS]
+        """)
+        pattern2 = strip_and_dedent("""
+            Clement Tsang <cjhtsang@uwaterloo.ca>
+
+            A customizable cross-platform graphical process/system monitor for the terminal.
+            Supports Linux, macOS, and Windows.
+
+            Usage: btm [OPTIONS]
+        """)
+        assert any(search(escape(p), result.out) for p in [pattern1, pattern2])
+
+
 class TestSetupDirenv:
-    @throttle_test(delta=5 * MINUTE)
+    @throttle_test(delta=HOUR)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -84,7 +112,7 @@ class TestSetupDirenv:
 
 
 class TestSetupFzf:
-    @throttle_test(delta=5 * MINUTE)
+    @throttle_test(delta=HOUR)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -108,7 +136,7 @@ class TestSetupFzf:
 
 
 class TestSetupJust:
-    @throttle_test(delta=5 * MINUTE)
+    @throttle_test(delta=HOUR)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -124,7 +152,7 @@ class TestSetupJust:
 
 
 class TestSetupRestic:
-    @throttle_test(delta=5 * MINUTE)
+    @throttle_test(delta=HOUR)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -144,7 +172,7 @@ class TestSetupRestic:
 
 
 class TestSetupRipgrep:
-    @throttle_test(delta=5 * MINUTE)
+    @throttle_test(delta=HOUR)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -174,7 +202,7 @@ class TestSetupRipgrep:
 
 
 class TestSetupSops:
-    @throttle_test(delta=5 * MINUTE)
+    @throttle_test(delta=HOUR)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -189,7 +217,7 @@ class TestSetupSops:
 
 
 class TestSetupStarship:
-    @throttle_test(delta=5 * MINUTE)
+    @throttle_test(delta=HOUR)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:

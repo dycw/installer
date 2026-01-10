@@ -46,6 +46,7 @@ def setup_asset(
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
     match_machine: bool = MATCH_SETTINGS.match_machine,
+    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
     not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
@@ -65,6 +66,7 @@ def setup_asset(
              - match_system    = %s
              - match_c_std_lib = %s
              - match_machine   = %s
+             - not_matches    = %s
              - not_endswith    = %s
              - timeout         = %d
              - chunk_size      = %d
@@ -82,6 +84,7 @@ def setup_asset(
         match_system,
         match_c_std_lib,
         match_machine,
+        not_matches,
         not_endswith,
         timeout,
         chunk_size,
@@ -137,6 +140,38 @@ def setup_age(
                 cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
                 downloads.append(dest)
         LOGGER.info("Downloaded to %s", ", ".join(map(repr_str, downloads)))
+
+
+##
+
+
+def setup_bottom(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = PERMS_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'bottom'."""
+    with _yield_tar_asset(
+        "ClementTsang",
+        "bottom",
+        token=token,
+        match_system=True,
+        match_c_std_lib=True,
+        match_machine=True,
+        not_matches=[r"\d+\.tar\.gz$"],
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as temp:
+        src = temp / "btm"
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -215,7 +250,7 @@ def setup_just(
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
-    """Setup 'fzf'."""
+    """Setup 'just'."""
     with _yield_tar_asset(
         "casey",
         "just",
@@ -369,6 +404,7 @@ def _yield_asset(
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
     match_machine: bool = MATCH_SETTINGS.match_machine,
+    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
     not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
@@ -408,6 +444,15 @@ def _yield_asset(
         LOGGER.info(
             "Post machine type group %s, got %s: %s",
             MACHINE_TYPE_GROUP,
+            counted_noun(assets, "asset"),
+            [a.name for a in assets],
+        )
+    if not_matches is not None:
+        assets = [
+            a for a in assets if all(search(p, a.name) is None for p in not_matches)
+        ]
+        LOGGER.info(
+            "Post asset name patterns, got %s: %s",
             counted_noun(assets, "asset"),
             [a.name for a in assets],
         )
@@ -456,6 +501,7 @@ def _yield_bz2_asset(
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
     match_machine: bool = MATCH_SETTINGS.match_machine,
+    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
     not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
@@ -468,6 +514,7 @@ def _yield_bz2_asset(
             match_system=match_system,
             match_c_std_lib=match_c_std_lib,
             match_machine=match_machine,
+            not_matches=not_matches,
             not_endswith=not_endswith,
             timeout=timeout,
             chunk_size=chunk_size,
@@ -493,6 +540,7 @@ def _yield_tar_asset(
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
     match_machine: bool = MATCH_SETTINGS.match_machine,
+    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
     not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
@@ -505,6 +553,7 @@ def _yield_tar_asset(
             match_system=match_system,
             match_c_std_lib=match_c_std_lib,
             match_machine=match_machine,
+            not_matches=not_matches,
             not_endswith=not_endswith,
             timeout=timeout,
             chunk_size=chunk_size,
