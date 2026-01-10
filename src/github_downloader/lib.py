@@ -296,6 +296,39 @@ def setup_direnv(
 ##
 
 
+def setup_fzf(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = PERMS_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'fzf'."""
+    dest = Path(path_binaries, "fzf")
+    setup_asset(
+        "fzf",
+        "fzf",
+        dest,
+        token=token,
+        match_system=True,
+        match_machine=True,
+        timeout=timeout,
+        chunk_size=chunk_size,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+    )
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
 def setup_ripgrep(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
@@ -393,6 +426,7 @@ __all__ = [
     "setup_age",
     "setup_asset",
     "setup_direnv",
+    "setup_fzf",
     "setup_ripgrep",
     "setup_sops",
     "setup_starship",
