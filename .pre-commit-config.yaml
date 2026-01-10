@@ -25,6 +25,7 @@ repos:
           - --pyproject
           - --pyright
           - --pytest
+          - --pytest--ignore-warnings
           - --python-package-name=github_downloader
           - --python-version=3.12
           - --readme

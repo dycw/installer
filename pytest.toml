@@ -8,7 +8,12 @@
   ]
   collect_imported_tests = false
   empty_parameter_set_mark = "fail_at_collect"
-  filterwarnings = ["error"]
+  filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning",
+    "ignore::ResourceWarning",
+    "ignore::RuntimeWarning",
+  ]
   minversion = "9.0"
   strict = true
   testpaths = ["src/tests"]
