@@ -9,6 +9,7 @@ from utilities.os import is_pytest
 from github_downloader.lib import (
     setup_age,
     setup_asset,
+    setup_bottom,
     setup_direnv,
     setup_fzf,
     setup_just,
@@ -88,6 +89,35 @@ def age_sub_cmd(
         return
     basic_config(obj=LOGGER)
     setup_age(
+        token=download.token,
+        timeout=download.timeout,
+        path_binaries=path_binaries.path_binaries,
+        chunk_size=download.chunk_size,
+        sudo=perms.sudo,
+        perms=perms.perms,
+        owner=perms.owner,
+        group=perms.group,
+    )
+
+
+@_main.command(name="btm", **CONTEXT_SETTINGS)
+@click_options(
+    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
+)
+@click_options(
+    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
+)
+@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+def btm_sub_cmd(
+    *,
+    download: DownloadSettings,
+    path_binaries: PathBinariesSettings,
+    perms: PermsSettings,
+) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_bottom(
         token=download.token,
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,

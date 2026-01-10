@@ -9,6 +9,7 @@ class TestCLI:
         "args",
         [
             param(["age"]),
+            param(["btm"]),
             param(["direnv"]),
             param(["fzf"]),
             param(["just"]),
