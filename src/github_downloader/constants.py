@@ -4,27 +4,38 @@ from collections.abc import Set as AbstractSet
 from os import environ
 from platform import machine, system
 from re import IGNORECASE, search
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
 from utilities.iterables import OneEmptyError, one
 from utilities.subprocess import run
+from utilities.typing import get_args
+
+from github_downloader.types import Shell, System
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
-    from github_downloader.types import Shell, System
-
 
 def _get_shell() -> Shell:
-    environ["SHELL"]
+    shell = environ["SHELL"]
+    shells: tuple[Shell, ...] = get_args(Shell)
+    matches: list[Shell] = [s for s in shells if search(s, shell) is not None]
+    try:
+        return one(matches)
+    except OneEmptyError:
+        msg = f"Invalid shell; must be in {shells} but got {shell!r}"
+        raise ValueError(msg) from None
+
+
+SHELL = _get_shell()
 
 
 def _get_system_name() -> System:
     sys = system()
-    names = {"Darwin", "Linux"}
-    if sys in names:
-        return cast("Any", sys)
-    msg = f"Invalid system name; must be in {names} but got {sys!r}"
+    systems: tuple[System, ...] = get_args(System)
+    if sys in systems:
+        return sys
+    msg = f"Invalid system name; must be in {systems} but got {sys!r}"
     raise ValueError(msg)
 
 
@@ -77,4 +88,10 @@ def _get_machine_type_group() -> set[str]:
 
 MACHINE_TYPE_GROUP = _get_machine_type_group()
 
-__all__ = ["C_STD_LIB_GROUP", "MACHINE_TYPE", "MACHINE_TYPE_GROUP", "SYSTEM_NAME"]
+__all__ = [
+    "C_STD_LIB_GROUP",
+    "MACHINE_TYPE",
+    "MACHINE_TYPE_GROUP",
+    "SHELL",
+    "SYSTEM_NAME",
+]
