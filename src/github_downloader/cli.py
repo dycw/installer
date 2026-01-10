@@ -55,6 +55,7 @@ def run_sub_cmd(
         binary_name,
         token=download.token,
         match_system=common.match_system,
+        match_c_std_lib=common.match_c_std_lib,
         match_machine=common.match_machine,
         not_endswith=common.not_endswith,
         timeout=download.timeout,
