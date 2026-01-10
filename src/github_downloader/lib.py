@@ -244,6 +244,40 @@ def setup_age(
 ##
 
 
+def setup_direnv(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = PERMS_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'direnv'."""
+    with yield_tar_asset(
+        "FiloSottile",
+        "age",
+        token=token,
+        match_system=True,
+        match_machine=True,
+        not_endswith=["proof"],
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as temp:
+        downloads: list[Path] = []
+        for src in temp.iterdir():
+            if src.name.startswith("age"):
+                dest = Path(path_binaries, src.name)
+                cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+                downloads.append(dest)
+        LOGGER.info("Downloaded to %s", ", ".join(map(repr_str, downloads)))
+
+
+##
+
+
 def setup_ripgrep(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
@@ -309,6 +343,7 @@ def setup_sops(
 __all__ = [
     "setup_age",
     "setup_asset",
+    "setup_direnv",
     "setup_ripgrep",
     "setup_sops",
     "yield_asset",
