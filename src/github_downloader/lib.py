@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import bz2
 import tarfile
 from contextlib import contextmanager
 from pathlib import Path
 from re import IGNORECASE, search
+from shutil import copyfileobj
 from typing import TYPE_CHECKING, Any
 
 from github import Github
@@ -13,7 +15,7 @@ from typed_settings import Secret
 from utilities.inflect import counted_noun
 from utilities.iterables import OneNonUniqueError, one
 from utilities.subprocess import cp
-from utilities.tempfile import TemporaryDirectory
+from utilities.tempfile import TemporaryDirectory, TemporaryFile
 from utilities.text import repr_str, strip_and_dedent
 
 from github_downloader import __version__
@@ -34,8 +36,331 @@ if TYPE_CHECKING:
     from utilities.types import PathLike
 
 
+def setup_asset(
+    asset_owner: str,
+    asset_repo: str,
+    path: PathLike,
+    /,
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    match_system: bool = MATCH_SETTINGS.match_system,
+    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
+    match_machine: bool = MATCH_SETTINGS.match_machine,
+    not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = PERMS_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup a GitHub asset."""
+    LOGGER.info(
+        strip_and_dedent("""
+            Running '%s' (version %s) with settings:
+             - asset_owner     = %s
+             - asset_repo      = %s
+             - path            = %s
+             - token           = %s
+             - match_system    = %s
+             - match_c_std_lib = %s
+             - match_machine   = %s
+             - not_endswith    = %s
+             - timeout         = %d
+             - chunk_size      = %d
+             - sudo            = %s
+             - perms           = %s
+             - owner           = %s
+             - group           = %s
+        """),
+        setup_asset.__name__,
+        __version__,
+        asset_owner,
+        asset_repo,
+        path,
+        token,
+        match_system,
+        match_c_std_lib,
+        match_machine,
+        not_endswith,
+        timeout,
+        chunk_size,
+        sudo,
+        perms,
+        owner,
+        group,
+    )
+    with _yield_asset(
+        asset_owner,
+        asset_repo,
+        token=token,
+        match_system=match_system,
+        match_c_std_lib=match_c_std_lib,
+        match_machine=match_machine,
+        not_endswith=not_endswith,
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as src:
+        cp(src, path, sudo=sudo, perms=perms, owner=owner, group=group)
+        LOGGER.info("Downloaded to %r", str(path))
+
+
+##
+
+
+def setup_age(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = PERMS_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'age'."""
+    with _yield_tar_asset(
+        "FiloSottile",
+        "age",
+        token=token,
+        match_system=True,
+        match_machine=True,
+        not_endswith=["proof"],
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as temp:
+        downloads: list[Path] = []
+        for src in temp.iterdir():
+            if src.name.startswith("age"):
+                dest = Path(path_binaries, src.name)
+                cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+                downloads.append(dest)
+        LOGGER.info("Downloaded to %s", ", ".join(map(repr_str, downloads)))
+
+
+##
+
+
+def setup_direnv(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = PERMS_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'direnv'."""
+    dest = Path(path_binaries, "direnv")
+    setup_asset(
+        "direnv",
+        "direnv",
+        dest,
+        token=token,
+        match_system=True,
+        match_machine=True,
+        timeout=timeout,
+        chunk_size=chunk_size,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+    )
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
+def setup_fzf(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = PERMS_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'fzf'."""
+    with _yield_tar_asset(
+        "junegunn",
+        "fzf",
+        token=token,
+        match_system=True,
+        match_machine=True,
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as src:
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
+def setup_just(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = PERMS_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'fzf'."""
+    with _yield_tar_asset(
+        "casey",
+        "just",
+        token=token,
+        match_system=True,
+        match_machine=True,
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as temp:
+        src = temp / "just"
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
+def setup_restic(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = PERMS_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'restic'."""
+    with _yield_bz2_asset(
+        "restic",
+        "restic",
+        token=token,
+        match_system=True,
+        match_machine=True,
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as src:
+        dest = Path(path_binaries, "restic")
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
+def setup_ripgrep(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = PERMS_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'ripgrep'."""
+    with _yield_tar_asset(
+        "burntsushi",
+        "ripgrep",
+        token=token,
+        match_system=True,
+        match_machine=True,
+        not_endswith=["sha256"],
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as temp:
+        src = temp / "rg"
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
+def setup_starship(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = PERMS_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'starship'."""
+    with _yield_tar_asset(
+        "starship",
+        "starship",
+        token=token,
+        match_system=True,
+        match_c_std_lib=True,
+        match_machine=True,
+        not_endswith=["sha256"],
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as src:
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
+def setup_sops(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = PERMS_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'sops'."""
+    dest = Path(path_binaries, "sops")
+    setup_asset(
+        "getsops",
+        "sops",
+        dest,
+        token=token,
+        match_system=True,
+        match_machine=True,
+        not_endswith=["json"],
+        timeout=timeout,
+        chunk_size=chunk_size,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+    )
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
 @contextmanager
-def yield_asset(
+def _yield_asset(
     owner: str,
     repo: str,
     /,
@@ -122,7 +447,7 @@ def yield_asset(
 
 
 @contextmanager
-def yield_tar_asset(
+def _yield_bz2_asset(
     owner: str,
     repo: str,
     /,
@@ -136,7 +461,7 @@ def yield_tar_asset(
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
 ) -> Iterator[Path]:
     with (
-        yield_asset(
+        _yield_asset(
             owner,
             repo,
             token=token,
@@ -147,7 +472,44 @@ def yield_tar_asset(
             timeout=timeout,
             chunk_size=chunk_size,
         ) as temp1,
-        tarfile.open(temp1, "r:gz") as tar,
+        bz2.open(temp1) as bz,
+        TemporaryFile() as temp2,
+        temp2.open(mode="wb") as fh,
+    ):
+        copyfileobj(bz, fh)
+        yield temp2
+
+
+##
+
+
+@contextmanager
+def _yield_tar_asset(
+    owner: str,
+    repo: str,
+    /,
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    match_system: bool = MATCH_SETTINGS.match_system,
+    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
+    match_machine: bool = MATCH_SETTINGS.match_machine,
+    not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+) -> Iterator[Path]:
+    with (
+        _yield_asset(
+            owner,
+            repo,
+            token=token,
+            match_system=match_system,
+            match_c_std_lib=match_c_std_lib,
+            match_machine=match_machine,
+            not_endswith=not_endswith,
+            timeout=timeout,
+            chunk_size=chunk_size,
+        ) as temp1,
+        tarfile.open(name=temp1, mode="r:gz") as tar,
         TemporaryDirectory() as temp2,
     ):
         tar.extractall(temp2, filter="data")
@@ -160,306 +522,14 @@ def yield_tar_asset(
 ##
 
 
-def setup_asset(
-    asset_owner: str,
-    asset_repo: str,
-    path: PathLike,
-    /,
-    *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    match_system: bool = MATCH_SETTINGS.match_system,
-    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
-    match_machine: bool = MATCH_SETTINGS.match_machine,
-    not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-) -> None:
-    """Setup a GitHub asset."""
-    LOGGER.info(
-        strip_and_dedent("""
-            Running '%s' (version %s) with settings:
-             - asset_owner     = %s
-             - asset_repo      = %s
-             - path            = %s
-             - token           = %s
-             - match_system    = %s
-             - match_c_std_lib = %s
-             - match_machine   = %s
-             - not_endswith    = %s
-             - timeout         = %d
-             - chunk_size      = %d
-             - sudo            = %s
-             - perms           = %s
-             - owner           = %s
-             - group           = %s
-        """),
-        setup_asset.__name__,
-        __version__,
-        asset_owner,
-        asset_repo,
-        path,
-        token,
-        match_system,
-        match_c_std_lib,
-        match_machine,
-        not_endswith,
-        timeout,
-        chunk_size,
-        sudo,
-        perms,
-        owner,
-        group,
-    )
-    with yield_asset(
-        asset_owner,
-        asset_repo,
-        token=token,
-        match_system=match_system,
-        match_c_std_lib=match_c_std_lib,
-        match_machine=match_machine,
-        not_endswith=not_endswith,
-        timeout=timeout,
-        chunk_size=chunk_size,
-    ) as src:
-        cp(src, path, sudo=sudo, perms=perms, owner=owner, group=group)
-        LOGGER.info("Downloaded to %r", str(path))
-
-
-##
-
-
-def setup_age(
-    *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-) -> None:
-    """Setup 'age'."""
-    with yield_tar_asset(
-        "FiloSottile",
-        "age",
-        token=token,
-        match_system=True,
-        match_machine=True,
-        not_endswith=["proof"],
-        timeout=timeout,
-        chunk_size=chunk_size,
-    ) as temp:
-        downloads: list[Path] = []
-        for src in temp.iterdir():
-            if src.name.startswith("age"):
-                dest = Path(path_binaries, src.name)
-                cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-                downloads.append(dest)
-        LOGGER.info("Downloaded to %s", ", ".join(map(repr_str, downloads)))
-
-
-##
-
-
-def setup_direnv(
-    *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-) -> None:
-    """Setup 'direnv'."""
-    dest = Path(path_binaries, "direnv")
-    setup_asset(
-        "direnv",
-        "direnv",
-        dest,
-        token=token,
-        match_system=True,
-        match_machine=True,
-        timeout=timeout,
-        chunk_size=chunk_size,
-        sudo=sudo,
-        perms=perms,
-        owner=owner,
-        group=group,
-    )
-    LOGGER.info("Downloaded to %r", str(dest))
-
-
-##
-
-
-def setup_fzf(
-    *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-) -> None:
-    """Setup 'fzf'."""
-    with yield_tar_asset(
-        "junegunn",
-        "fzf",
-        token=token,
-        match_system=True,
-        match_machine=True,
-        timeout=timeout,
-        chunk_size=chunk_size,
-    ) as src:
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
-
-
-##
-
-
-def setup_just(
-    *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-) -> None:
-    """Setup 'fzf'."""
-    with yield_tar_asset(
-        "casey",
-        "just",
-        token=token,
-        match_system=True,
-        match_machine=True,
-        timeout=timeout,
-        chunk_size=chunk_size,
-    ) as temp:
-        src = temp / "just"
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
-
-
-##
-
-
-def setup_ripgrep(
-    *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-) -> None:
-    """Setup 'ripgrep'."""
-    with yield_tar_asset(
-        "burntsushi",
-        "ripgrep",
-        token=token,
-        match_system=True,
-        match_machine=True,
-        not_endswith=["sha256"],
-        timeout=timeout,
-        chunk_size=chunk_size,
-    ) as temp:
-        src = temp / "rg"
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
-
-
-##
-
-
-def setup_starship(
-    *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-) -> None:
-    """Setup 'starship'."""
-    with yield_tar_asset(
-        "starship",
-        "starship",
-        token=token,
-        match_system=True,
-        match_c_std_lib=True,
-        match_machine=True,
-        not_endswith=["sha256"],
-        timeout=timeout,
-        chunk_size=chunk_size,
-    ) as src:
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
-
-
-##
-
-
-def setup_sops(
-    *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-) -> None:
-    """Setup 'sops'."""
-    dest = Path(path_binaries, "sops")
-    setup_asset(
-        "getsops",
-        "sops",
-        dest,
-        token=token,
-        match_system=True,
-        match_machine=True,
-        not_endswith=["json"],
-        timeout=timeout,
-        chunk_size=chunk_size,
-        sudo=sudo,
-        perms=perms,
-        owner=owner,
-        group=group,
-    )
-    LOGGER.info("Downloaded to %r", str(dest))
-
-
 __all__ = [
     "setup_age",
     "setup_asset",
     "setup_direnv",
     "setup_fzf",
     "setup_just",
+    "setup_restic",
     "setup_ripgrep",
     "setup_sops",
     "setup_starship",
-    "yield_asset",
-    "yield_tar_asset",
 ]

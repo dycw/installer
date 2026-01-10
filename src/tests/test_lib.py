@@ -13,6 +13,7 @@ from github_downloader.lib import (
     setup_direnv,
     setup_fzf,
     setup_just,
+    setup_restic,
     setup_ripgrep,
     setup_sops,
     setup_starship,
@@ -118,6 +119,26 @@ class TestSetupJust:
             🤖 Just a command runner - https://github.com/casey/just
 
             Usage: just [OPTIONS] [ARGUMENTS]...
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupRestic:
+    @throttle_test(delta=5 * MINUTE)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_restic(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "restic"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            restic is a backup program which allows saving multiple revisions of files and
+            directories in an encrypted repository stored on different backends.
+
+            The full documentation can be found at https://restic.readthedocs.io/ .
+
+            Usage:
+              restic [command]
         """)
         assert search(escape(pattern), result.out)
 
