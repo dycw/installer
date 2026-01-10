@@ -9,6 +9,7 @@ from utilities.text import repr_str, strip_and_dedent
 
 from github_downloader import __version__
 from github_downloader.constants import SHELL
+from github_downloader.download import yield_asset, yield_bz2_asset, yield_tar_asset
 from github_downloader.logging import LOGGER
 from github_downloader.settings import (
     DOWNLOAD_SETTINGS,
@@ -16,12 +17,7 @@ from github_downloader.settings import (
     PATH_BINARIES_SETTINGS,
     PERMS_SETTINGS,
 )
-from github_downloader.utilities import (
-    ensure_shell_rc,
-    yield_asset,
-    yield_bz2_asset,
-    yield_tar_asset,
-)
+from github_downloader.utilities import ensure_shell_rc
 
 if TYPE_CHECKING:
     from typed_settings import Secret
