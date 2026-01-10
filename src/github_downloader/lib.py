@@ -151,7 +151,10 @@ def yield_tar_asset(
         TemporaryDirectory() as temp2,
     ):
         tar.extractall(temp2, filter="data")
-        yield one(temp2.iterdir())
+        try:
+            yield one(temp2.iterdir())
+        except OneNonUniqueError:
+            yield temp2
 
 
 ##
@@ -325,6 +328,36 @@ def setup_fzf(
 ##
 
 
+def setup_just(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = PERMS_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'fzf'."""
+    with yield_tar_asset(
+        "casey",
+        "just",
+        token=token,
+        match_system=True,
+        match_machine=True,
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as temp:
+        src = temp / "just"
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
 def setup_ripgrep(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
@@ -423,6 +456,7 @@ __all__ = [
     "setup_asset",
     "setup_direnv",
     "setup_fzf",
+    "setup_just",
     "setup_ripgrep",
     "setup_sops",
     "setup_starship",
