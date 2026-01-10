@@ -102,20 +102,6 @@ class TestSetupRipgrep:
         assert search(escape(pattern), result.out)
 
 
-class TestSetupStarship:
-    @throttle_test(delta=5 * MINUTE)
-    def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_starship(token=token, path_binaries=tmp_path)
-        run(str(tmp_path / "starship"), "--help", print=True)
-        result = capsys.readouterr()
-        pattern = strip_and_dedent("""
-            Usage: starship <COMMAND>
-        """)
-        assert search(escape(pattern), result.out)
-
-
 class TestSetupSops:
     @throttle_test(delta=5 * MINUTE)
     def test_main(
@@ -129,3 +115,17 @@ class TestSetupSops:
                sops - sops - encrypted file editor with AWS KMS, GCP KMS, Azure Key Vault, age, and GPG support
         """)
         assert search(pattern, result.out)
+
+
+class TestSetupStarship:
+    @throttle_test(delta=5 * MINUTE)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_starship(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "starship"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage: starship <COMMAND>
+        """)
+        assert search(escape(pattern), result.out)
