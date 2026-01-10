@@ -164,6 +164,7 @@ def setup_bottom(
         match_system=True,
         match_c_std_lib=True,
         match_machine=True,
+        not_matches=[r"\d+\.tar\.gz$"],
         timeout=timeout,
         chunk_size=chunk_size,
     ) as temp:
