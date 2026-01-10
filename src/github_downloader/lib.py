@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, assert_never
 
 from typed_settings import Secret
 from utilities.subprocess import cp
 from utilities.text import repr_str, strip_and_dedent
 
 from github_downloader import __version__
+from github_downloader.constants import SHELL
 from github_downloader.logging import LOGGER
 from github_downloader.settings import (
     DOWNLOAD_SETTINGS,
@@ -15,7 +16,12 @@ from github_downloader.settings import (
     PATH_BINARIES_SETTINGS,
     PERMS_SETTINGS,
 )
-from github_downloader.utilities import yield_asset, yield_bz2_asset, yield_tar_asset
+from github_downloader.utilities import (
+    ensure_shell_rc,
+    yield_asset,
+    yield_bz2_asset,
+    yield_tar_asset,
+)
 
 if TYPE_CHECKING:
     from typed_settings import Secret
@@ -192,6 +198,14 @@ def setup_direnv(
         group=group,
     )
     LOGGER.info("Downloaded to %r", str(dest))
+    match SHELL:
+        case "bash" | "zsh":
+            line = f'eval "$(direnv hook {SHELL})"'
+        case "fish":
+            line = "direnv hook fish | source"
+        case never:
+            assert_never(never)
+    ensure_shell_rc(line)
 
 
 ##
@@ -221,6 +235,16 @@ def setup_fzf(
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
     LOGGER.info("Downloaded to %r", str(dest))
+    match SHELL:
+        case "bash":
+            line = 'eval "$(fzf --bash)"'
+        case "zsh":
+            line = "source <(fzf --zsh)"
+        case "fish":
+            line = "fzf --fish | source"
+        case never:
+            assert_never(never)
+    ensure_shell_rc(line)
 
 
 ##
@@ -342,6 +366,14 @@ def setup_starship(
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
     LOGGER.info("Downloaded to %r", str(dest))
+    match SHELL:
+        case "bash" | "zsh":
+            line = f'eval "$(starship init {SHELL})"'
+        case "fish":
+            line = "starship init fish | source"
+        case never:
+            assert_never(never)
+    ensure_shell_rc(line)
 
 
 ##
