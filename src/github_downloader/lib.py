@@ -308,21 +308,17 @@ def setup_fzf(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'fzf'."""
-    dest = Path(path_binaries, "fzf")
-    setup_asset(
+    with yield_tar_asset(
+        "junegunn",
         "fzf",
-        "fzf",
-        dest,
         token=token,
         match_system=True,
         match_machine=True,
         timeout=timeout,
         chunk_size=chunk_size,
-        sudo=sudo,
-        perms=perms,
-        owner=owner,
-        group=group,
-    )
+    ) as src:
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
     LOGGER.info("Downloaded to %r", str(dest))
 
 
