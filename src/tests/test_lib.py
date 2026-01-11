@@ -102,11 +102,35 @@ class TestSetupDirenv:
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
-        setup_direnv(token=token, path_binaries=tmp_path)
+        setup_direnv(token=token, path_binaries=tmp_path, skip_shell_rc=True)
         run(str(tmp_path / "direnv"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
             Usage: direnv COMMAND [...ARGS]
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupFd:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_fzf(token=token, path_binaries=tmp_path, skip_shell_rc=True)
+        run(str(tmp_path / "fzf"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            fzf is an interactive filter program for any kind of list.
+
+            It implements a "fuzzy" matching algorithm, so you can quickly type in patterns
+            with omitted characters and still get the results you want.
+
+            Project URL: https://github.com/junegunn/fzf
+            Author: Junegunn Choi <junegunn.c@gmail.com>
+
+            * See man page for more information: fzf --man
+
+            Usage: fzf [options]
         """)
         assert search(escape(pattern), result.out)
 
@@ -116,7 +140,7 @@ class TestSetupFzf:
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
-        setup_fzf(token=token, path_binaries=tmp_path)
+        setup_fzf(token=token, path_binaries=tmp_path, skip_shell_rc=True)
         run(str(tmp_path / "fzf"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
@@ -221,7 +245,7 @@ class TestSetupStarship:
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
-        setup_starship(token=token, path_binaries=tmp_path)
+        setup_starship(token=token, path_binaries=tmp_path, skip_shell_rc=True)
         run(str(tmp_path / "starship"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""

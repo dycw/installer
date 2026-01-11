@@ -13,10 +13,10 @@ from installer.download import yield_asset, yield_bz2_asset, yield_tar_asset
 from installer.logging import LOGGER
 from installer.settings import (
     DOWNLOAD_SETTINGS,
-    ETC_SETTINGS,
     MATCH_SETTINGS,
     PATH_BINARIES_SETTINGS,
     PERMS_SETTINGS,
+    SHELL_RC_SETTINGS,
     SUDO_SETTINGS,
 )
 from installer.utilities import ensure_shell_rc
@@ -178,7 +178,8 @@ def setup_direnv(
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
-    etc: bool = ETC_SETTINGS.etc,
+    skip_shell_rc: bool = SHELL_RC_SETTINGS.skip_shell_rc,
+    etc: bool = SHELL_RC_SETTINGS.etc,
 ) -> None:
     """Setup 'direnv'."""
     dest = Path(path_binaries, "direnv")
@@ -197,14 +198,44 @@ def setup_direnv(
         group=group,
     )
     LOGGER.info("Downloaded to %r", str(dest))
-    match SHELL:
-        case "bash" | "zsh":
-            line = f'eval "$(direnv hook {SHELL})"'
-        case "fish":
-            line = "direnv hook fish | source"
-        case never:
-            assert_never(never)
-    ensure_shell_rc(line, etc="direnv" if etc else None)
+    if not skip_shell_rc:
+        match SHELL:
+            case "bash" | "zsh":
+                line = f'eval "$(direnv hook {SHELL})"'
+            case "fish":
+                line = "direnv hook fish | source"
+            case never:
+                assert_never(never)
+        ensure_shell_rc(line, etc="direnv" if etc else None)
+
+
+##
+
+
+def setup_fd(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'fd'."""
+    with yield_tar_asset(
+        "sharkdp",
+        "fd",
+        token=token,
+        match_system=True,
+        match_machine=True,
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as src:
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -220,7 +251,8 @@ def setup_fzf(
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
-    etc: bool = ETC_SETTINGS.etc,
+    skip_shell_rc: bool = SHELL_RC_SETTINGS.skip_shell_rc,
+    etc: bool = SHELL_RC_SETTINGS.etc,
 ) -> None:
     """Setup 'fzf'."""
     with yield_tar_asset(
@@ -235,16 +267,17 @@ def setup_fzf(
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
     LOGGER.info("Downloaded to %r", str(dest))
-    match SHELL:
-        case "bash":
-            line = 'eval "$(fzf --bash)"'
-        case "zsh":
-            line = "source <(fzf --zsh)"
-        case "fish":
-            line = "fzf --fish | source"
-        case never:
-            assert_never(never)
-    ensure_shell_rc(line, etc="fzf" if etc else None)
+    if not skip_shell_rc:
+        match SHELL:
+            case "bash":
+                line = 'eval "$(fzf --bash)"'
+            case "zsh":
+                line = "source <(fzf --zsh)"
+            case "fish":
+                line = "fzf --fish | source"
+            case never:
+                assert_never(never)
+        ensure_shell_rc(line, etc="fzf" if etc else None)
 
 
 ##
@@ -367,7 +400,8 @@ def setup_starship(
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
-    etc: bool = ETC_SETTINGS.etc,
+    skip_shell_rc: bool = SHELL_RC_SETTINGS.skip_shell_rc,
+    etc: bool = SHELL_RC_SETTINGS.etc,
 ) -> None:
     """Setup 'starship'."""
     with yield_tar_asset(
@@ -384,14 +418,15 @@ def setup_starship(
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
     LOGGER.info("Downloaded to %r", str(dest))
-    match SHELL:
-        case "bash" | "zsh":
-            line = f'eval "$(starship init {SHELL})"'
-        case "fish":
-            line = "starship init fish | source"
-        case never:
-            assert_never(never)
-    ensure_shell_rc(line, etc="starship" if etc else None)
+    if not skip_shell_rc:
+        match SHELL:
+            case "bash" | "zsh":
+                line = f'eval "$(starship init {SHELL})"'
+            case "fish":
+                line = "starship init fish | source"
+            case never:
+                assert_never(never)
+        ensure_shell_rc(line, etc="starship" if etc else None)
 
 
 ##
@@ -449,6 +484,7 @@ __all__ = [
     "setup_age",
     "setup_asset",
     "setup_direnv",
+    "setup_fd",
     "setup_fzf",
     "setup_git",
     "setup_just",

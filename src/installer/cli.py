@@ -24,10 +24,10 @@ from installer.logging import LOGGER
 from installer.settings import (
     LOADER,
     DownloadSettings,
-    EtcSettings,
     MatchSettings,
     PathBinariesSettings,
     PermsSettings,
+    ShellRcSettings,
     SudoSettings,
 )
 
@@ -143,18 +143,18 @@ def btm_sub_cmd(
 @click_options(
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
-@click_options(EtcSettings, [LOADER], show_envvars_in_help=True, argname="etc")
 @click_options(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(ShellRcSettings, [LOADER], show_envvars_in_help=True, argname="shell_rc")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def direnv_sub_cmd(
     *,
     download: DownloadSettings,
-    etc: EtcSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
+    shell_rc: ShellRcSettings,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
@@ -169,7 +169,8 @@ def direnv_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
-        etc=etc.etc,
+        skip_shell_rc=shell_rc.skip_shell_rc,
+        etc=shell_rc.etc,
     )
 
 
@@ -177,16 +178,16 @@ def direnv_sub_cmd(
 @click_options(
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
-@click_options(EtcSettings, [LOADER], show_envvars_in_help=True, argname="etc")
 @click_options(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(ShellRcSettings, [LOADER], show_envvars_in_help=True, argname="shell_rc")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def fzf_sub_cmd(
     *,
     download: DownloadSettings,
-    etc: EtcSettings,
+    shell_rc: ShellRcSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
     sudo: SudoSettings,
@@ -203,7 +204,8 @@ def fzf_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
-        etc=etc.etc,
+        skip_shell_rc=shell_rc.skip_shell_rc,
+        etc=shell_rc.etc,
     )
 
 
@@ -353,18 +355,18 @@ def sops_sub_cmd(
 @click_options(
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
-@click_options(EtcSettings, [LOADER], show_envvars_in_help=True, argname="etc")
 @click_options(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(ShellRcSettings, [LOADER], show_envvars_in_help=True, argname="shell_rc")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def starship_sub_cmd(
     *,
     download: DownloadSettings,
-    etc: EtcSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
+    shell_rc: ShellRcSettings,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
@@ -379,7 +381,8 @@ def starship_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
-        etc=etc.etc,
+        skip_shell_rc=shell_rc.skip_shell_rc,
+        etc=shell_rc.etc,
     )
 
 

@@ -23,14 +23,6 @@ DOWNLOAD_SETTINGS = load_settings(DownloadSettings, [LOADER])
 
 
 @settings
-class EtcSettings:
-    etc: bool = option(default=False, help="Set up shell configs in '/etc'")
-
-
-ETC_SETTINGS = load_settings(EtcSettings, [LOADER])
-
-
-@settings
 class MatchSettings:
     match_system: bool = option(
         default=False, help=f"Match the system name {SYSTEM_NAME!r}"
@@ -69,6 +61,17 @@ PERMS_SETTINGS = load_settings(PermsSettings, [LOADER])
 
 
 @settings
+class ShellRcSettings:
+    skip_shell_rc: bool = option(
+        default=False, help="Skip setting up the shell configs"
+    )
+    etc: bool = option(default=False, help="Set up shell configs in '/etc'")
+
+
+SHELL_RC_SETTINGS = load_settings(ShellRcSettings, [LOADER])
+
+
+@settings
 class SudoSettings:
     sudo: bool = option(default=False, help="Run as 'sudo'")
 
@@ -78,17 +81,17 @@ SUDO_SETTINGS = load_settings(SudoSettings, [LOADER])
 
 __all__ = [
     "DOWNLOAD_SETTINGS",
-    "ETC_SETTINGS",
     "LOADER",
     "MATCH_SETTINGS",
     "PATH_BINARIES_SETTINGS",
     "PERMS_SETTINGS",
+    "SHELL_RC_SETTINGS",
     "SUDO_SETTINGS",
     "DownloadSettings",
     "DownloadSettings",
-    "EtcSettings",
     "MatchSettings",
     "PathBinariesSettings",
     "PermsSettings",
+    "ShellRcSettings",
     "SudoSettings",
 ]
