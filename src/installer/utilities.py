@@ -7,8 +7,8 @@ from typed_settings import Secret
 from utilities.atomicwrites import writer
 from utilities.text import strip_and_dedent
 
-from github_downloader.constants import SHELL
-from github_downloader.logging import LOGGER
+from installer.constants import SHELL
+from installer.logging import LOGGER
 
 if TYPE_CHECKING:
     from utilities.types import PathLike

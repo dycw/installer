@@ -5,8 +5,8 @@ from click.testing import CliRunner
 from pytest import MonkeyPatch, mark, param
 from typed_settings import Secret, click_options, secret, settings
 
-from github_downloader.settings import LOADER
-from github_downloader.utilities import convert_token
+from installer.settings import LOADER
+from installer.utilities import convert_token
 
 
 @settings

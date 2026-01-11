@@ -8,7 +8,7 @@ from utilities.subprocess import run
 from utilities.text import strip_and_dedent
 from utilities.whenever import HOUR
 
-from github_downloader.lib import (
+from installer.lib import (
     setup_age,
     setup_bottom,
     setup_direnv,

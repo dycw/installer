@@ -1,3 +1,3 @@
-# `github-downloader`
+# `installer`
 
-GitHub release downloader
+Installer
