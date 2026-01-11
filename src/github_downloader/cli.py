@@ -16,6 +16,7 @@ from github_downloader.lib import (
     setup_just,
     setup_restic,
     setup_ripgrep,
+    setup_rsync,
     setup_sops,
     setup_starship,
 )
@@ -306,6 +307,15 @@ def ripgrep_sub_cmd(
         owner=perms.owner,
         group=perms.group,
     )
+
+
+@_main.command(name="rsync", **CONTEXT_SETTINGS)
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+def rsync_sub_cmd(*, sudo: SudoSettings) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_rsync(sudo=sudo.sudo)
 
 
 @_main.command(name="sops", **CONTEXT_SETTINGS)
