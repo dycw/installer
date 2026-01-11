@@ -4,11 +4,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING, assert_never
 
 from typed_settings import Secret
-from utilities.subprocess import cp
+from utilities.subprocess import APT_UPDATE, apt_install_cmd, cp, maybe_sudo_cmd, run
 from utilities.text import repr_str, strip_and_dedent
 
 from github_downloader import __version__
-from github_downloader.constants import SHELL
+from github_downloader.constants import SHELL, SYSTEM_NAME
 from github_downloader.download import yield_asset, yield_bz2_asset, yield_tar_asset
 from github_downloader.logging import LOGGER
 from github_downloader.settings import (
@@ -17,6 +17,7 @@ from github_downloader.settings import (
     MATCH_SETTINGS,
     PATH_BINARIES_SETTINGS,
     PERMS_SETTINGS,
+    SUDO_SETTINGS,
 )
 from github_downloader.utilities import ensure_shell_rc
 
@@ -40,7 +41,7 @@ def setup_asset(
     not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
+    sudo: bool = SUDO_SETTINGS.sudo,
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
@@ -107,7 +108,7 @@ def setup_age(
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
+    sudo: bool = SUDO_SETTINGS.sudo,
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
@@ -141,7 +142,7 @@ def setup_bottom(
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
+    sudo: bool = SUDO_SETTINGS.sudo,
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
@@ -173,7 +174,7 @@ def setup_direnv(
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
+    sudo: bool = SUDO_SETTINGS.sudo,
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
@@ -215,7 +216,7 @@ def setup_fzf(
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
+    sudo: bool = SUDO_SETTINGS.sudo,
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
@@ -249,13 +250,30 @@ def setup_fzf(
 ##
 
 
+def setup_git(*, sudo: bool = SUDO_SETTINGS.sudo) -> None:
+    """Setup 'git'."""
+    match SYSTEM_NAME:
+        case "Darwin":
+            msg = f"Unsupported system: {SYSTEM_NAME!r}"
+            raise ValueError(msg)
+        case "Linux":
+            run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
+            run(*maybe_sudo_cmd(*apt_install_cmd("git"), sudo=sudo))
+            LOGGER.info("Installed 'git'")
+        case never:
+            assert_never(never)
+
+
+##
+
+
 def setup_just(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
+    sudo: bool = SUDO_SETTINGS.sudo,
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
@@ -285,7 +303,7 @@ def setup_restic(
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
+    sudo: bool = SUDO_SETTINGS.sudo,
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
@@ -314,7 +332,7 @@ def setup_ripgrep(
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
+    sudo: bool = SUDO_SETTINGS.sudo,
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
@@ -345,7 +363,7 @@ def setup_starship(
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
+    sudo: bool = SUDO_SETTINGS.sudo,
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
@@ -385,7 +403,7 @@ def setup_sops(
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = PERMS_SETTINGS.sudo,
+    sudo: bool = SUDO_SETTINGS.sudo,
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
@@ -415,6 +433,7 @@ __all__ = [
     "setup_asset",
     "setup_direnv",
     "setup_fzf",
+    "setup_git",
     "setup_just",
     "setup_restic",
     "setup_ripgrep",

@@ -12,6 +12,7 @@ from github_downloader.lib import (
     setup_bottom,
     setup_direnv,
     setup_fzf,
+    setup_git,
     setup_just,
     setup_restic,
     setup_ripgrep,
@@ -26,6 +27,7 @@ from github_downloader.settings import (
     MatchSettings,
     PathBinariesSettings,
     PermsSettings,
+    SudoSettings,
 )
 
 
@@ -42,6 +44,7 @@ def _main() -> None: ...
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def run_sub_cmd(
     *,
     asset_owner: str,
@@ -50,6 +53,7 @@ def run_sub_cmd(
     common: MatchSettings,
     download: DownloadSettings,
     perms: PermsSettings,
+    sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
@@ -65,7 +69,7 @@ def run_sub_cmd(
         not_endswith=common.not_endswith,
         timeout=download.timeout,
         chunk_size=download.chunk_size,
-        sudo=perms.sudo,
+        sudo=sudo.sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -80,11 +84,13 @@ def run_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def age_sub_cmd(
     *,
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
+    sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
@@ -94,7 +100,7 @@ def age_sub_cmd(
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=perms.sudo,
+        sudo=sudo.sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -109,11 +115,13 @@ def age_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def btm_sub_cmd(
     *,
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
+    sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
@@ -123,7 +131,7 @@ def btm_sub_cmd(
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=perms.sudo,
+        sudo=sudo.sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -139,12 +147,14 @@ def btm_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def direnv_sub_cmd(
     *,
     download: DownloadSettings,
     etc: EtcSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
+    sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
@@ -154,7 +164,7 @@ def direnv_sub_cmd(
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=perms.sudo,
+        sudo=sudo.sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -171,12 +181,14 @@ def direnv_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def fzf_sub_cmd(
     *,
     download: DownloadSettings,
     etc: EtcSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
+    sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
@@ -186,12 +198,21 @@ def fzf_sub_cmd(
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=perms.sudo,
+        sudo=sudo.sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
         etc=etc.etc,
     )
+
+
+@_main.command(name="git", **CONTEXT_SETTINGS)
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+def git_sub_cmd(*, sudo: SudoSettings) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_git(sudo=sudo.sudo)
 
 
 @_main.command(name="just", **CONTEXT_SETTINGS)
@@ -202,11 +223,13 @@ def fzf_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def just_sub_cmd(
     *,
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
+    sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
@@ -216,7 +239,7 @@ def just_sub_cmd(
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=perms.sudo,
+        sudo=sudo.sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -231,11 +254,13 @@ def just_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def restic_sub_cmd(
     *,
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
+    sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
@@ -245,7 +270,7 @@ def restic_sub_cmd(
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=perms.sudo,
+        sudo=sudo.sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -260,11 +285,13 @@ def restic_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def ripgrep_sub_cmd(
     *,
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
+    sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
@@ -274,7 +301,7 @@ def ripgrep_sub_cmd(
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=perms.sudo,
+        sudo=sudo.sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -289,11 +316,13 @@ def ripgrep_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def sops_sub_cmd(
     *,
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
+    sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
@@ -303,7 +332,7 @@ def sops_sub_cmd(
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=perms.sudo,
+        sudo=sudo.sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -319,12 +348,14 @@ def sops_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def starship_sub_cmd(
     *,
     download: DownloadSettings,
     etc: EtcSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
+    sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
@@ -334,7 +365,7 @@ def starship_sub_cmd(
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=perms.sudo,
+        sudo=sudo.sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,

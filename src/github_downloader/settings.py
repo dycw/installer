@@ -60,13 +60,20 @@ PATH_BINARIES_SETTINGS = load_settings(PathBinariesSettings, [LOADER])
 
 @settings
 class PermsSettings:
-    sudo: bool = option(default=False, help="Call 'mv' with 'sudo'")
     perms: str = option(default="u=rwx,g=rx,o=rx", help="Change permissions")
     owner: str | None = option(default=None, help="Change owner")
     group: str | None = option(default=None, help="Change group")
 
 
 PERMS_SETTINGS = load_settings(PermsSettings, [LOADER])
+
+
+@settings
+class SudoSettings:
+    sudo: bool = option(default=False, help="Run as 'sudo'")
+
+
+SUDO_SETTINGS = load_settings(SudoSettings, [LOADER])
 
 
 __all__ = [
@@ -76,10 +83,12 @@ __all__ = [
     "MATCH_SETTINGS",
     "PATH_BINARIES_SETTINGS",
     "PERMS_SETTINGS",
+    "SUDO_SETTINGS",
     "DownloadSettings",
     "DownloadSettings",
     "EtcSettings",
     "MatchSettings",
     "PathBinariesSettings",
     "PermsSettings",
+    "SudoSettings",
 ]
