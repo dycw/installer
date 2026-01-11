@@ -397,6 +397,23 @@ def setup_starship(
 ##
 
 
+def setup_rsync(*, sudo: bool = SUDO_SETTINGS.sudo) -> None:
+    """Setup 'rsync'."""
+    match SYSTEM_NAME:
+        case "Darwin":
+            msg = f"Unsupported system: {SYSTEM_NAME!r}"
+            raise ValueError(msg)
+        case "Linux":
+            run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
+            run(*maybe_sudo_cmd(*apt_install_cmd("rsync"), sudo=sudo))
+            LOGGER.info("Installed 'rsync'")
+        case never:
+            assert_never(never)
+
+
+##
+
+
 def setup_sops(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
@@ -437,6 +454,7 @@ __all__ = [
     "setup_just",
     "setup_restic",
     "setup_ripgrep",
+    "setup_rsync",
     "setup_sops",
     "setup_starship",
 ]

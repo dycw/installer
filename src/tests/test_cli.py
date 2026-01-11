@@ -16,6 +16,7 @@ class TestCLI:
             param(["just"]),
             param(["restic"]),
             param(["ripgrep"]),
+            param(["rsync"]),
             param(["run", "asset-owner", "asset-repo", "binary-name"]),
             param(["sops"]),
             param(["starship"]),
