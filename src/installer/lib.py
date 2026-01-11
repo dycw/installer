@@ -229,6 +229,7 @@ def setup_fd(
         "fd",
         token=token,
         match_system=True,
+        match_c_std_lib=True,
         match_machine=True,
         timeout=timeout,
         chunk_size=chunk_size,
