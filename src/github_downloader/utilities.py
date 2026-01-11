@@ -64,9 +64,19 @@ def ensure_shell_rc(text: str, /, *, etc: str | None = None) -> None:
                 path = Path.home() / ".config/fish/config.fish"
             case never:
                 assert_never(never)
+        ensure_line(text, path)
     else:
-        path = Path(f"/etc/profile.d/{etc}.sh")
-    ensure_line(text, path)
+        match SHELL:
+            case "bash" | "zsh":
+                full = strip_and_dedent(f"""
+                    #!/usr/bin/env sh
+                    {text}
+                """)
+                path = Path(f"/etc/profile.d/{etc}.sh")
+                ensure_line(full, path)
+            case "fish":
+                msg = f"Unsupported shell: {SHELL!r}"
+                raise ValueError(msg)
 
 
 __all__ = ["convert_token", "ensure_line", "ensure_shell_rc"]
