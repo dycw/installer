@@ -23,6 +23,14 @@ DOWNLOAD_SETTINGS = load_settings(DownloadSettings, [LOADER])
 
 
 @settings
+class EtcSettings:
+    etc: bool = option(default=False, help="Set up shell configs in '/etc'")
+
+
+ETC_SETTINGS = load_settings(EtcSettings, [LOADER])
+
+
+@settings
 class MatchSettings:
     match_system: bool = option(
         default=False, help=f"Match the system name {SYSTEM_NAME!r}"
@@ -62,12 +70,15 @@ PERMS_SETTINGS = load_settings(PermsSettings, [LOADER])
 
 
 __all__ = [
+    "DOWNLOAD_SETTINGS",
+    "ETC_SETTINGS",
     "LOADER",
     "MATCH_SETTINGS",
     "PATH_BINARIES_SETTINGS",
     "PERMS_SETTINGS",
     "DownloadSettings",
     "DownloadSettings",
+    "EtcSettings",
     "MatchSettings",
     "PathBinariesSettings",
     "PermsSettings",

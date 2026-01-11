@@ -54,14 +54,18 @@ def ensure_line(text: str, path: PathLike, /) -> None:
 ##
 
 
-def ensure_shell_rc(text: str, /) -> None:
-    match SHELL:
-        case "bash" | "zsh":
-            ensure_line(text, Path.home() / f".{SHELL}rc")
-        case "fish":
-            ensure_line(text, Path.home() / ".config/fish/config.fish")
-        case never:
-            assert_never(never)
+def ensure_shell_rc(text: str, /, *, etc: str | None = None) -> None:
+    if etc is None:
+        match SHELL:
+            case "bash" | "zsh":
+                path = Path.home() / f".{SHELL}rc"
+            case "fish":
+                path = Path.home() / ".config/fish/config.fish"
+            case never:
+                assert_never(never)
+    else:
+        path = Path(f"/etc/profile.d/{etc}.sh")
+    ensure_line(text, path)
 
 
 __all__ = ["convert_token", "ensure_line", "ensure_shell_rc"]

@@ -13,6 +13,7 @@ from github_downloader.download import yield_asset, yield_bz2_asset, yield_tar_a
 from github_downloader.logging import LOGGER
 from github_downloader.settings import (
     DOWNLOAD_SETTINGS,
+    ETC_SETTINGS,
     MATCH_SETTINGS,
     PATH_BINARIES_SETTINGS,
     PERMS_SETTINGS,
@@ -176,6 +177,7 @@ def setup_direnv(
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
+    etc: bool = ETC_SETTINGS.etc,
 ) -> None:
     """Setup 'direnv'."""
     dest = Path(path_binaries, "direnv")
@@ -201,7 +203,7 @@ def setup_direnv(
             line = "direnv hook fish | source"
         case never:
             assert_never(never)
-    ensure_shell_rc(line)
+    ensure_shell_rc(line, etc="direnv" if etc else None)
 
 
 ##
@@ -217,6 +219,7 @@ def setup_fzf(
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
+    etc: bool = ETC_SETTINGS.etc,
 ) -> None:
     """Setup 'fzf'."""
     with yield_tar_asset(
@@ -240,7 +243,7 @@ def setup_fzf(
             line = "fzf --fish | source"
         case never:
             assert_never(never)
-    ensure_shell_rc(line)
+    ensure_shell_rc(line, etc="fzf" if etc else None)
 
 
 ##
@@ -346,6 +349,7 @@ def setup_starship(
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
+    etc: bool = ETC_SETTINGS.etc,
 ) -> None:
     """Setup 'starship'."""
     with yield_tar_asset(
@@ -369,7 +373,7 @@ def setup_starship(
             line = "starship init fish | source"
         case never:
             assert_never(never)
-    ensure_shell_rc(line)
+    ensure_shell_rc(line, etc="starship" if etc else None)
 
 
 ##
