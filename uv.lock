@@ -295,8 +295,8 @@ wheels = [
 ]
 
 [[package]]
-name = "dycw-github-downloader"
-version = "0.1.27"
+name = "dycw-installer"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "click" },

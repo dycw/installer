@@ -10,7 +10,7 @@ from utilities.iterables import OneEmptyError, one
 from utilities.subprocess import run
 from utilities.typing import get_args
 
-from github_downloader.types import Shell, System
+from installer.types import Shell, System
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable

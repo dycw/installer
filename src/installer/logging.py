@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from logging import getLogger
 
-LOGGER = getLogger("github_downloader")
+LOGGER = getLogger("installer")
 
 
 __all__ = ["LOGGER"]

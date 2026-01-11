@@ -4,8 +4,8 @@ from pathlib import Path
 
 from typed_settings import EnvLoader, Secret, load_settings, option, secret, settings
 
-from github_downloader.constants import MACHINE_TYPE, SYSTEM_NAME
-from github_downloader.utilities import convert_token
+from installer.constants import MACHINE_TYPE, SYSTEM_NAME
+from installer.utilities import convert_token
 
 LOADER = EnvLoader("")
 

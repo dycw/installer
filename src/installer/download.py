@@ -14,9 +14,9 @@ from utilities.inflect import counted_noun
 from utilities.iterables import OneNonUniqueError, one
 from utilities.tempfile import TemporaryDirectory, TemporaryFile
 
-from github_downloader.constants import C_STD_LIB_GROUP, MACHINE_TYPE_GROUP, SYSTEM_NAME
-from github_downloader.logging import LOGGER
-from github_downloader.settings import DOWNLOAD_SETTINGS, MATCH_SETTINGS
+from installer.constants import C_STD_LIB_GROUP, MACHINE_TYPE_GROUP, SYSTEM_NAME
+from installer.logging import LOGGER
+from installer.settings import DOWNLOAD_SETTINGS, MATCH_SETTINGS
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

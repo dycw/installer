@@ -6,7 +6,7 @@ from utilities.click import CONTEXT_SETTINGS
 from utilities.logging import basic_config
 from utilities.os import is_pytest
 
-from github_downloader.lib import (
+from installer.lib import (
     setup_age,
     setup_asset,
     setup_bottom,
@@ -20,8 +20,8 @@ from github_downloader.lib import (
     setup_sops,
     setup_starship,
 )
-from github_downloader.logging import LOGGER
-from github_downloader.settings import (
+from installer.logging import LOGGER
+from installer.settings import (
     LOADER,
     DownloadSettings,
     EtcSettings,

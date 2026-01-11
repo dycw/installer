@@ -12,11 +12,11 @@ repos:
           - --ci--pull-request--ruff
           - --ci--push--publish
           - --ci--push--tag
-          - --description=GitHub release downloader
+          - --description=Installer
           - --envrc
           - --envrc--uv
           - --gitignore
-          - --package-name=dycw-github-downloader
+          - --package-name=dycw-installer
           - --pre-commit--prettier
           - --pre-commit--python
           - --pre-commit--ruff
@@ -26,10 +26,10 @@ repos:
           - --pyright
           - --pytest
           - --pytest--ignore-warnings
-          - --python-package-name=github_downloader
+          - --python-package-name=installer
           - --python-version=3.12
           - --readme
-          - --repo-name=github-downloader
+          - --repo-name=installer
           - --ruff
       - id: format-requirements
       - id: replace-sequence-strs

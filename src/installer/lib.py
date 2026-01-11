@@ -7,11 +7,11 @@ from typed_settings import Secret
 from utilities.subprocess import APT_UPDATE, apt_install_cmd, cp, maybe_sudo_cmd, run
 from utilities.text import repr_str, strip_and_dedent
 
-from github_downloader import __version__
-from github_downloader.constants import SHELL, SYSTEM_NAME
-from github_downloader.download import yield_asset, yield_bz2_asset, yield_tar_asset
-from github_downloader.logging import LOGGER
-from github_downloader.settings import (
+from installer import __version__
+from installer.constants import SHELL, SYSTEM_NAME
+from installer.download import yield_asset, yield_bz2_asset, yield_tar_asset
+from installer.logging import LOGGER
+from installer.settings import (
     DOWNLOAD_SETTINGS,
     ETC_SETTINGS,
     MATCH_SETTINGS,
@@ -19,7 +19,7 @@ from github_downloader.settings import (
     PERMS_SETTINGS,
     SUDO_SETTINGS,
 )
-from github_downloader.utilities import ensure_shell_rc
+from installer.utilities import ensure_shell_rc
 
 if TYPE_CHECKING:
     from typed_settings import Secret

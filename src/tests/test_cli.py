@@ -23,4 +23,4 @@ class TestCLI:
         ],
     )
     def test_main(self, *, args: list[str]) -> None:
-        run("github-download", *args)
+        run("installer", *args)
