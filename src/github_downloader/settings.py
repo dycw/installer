@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from os import environ
 from pathlib import Path
 
 from typed_settings import EnvLoader, Secret, load_settings, option, secret, settings
+from utilities.pytest import IS_CI
 
 from github_downloader.constants import MACHINE_TYPE, SYSTEM_NAME
 from github_downloader.utilities import convert_token
@@ -13,7 +15,9 @@ LOADER = EnvLoader("")
 @settings
 class DownloadSettings:
     token: Secret[str] | None = secret(
-        default=None, converter=convert_token, help="The GitHub token"
+        default=Secret(environ["GITHUB_TOKEN"]) if IS_CI else None,
+        converter=convert_token,
+        help="The GitHub token",
     )
     timeout: int = option(default=60, help="Download timeout")
     chunk_size: int = option(default=8196, help="Streaming chunk size")
