@@ -22,6 +22,7 @@ from github_downloader.logging import LOGGER
 from github_downloader.settings import (
     LOADER,
     DownloadSettings,
+    EtcSettings,
     MatchSettings,
     PathBinariesSettings,
     PermsSettings,
@@ -133,6 +134,7 @@ def btm_sub_cmd(
 @click_options(
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
+@click_options(EtcSettings, [LOADER], show_envvars_in_help=True, argname="etc")
 @click_options(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
@@ -140,6 +142,7 @@ def btm_sub_cmd(
 def direnv_sub_cmd(
     *,
     download: DownloadSettings,
+    etc: EtcSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
 ) -> None:
@@ -155,6 +158,7 @@ def direnv_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
+        etc=etc.etc,
     )
 
 
@@ -162,6 +166,7 @@ def direnv_sub_cmd(
 @click_options(
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
+@click_options(EtcSettings, [LOADER], show_envvars_in_help=True, argname="etc")
 @click_options(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
@@ -169,6 +174,7 @@ def direnv_sub_cmd(
 def fzf_sub_cmd(
     *,
     download: DownloadSettings,
+    etc: EtcSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
 ) -> None:
@@ -184,6 +190,7 @@ def fzf_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
+        etc=etc.etc,
     )
 
 
@@ -307,6 +314,7 @@ def sops_sub_cmd(
 @click_options(
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
+@click_options(EtcSettings, [LOADER], show_envvars_in_help=True, argname="etc")
 @click_options(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
@@ -314,6 +322,7 @@ def sops_sub_cmd(
 def starship_sub_cmd(
     *,
     download: DownloadSettings,
+    etc: EtcSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
 ) -> None:
@@ -329,6 +338,7 @@ def starship_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
+        etc=etc.etc,
     )
 
 
