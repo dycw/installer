@@ -12,6 +12,7 @@ from installer.lib import (
     setup_age,
     setup_bottom,
     setup_direnv,
+    setup_fd,
     setup_fzf,
     setup_just,
     setup_restic,
@@ -116,21 +117,13 @@ class TestSetupFd:
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
-        setup_fzf(token=token, path_binaries=tmp_path, skip_shell_rc=True)
-        run(str(tmp_path / "fzf"), "--help", print=True)
+        setup_fd(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "fd"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
-            fzf is an interactive filter program for any kind of list.
+            A program to find entries in your filesystem
 
-            It implements a "fuzzy" matching algorithm, so you can quickly type in patterns
-            with omitted characters and still get the results you want.
-
-            Project URL: https://github.com/junegunn/fzf
-            Author: Junegunn Choi <junegunn.c@gmail.com>
-
-            * See man page for more information: fzf --man
-
-            Usage: fzf [options]
+            Usage: fd [OPTIONS] [pattern] [path]...
         """)
         assert search(escape(pattern), result.out)
 

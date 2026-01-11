@@ -11,6 +11,7 @@ from installer.lib import (
     setup_asset,
     setup_bottom,
     setup_direnv,
+    setup_fd,
     setup_fzf,
     setup_git,
     setup_just,
@@ -171,6 +172,37 @@ def direnv_sub_cmd(
         group=perms.group,
         skip_shell_rc=shell_rc.skip_shell_rc,
         etc=shell_rc.etc,
+    )
+
+
+@_main.command(name="fd", **CONTEXT_SETTINGS)
+@click_options(
+    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
+)
+@click_options(
+    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
+)
+@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+def fd_sub_cmd(
+    *,
+    download: DownloadSettings,
+    path_binaries: PathBinariesSettings,
+    perms: PermsSettings,
+    sudo: SudoSettings,
+) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_fd(
+        token=download.token,
+        timeout=download.timeout,
+        path_binaries=path_binaries.path_binaries,
+        chunk_size=download.chunk_size,
+        sudo=sudo.sudo,
+        perms=perms.perms,
+        owner=perms.owner,
+        group=perms.group,
     )
 
 
