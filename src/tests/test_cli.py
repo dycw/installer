@@ -12,6 +12,7 @@ class TestCLI:
             param(["btm"]),
             param(["direnv"]),
             param(["fzf"]),
+            param(["git"]),
             param(["just"]),
             param(["restic"]),
             param(["ripgrep"]),
