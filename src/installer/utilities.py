@@ -7,8 +7,8 @@ from typed_settings import Secret
 from utilities.atomicwrites import writer
 from utilities.text import strip_and_dedent
 
-from installer.constants import SHELL
 from installer.logging import LOGGER
+from installer.shellingham import SHELL
 
 if TYPE_CHECKING:
     from utilities.types import PathLike

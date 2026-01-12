@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections.abc import Set as AbstractSet
-from os import environ
 from platform import machine, system
 from re import IGNORECASE, search
 from typing import TYPE_CHECKING
@@ -10,24 +9,10 @@ from utilities.iterables import OneEmptyError, one
 from utilities.subprocess import run
 from utilities.typing import get_args
 
-from installer.types import Shell, System
+from installer.types import System
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
-
-
-def _get_shell() -> Shell:
-    shell = environ["SHELL"]
-    shells: tuple[Shell, ...] = get_args(Shell)
-    matches: list[Shell] = [s for s in shells if search(s, shell) is not None]
-    try:
-        return one(matches)
-    except OneEmptyError:
-        msg = f"Invalid shell; must be in {shells} but got {shell!r}"
-        raise ValueError(msg) from None
-
-
-SHELL = _get_shell()
 
 
 def _get_system_name() -> System:
@@ -88,10 +73,4 @@ def _get_machine_type_group() -> set[str]:
 
 MACHINE_TYPE_GROUP = _get_machine_type_group()
 
-__all__ = [
-    "C_STD_LIB_GROUP",
-    "MACHINE_TYPE",
-    "MACHINE_TYPE_GROUP",
-    "SHELL",
-    "SYSTEM_NAME",
-]
+__all__ = ["C_STD_LIB_GROUP", "MACHINE_TYPE", "MACHINE_TYPE_GROUP", "SYSTEM_NAME"]
