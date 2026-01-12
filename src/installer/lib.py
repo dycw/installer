@@ -8,7 +8,7 @@ from utilities.subprocess import APT_UPDATE, apt_install_cmd, cp, maybe_sudo_cmd
 from utilities.text import repr_str, strip_and_dedent
 
 from installer import __version__
-from installer.constants import SHELL, SYSTEM_NAME
+from installer.constants import SYSTEM_NAME
 from installer.download import yield_asset, yield_bz2_asset, yield_tar_asset
 from installer.logging import LOGGER
 from installer.settings import (
@@ -19,6 +19,7 @@ from installer.settings import (
     SHELL_RC_SETTINGS,
     SUDO_SETTINGS,
 )
+from installer.shellingham import SHELL
 from installer.utilities import ensure_shell_rc
 
 if TYPE_CHECKING:
