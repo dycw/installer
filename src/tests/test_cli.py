@@ -22,6 +22,7 @@ class TestCLI:
             param(["restic"]),
             param(["ripgrep"]),
             param(["rsync"]),
+            param(["ruff"]),
             param(["run", "asset-owner", "asset-repo", "binary-name"]),
             param(["sd"]),
             param(["shellcheck"]),

@@ -26,6 +26,7 @@ from installer.lib import (
     setup_neovim,
     setup_restic,
     setup_ripgrep,
+    setup_ruff,
     setup_sd,
     setup_shellcheck,
     setup_shfmt,
@@ -279,6 +280,21 @@ class TestSetupRipgrep:
                 command | rg [OPTIONS] PATTERN
                 rg [OPTIONS] --help
                 rg [OPTIONS] --version
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupRuff:
+    @mark.only
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_ruff(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "ruff"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage: ruff [OPTIONS] <COMMAND>
         """)
         assert search(escape(pattern), result.out)
 

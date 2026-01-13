@@ -703,6 +703,38 @@ def setup_rsync(*, sudo: bool = SUDO_SETTINGS.sudo) -> None:
 ##
 
 
+def setup_ruff(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'ruff'."""
+    with yield_tar_asset(
+        "astral-sh",
+        "ruff",
+        token=token,
+        match_system=True,
+        match_c_std_lib=True,
+        match_machine=True,
+        not_endswith=["sha256"],
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as temp:
+        src = temp / "ruff"
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
 def setup_sd(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
@@ -849,6 +881,7 @@ def setup_uv(
         "uv",
         token=token,
         match_system=True,
+        match_c_std_lib=True,
         match_machine=True,
         not_endswith=["sha256"],
         timeout=timeout,
@@ -955,6 +988,7 @@ __all__ = [
     "setup_restic",
     "setup_ripgrep",
     "setup_rsync",
+    "setup_ruff",
     "setup_sd",
     "setup_shellcheck",
     "setup_shfmt",
