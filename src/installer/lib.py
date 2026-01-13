@@ -169,7 +169,6 @@ def setup_delta(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'delta'."""
-    dest = Path(path_binaries, "direnv")
     with yield_tar_asset(
         "dandavison",
         "delta",
@@ -178,7 +177,8 @@ def setup_delta(
         match_machine=True,
         timeout=timeout,
         chunk_size=chunk_size,
-    ) as src:
+    ) as temp:
+        src = temp / "delta"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
     LOGGER.info("Downloaded to %r", str(dest))
