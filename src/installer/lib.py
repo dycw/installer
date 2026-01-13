@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING, assert_never
 
 from typed_settings import Secret
 from utilities.subprocess import APT_UPDATE, apt_install_cmd, cp, maybe_sudo_cmd, run
-from utilities.text import repr_str, strip_and_dedent
+from utilities.tabulate import func_param_desc
+from utilities.text import repr_str
 
 from installer import __version__
 from installer.constants import SHELL, SYSTEM_NAME
@@ -48,41 +49,25 @@ def setup_asset(
 ) -> None:
     """Setup a GitHub asset."""
     LOGGER.info(
-        strip_and_dedent("""
-            Running '%s' (version %s) with settings:
-             - asset_owner     = %s
-             - asset_repo      = %s
-             - path            = %s
-             - token           = %s
-             - match_system    = %s
-             - match_c_std_lib = %s
-             - match_machine   = %s
-             - not_matches    = %s
-             - not_endswith    = %s
-             - timeout         = %d
-             - chunk_size      = %d
-             - sudo            = %s
-             - perms           = %s
-             - owner           = %s
-             - group           = %s
-        """),
-        setup_asset.__name__,
-        __version__,
-        asset_owner,
-        asset_repo,
-        path,
-        token,
-        match_system,
-        match_c_std_lib,
-        match_machine,
-        not_matches,
-        not_endswith,
-        timeout,
-        chunk_size,
-        sudo,
-        perms,
-        owner,
-        group,
+        func_param_desc(
+            setup_asset,
+            __version__,
+            f"{asset_owner=}",
+            f"{asset_repo=}",
+            f"{path=}",
+            f"{token=}",
+            f"{match_system=}",
+            f"{match_c_std_lib=}",
+            f"{match_machine=}",
+            f"{not_matches=}",
+            f"{not_endswith=}",
+            f"{timeout=}",
+            f"{chunk_size=}",
+            f"{sudo=}",
+            f"{perms=}",
+            f"{owner=}",
+            f"{group=}",
+        )
     )
     with yield_asset(
         asset_owner,
@@ -654,6 +639,50 @@ def setup_yq(
     LOGGER.info("Downloaded to %r", str(dest))
 
 
+##
+
+
+def setup_zoxide(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+    skip_shell_rc: bool = SHELL_RC_SETTINGS.skip_shell_rc,
+    etc: bool = SHELL_RC_SETTINGS.etc,
+) -> None:
+    """Setup 'zoxide'."""
+    with yield_tar_asset(
+        "ajeetdsouza",
+        "zoxide",
+        token=token,
+        match_system=True,
+        match_machine=True,
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as temp:
+        src = temp / "zoxide"
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
+    if not skip_shell_rc:
+        match SHELL:
+            case "bash" | "zsh":
+                line = f'eval "$(fzf --{SHELL})"'
+            case "fish":
+                line = "zoxide init fish | source"
+            case "posix":
+                msg = f"Invalid shell: {SHELL=}"
+                raise TypeError(msg)
+            case never:
+                assert_never(never)
+        ensure_shell_rc(line, etc="zoxide" if etc else None)
+
+
 __all__ = [
     "setup_age",
     "setup_asset",
@@ -672,4 +701,5 @@ __all__ = [
     "setup_sops",
     "setup_starship",
     "setup_yq",
+    "setup_zoxide",
 ]

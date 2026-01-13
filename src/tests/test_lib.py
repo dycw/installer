@@ -24,6 +24,7 @@ from installer.lib import (
     setup_sops,
     setup_starship,
     setup_yq,
+    setup_zoxide,
 )
 
 if TYPE_CHECKING:
@@ -336,5 +337,29 @@ class TestSetupYq:
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
             yq is a portable command-line data file processor (https://github.com/mikefarah/yq/)
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupZoxide:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_zoxide(token=token, path_binaries=tmp_path, skip_shell_rc=True)
+        run(str(tmp_path / "zoxide"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            zoxide is an interactive filter program for any kind of list.
+
+            It implements a "fuzzy" matching algorithm, so you can quickly type in patterns
+            with omitted characters and still get the results you want.
+
+            Project URL: https://github.com/junegunn/zoxide
+            Author: Junegunn Choi <junegunn.c@gmail.com>
+
+            * See man page for more information: zoxide --man
+
+            Usage: zoxide [options]
         """)
         assert search(escape(pattern), result.out)
