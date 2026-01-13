@@ -17,7 +17,12 @@ from utilities.text import repr_str
 
 from installer import __version__
 from installer.constants import SHELL, SYSTEM_NAME
-from installer.download import yield_asset, yield_bz2_asset, yield_tar_asset
+from installer.download import (
+    yield_asset,
+    yield_bz2_asset,
+    yield_gzip_asset,
+    yield_tar_asset,
+)
 from installer.logging import LOGGER
 from installer.settings import (
     DOWNLOAD_SETTINGS,
@@ -652,6 +657,35 @@ def setup_starship(
 ##
 
 
+def setup_taplo(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'taplo'."""
+    with yield_gzip_asset(
+        "tamasfe",
+        "taplo",
+        token=token,
+        match_system=True,
+        match_machine=True,
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as src:
+        dest = Path(path_binaries, "taplo")
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
 def setup_rsync(*, sudo: bool = SUDO_SETTINGS.sudo) -> None:
     """Setup 'rsync'."""
     match SYSTEM_NAME:
@@ -895,6 +929,7 @@ __all__ = [
     "setup_shfmt",
     "setup_sops",
     "setup_starship",
+    "setup_taplo",
     "setup_yq",
     "setup_zoxide",
 ]

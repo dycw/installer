@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import bz2
+import gzip
 import tarfile
 from contextlib import contextmanager
 from re import IGNORECASE, search
@@ -208,6 +209,64 @@ def yield_bz2_asset(
 
 
 @contextmanager
+def yield_gzip_asset(
+    owner: str,
+    repo: str,
+    /,
+    *,
+    tag: str | None = TAG_SETTINGS.tag,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    match_system: bool = MATCH_SETTINGS.match_system,
+    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
+    match_machine: bool = MATCH_SETTINGS.match_machine,
+    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
+    not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+) -> Iterator[Path]:
+    LOGGER.info(
+        func_param_desc(
+            yield_gzip_asset,
+            __version__,
+            f"{owner=}",
+            f"{repo=}",
+            f"{tag=}",
+            f"{token=}",
+            f"{match_system=}",
+            f"{match_c_std_lib=}",
+            f"{match_machine=}",
+            f"{not_matches=}",
+            f"{not_endswith=}",
+            f"{timeout=}",
+            f"{chunk_size=}",
+        )
+    )
+    with (
+        yield_asset(
+            owner,
+            repo,
+            tag=tag,
+            token=token,
+            match_system=match_system,
+            match_c_std_lib=match_c_std_lib,
+            match_machine=match_machine,
+            not_matches=not_matches,
+            not_endswith=not_endswith,
+            timeout=timeout,
+            chunk_size=chunk_size,
+        ) as temp1,
+        gzip.open(temp1) as gz,
+        TemporaryFile() as temp2,
+        temp2.open(mode="wb") as fh,
+    ):
+        copyfileobj(gz, fh)
+        yield temp2
+
+
+##
+
+
+@contextmanager
 def yield_tar_asset(
     owner: str,
     repo: str,
@@ -264,4 +323,4 @@ def yield_tar_asset(
             yield temp2
 
 
-__all__ = ["yield_asset", "yield_bz2_asset", "yield_tar_asset"]
+__all__ = ["yield_asset", "yield_bz2_asset", "yield_gzip_asset", "yield_tar_asset"]
