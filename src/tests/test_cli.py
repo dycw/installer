@@ -28,6 +28,7 @@ class TestCLI:
             param(["shfmt"]),
             param(["sops"]),
             param(["starship"]),
+            param(["taplo"]),
             param(["yq"]),
             param(["zoxide"]),
         ],

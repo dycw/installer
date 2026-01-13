@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from re import escape, search
+from subprocess import CalledProcessError
+from sys import version_info
 from typing import TYPE_CHECKING
 
+from pytest import mark
 from utilities.pytest import throttle_test
 from utilities.subprocess import run
 from utilities.text import strip_and_dedent
@@ -28,6 +31,7 @@ from installer.lib import (
     setup_shfmt,
     setup_sops,
     setup_starship,
+    setup_taplo,
     setup_yq,
     setup_zoxide,
 )
@@ -345,6 +349,25 @@ class TestSetupStarship:
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
             Usage: starship <COMMAND>
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupTaplo:
+    @mark.xfail(
+        condition=version_info >= (3, 14),
+        reason="Fails for >= 3.14",
+        raises=CalledProcessError,
+    )
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_taplo(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "taplo"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage: taplo [OPTIONS] <COMMAND>
         """)
         assert search(escape(pattern), result.out)
 
