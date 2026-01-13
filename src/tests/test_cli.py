@@ -10,6 +10,7 @@ class TestCLI:
         [
             param(["age"]),
             param(["btm"]),
+            param(["delta"]),
             param(["direnv"]),
             param(["eza"]),
             param(["fd"]),
