@@ -354,7 +354,11 @@ class TestSetupStarship:
 
 
 class TestSetupTaplo:
-    @mark.xfail(condition=version_info >= (3, 14), raises=CalledProcessError)
+    @mark.xfail(
+        condition=version_info >= (3, 14),
+        reason="Fails for >= 3.14",
+        raises=CalledProcessError,
+    )
     @throttle_test(delta=HOUR)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
