@@ -74,6 +74,14 @@ class SudoSettings:
 SUDO_SETTINGS = load_settings(SudoSettings, [LOADER])
 
 
+@settings
+class TagSettings:
+    tag: str | None = secret(default=None, help="The GitHub release tag")
+
+
+TAG_SETTINGS = load_settings(TagSettings, [LOADER])
+
+
 __all__ = [
     "DOWNLOAD_SETTINGS",
     "LOADER",
@@ -82,6 +90,7 @@ __all__ = [
     "PERMS_SETTINGS",
     "SHELL_RC_SETTINGS",
     "SUDO_SETTINGS",
+    "TAG_SETTINGS",
     "DownloadSettings",
     "DownloadSettings",
     "MatchSettings",
@@ -89,4 +98,5 @@ __all__ = [
     "PermsSettings",
     "ShellRcSettings",
     "SudoSettings",
+    "TagSettings",
 ]

@@ -19,6 +19,7 @@ from installer.settings import (
     PERMS_SETTINGS,
     SHELL_RC_SETTINGS,
     SUDO_SETTINGS,
+    TAG_SETTINGS,
 )
 from installer.utilities import ensure_shell_rc
 
@@ -34,6 +35,7 @@ def setup_asset(
     path: PathLike,
     /,
     *,
+    tag: str | None = TAG_SETTINGS.tag,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
@@ -55,6 +57,7 @@ def setup_asset(
             f"{asset_owner=}",
             f"{asset_repo=}",
             f"{path=}",
+            f"{tag=}",
             f"{token=}",
             f"{match_system=}",
             f"{match_c_std_lib=}",
@@ -72,6 +75,7 @@ def setup_asset(
     with yield_asset(
         asset_owner,
         asset_repo,
+        tag=tag,
         token=token,
         match_system=match_system,
         match_c_std_lib=match_c_std_lib,
@@ -115,7 +119,7 @@ def setup_age(
                 dest = Path(path_binaries, src.name)
                 cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
                 downloads.append(dest)
-        LOGGER.info("Downloaded to %s", ", ".join(map(repr_str, downloads)))
+    LOGGER.info("Downloaded to %s", ", ".join(map(repr_str, downloads)))
 
 
 ##
@@ -195,6 +199,53 @@ def setup_direnv(
             case never:
                 assert_never(never)
         ensure_shell_rc(line, etc="direnv" if etc else None)
+
+
+##
+
+
+def setup_eza(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'eza'."""
+    match SYSTEM_NAME:
+        case "Darwin":
+            asset_owner = "cargo-bins"
+            asset_repo = "cargo-quickinstall"
+            tag = "eza"
+            match_c_std_lib = False
+            not_endswith = ["sig"]
+        case "Linux":
+            asset_owner = "eza-community"
+            asset_repo = "eza"
+            tag = None
+            match_c_std_lib = True
+            not_endswith = ["zip"]
+        case never:
+            assert_never(never)
+    with yield_tar_asset(
+        asset_owner,
+        asset_repo,
+        tag=tag,
+        token=token,
+        match_system=True,
+        match_c_std_lib=match_c_std_lib,
+        match_machine=True,
+        not_endswith=not_endswith,
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as src:
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -687,6 +738,7 @@ __all__ = [
     "setup_age",
     "setup_asset",
     "setup_direnv",
+    "setup_eza",
     "setup_fd",
     "setup_fzf",
     "setup_git",
