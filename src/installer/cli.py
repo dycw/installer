@@ -25,6 +25,7 @@ from installer.lib import (
     setup_sops,
     setup_starship,
     setup_yq,
+    setup_zoxide,
 )
 from installer.logging import LOGGER
 from installer.settings import (
@@ -575,6 +576,41 @@ def yq_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
+    )
+
+
+@_main.command(name="zoxide", **CONTEXT_SETTINGS)
+@click_options(
+    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
+)
+@click_options(
+    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
+)
+@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(ShellRcSettings, [LOADER], show_envvars_in_help=True, argname="shell_rc")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+def zoxide_sub_cmd(
+    *,
+    download: DownloadSettings,
+    shell_rc: ShellRcSettings,
+    path_binaries: PathBinariesSettings,
+    perms: PermsSettings,
+    sudo: SudoSettings,
+) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_zoxide(
+        token=download.token,
+        timeout=download.timeout,
+        path_binaries=path_binaries.path_binaries,
+        chunk_size=download.chunk_size,
+        sudo=sudo.sudo,
+        perms=perms.perms,
+        owner=perms.owner,
+        group=perms.group,
+        skip_shell_rc=shell_rc.skip_shell_rc,
+        etc=shell_rc.etc,
     )
 
 
