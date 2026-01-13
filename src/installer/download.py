@@ -171,6 +171,7 @@ def yield_bz2_asset(
             __version__,
             f"{owner=}",
             f"{repo=}",
+            f"{tag=}",
             f"{token=}",
             f"{match_system=}",
             f"{match_c_std_lib=}",
