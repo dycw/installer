@@ -296,7 +296,7 @@ wheels = [
 
 [[package]]
 name = "dycw-installer"
-version = "0.2.4"
+version = "0.2.5"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
@@ -319,7 +319,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.3.1,<9" },
-    { name = "dycw-utilities", specifier = ">=0.179.1,<1" },
+    { name = "dycw-utilities", specifier = ">=0.179.3,<1" },
     { name = "inflect", specifier = ">=7.5.0,<8" },
     { name = "pygithub", specifier = ">=2.8.1,<3" },
     { name = "rich", specifier = ">=14.2.0,<15" },
@@ -329,7 +329,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "dycw-utilities", extras = ["test"], specifier = ">=0.179.1,<1" },
+    { name = "dycw-utilities", extras = ["test"], specifier = ">=0.179.3,<1" },
     { name = "orjson", specifier = ">=3.11.5,<4" },
     { name = "pyright", specifier = ">=1.1.408,<2" },
     { name = "rich", specifier = ">=14.2.0,<15" },
@@ -349,7 +349,7 @@ wheels = [
 
 [[package]]
 name = "dycw-utilities"
-version = "0.179.1"
+version = "0.179.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "atomicwrites" },
@@ -358,7 +358,7 @@ dependencies = [
     { name = "whenever" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/71/c4/e6acd17c5b26cb44cae23101d67e42b1b62dd9836a976789ec510f3736ff/dycw_utilities-0.179.1-py3-none-any.whl", hash = "sha256:c5e0d553e2b6f65972ac14857c6e08f29a77abe961fdcccb6056d33818932e60", size = 207184, upload-time = "2026-01-09T04:53:16.23Z" },
+    { url = "https://files.pythonhosted.org/packages/03/7b/0049ff95bf72851e7ebdcc96038811ece07aa8abd7a4cf367a7648230c0e/dycw_utilities-0.179.3-py3-none-any.whl", hash = "sha256:c15ae6f231a614c4ae37008b7b59f6ff7a8381793e49cc37daae551f91d9de2f", size = 208557, upload-time = "2026-01-12T03:26:35.577Z" },
 ]
 
 [package.optional-dependencies]
@@ -390,14 +390,14 @@ wheels = [
 
 [[package]]
 name = "hypothesis"
-version = "6.150.0"
+version = "6.150.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "sortedcontainers" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ab/20/37805e8871ffd4bf4958c2e13d608fe1fc914d00f3707b35744ab62751a4/hypothesis-6.150.0.tar.gz", hash = "sha256:ac263bdaf338f4899a9a56e8224304e29b3ad91799e0274783c49abd91ea35ac", size = 474629, upload-time = "2026-01-06T17:08:27.582Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ad/4e/cd3a398b9834386a79f4eb777dc4004ca439c1019d324771ec8196fc8354/hypothesis-6.150.1.tar.gz", hash = "sha256:dc79672b3771e92e6563ca0c56a24135438f319b257a1a1982deb8fbb791be89", size = 474924, upload-time = "2026-01-12T08:45:45.416Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0f/6c/49e29a0b856be17048fa4a216cc21bf914623f66305f6327b7a9bcec6871/hypothesis-6.150.0-py3-none-any.whl", hash = "sha256:caf1f752418c49ac805f11d909c5831aaceb96762aa3895e0c702468dedbe3fe", size = 542064, upload-time = "2026-01-06T17:08:25.643Z" },
+    { url = "https://files.pythonhosted.org/packages/22/18/f43815244cd99b54d8ac9f44f9799bb7c0115e48e29bc7a1899c0589ee48/hypothesis-6.150.1-py3-none-any.whl", hash = "sha256:7badb28a0da323d6afaf25eae1c93932cb8ac06193355f5e080d6e6465a51da5", size = 542374, upload-time = "2026-01-12T08:45:41.854Z" },
 ]
 
 [[package]]

@@ -8,7 +8,7 @@ from utilities.subprocess import APT_UPDATE, apt_install_cmd, cp, maybe_sudo_cmd
 from utilities.text import repr_str, strip_and_dedent
 
 from installer import __version__
-from installer.constants import SYSTEM_NAME
+from installer.constants import SHELL, SYSTEM_NAME
 from installer.download import yield_asset, yield_bz2_asset, yield_tar_asset
 from installer.logging import LOGGER
 from installer.settings import (
@@ -19,7 +19,6 @@ from installer.settings import (
     SHELL_RC_SETTINGS,
     SUDO_SETTINGS,
 )
-from installer.shellingham import SHELL
 from installer.utilities import ensure_shell_rc
 
 if TYPE_CHECKING:
@@ -205,6 +204,9 @@ def setup_direnv(
                 line = f'eval "$(direnv hook {SHELL})"'
             case "fish":
                 line = "direnv hook fish | source"
+            case "posix":
+                msg = f"Invalid shell: {SHELL=}"
+                raise TypeError(msg)
             case never:
                 assert_never(never)
         ensure_shell_rc(line, etc="direnv" if etc else None)
@@ -278,6 +280,9 @@ def setup_fzf(
                 line = "source <(fzf --zsh)"
             case "fish":
                 line = "fzf --fish | source"
+            case "posix":
+                msg = f"Invalid shell: {SHELL=}"
+                raise TypeError(msg)
             case never:
                 assert_never(never)
         ensure_shell_rc(line, etc="fzf" if etc else None)
@@ -427,6 +432,9 @@ def setup_starship(
                 line = f'eval "$(starship init {SHELL})"'
             case "fish":
                 line = "starship init fish | source"
+            case "posix":
+                msg = f"Invalid shell: {SHELL=}"
+                raise TypeError(msg)
             case never:
                 assert_never(never)
         ensure_shell_rc(line, etc="starship" if etc else None)
