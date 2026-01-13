@@ -350,16 +350,12 @@ class TestSetupZoxide:
         run(str(tmp_path / "zoxide"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
-            zoxide is an interactive filter program for any kind of list.
+            Ajeet D'Souza <98ajeet@gmail.com>
+            https://github.com/ajeetdsouza/zoxide
 
-            It implements a "fuzzy" matching algorithm, so you can quickly type in patterns
-            with omitted characters and still get the results you want.
+            A smarter cd command for your terminal
 
-            Project URL: https://github.com/junegunn/zoxide
-            Author: Junegunn Choi <junegunn.c@gmail.com>
-
-            * See man page for more information: zoxide --man
-
-            Usage: zoxide [options]
+            Usage:
+              zoxide <COMMAND>
         """)
         assert search(escape(pattern), result.out)
