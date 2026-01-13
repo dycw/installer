@@ -13,6 +13,7 @@ from installer.lib import (
     setup_bottom,
     setup_delta,
     setup_direnv,
+    setup_dust,
     setup_eza,
     setup_fd,
     setup_fzf,
@@ -119,6 +120,21 @@ class TestSetupDirenv:
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
             Usage: direnv COMMAND [...ARGS]
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupDust:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_dust(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "dust"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage:
+              dust [options] [files...]
         """)
         assert search(escape(pattern), result.out)
 
