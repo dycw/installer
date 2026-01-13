@@ -247,12 +247,20 @@ def setup_dust(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'dust'."""
+    match SYSTEM_NAME:
+        case "Darwin":
+            match_machine = False
+        case "Linux":
+            match_machine = True
+        case never:
+            assert_never(never)
     with yield_tar_asset(
         "bootandy",
         "dust",
         token=token,
         match_system=True,
         match_c_std_lib=True,
+        match_machine=match_machine,
         timeout=timeout,
         chunk_size=chunk_size,
     ) as temp:
