@@ -6,6 +6,7 @@ from re import IGNORECASE, search
 from typing import TYPE_CHECKING
 
 from utilities.iterables import OneEmptyError, one
+from utilities.shellingham import get_shell
 from utilities.subprocess import run
 from utilities.typing import get_args
 
@@ -13,6 +14,9 @@ from installer.types import System
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
+
+
+SHELL = get_shell()
 
 
 def _get_system_name() -> System:
@@ -73,4 +77,11 @@ def _get_machine_type_group() -> set[str]:
 
 MACHINE_TYPE_GROUP = _get_machine_type_group()
 
-__all__ = ["C_STD_LIB_GROUP", "MACHINE_TYPE", "MACHINE_TYPE_GROUP", "SYSTEM_NAME"]
+
+__all__ = [
+    "C_STD_LIB_GROUP",
+    "MACHINE_TYPE",
+    "MACHINE_TYPE_GROUP",
+    "SHELL",
+    "SYSTEM_NAME",
+]

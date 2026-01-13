@@ -17,6 +17,7 @@ from installer.lib import (
     setup_just,
     setup_restic,
     setup_ripgrep,
+    setup_sd,
     setup_sops,
     setup_starship,
 )
@@ -214,6 +215,22 @@ class TestSetupRipgrep:
                 command | rg [OPTIONS] PATTERN
                 rg [OPTIONS] --help
                 rg [OPTIONS] --version
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupSd:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_sd(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "sd"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            An intuitive find & replace CLI
+
+            Usage: sd [OPTIONS] <FIND> <REPLACE_WITH> [FILES]...
         """)
         assert search(escape(pattern), result.out)
 

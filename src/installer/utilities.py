@@ -7,8 +7,8 @@ from typed_settings import Secret
 from utilities.atomicwrites import writer
 from utilities.text import strip_and_dedent
 
+from installer.constants import SHELL
 from installer.logging import LOGGER
-from installer.shellingham import SHELL
 
 if TYPE_CHECKING:
     from utilities.types import PathLike
@@ -62,6 +62,9 @@ def ensure_shell_rc(text: str, /, *, etc: str | None = None) -> None:
                 path = Path.home() / f".{SHELL}rc"
             case "fish":
                 path = Path.home() / ".config/fish/config.fish"
+            case "posix":
+                msg = f"Invalid shell: {SHELL=}"
+                raise TypeError(msg)
             case never:
                 assert_never(never)
         ensure_line(text, path)
@@ -74,9 +77,11 @@ def ensure_shell_rc(text: str, /, *, etc: str | None = None) -> None:
                 """)
                 path = Path(f"/etc/profile.d/{etc}.sh")
                 ensure_line(full, path)
-            case "fish":
-                msg = f"Unsupported shell: {SHELL!r}"
-                raise ValueError(msg)
+            case "fish" | "posix":
+                msg = f"Invalid shell: {SHELL!r}"
+                raise TypeError(msg)
+            case never:
+                assert_never(never)
 
 
 __all__ = ["convert_token", "ensure_line", "ensure_shell_rc"]
