@@ -285,7 +285,6 @@ class TestSetupRipgrep:
 
 
 class TestSetupRuff:
-    @mark.only
     @throttle_test(delta=HOUR)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
@@ -390,7 +389,6 @@ class TestSetupTaplo:
 
 
 class TestSetupUv:
-    @mark.only
     @throttle_test(delta=HOUR)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
