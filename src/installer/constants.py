@@ -77,4 +77,11 @@ def _get_machine_type_group() -> set[str]:
 
 MACHINE_TYPE_GROUP = _get_machine_type_group()
 
-__all__ = ["C_STD_LIB_GROUP", "MACHINE_TYPE", "MACHINE_TYPE_GROUP", "SYSTEM_NAME"]
+
+__all__ = [
+    "C_STD_LIB_GROUP",
+    "MACHINE_TYPE",
+    "MACHINE_TYPE_GROUP",
+    "SHELL",
+    "SYSTEM_NAME",
+]

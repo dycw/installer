@@ -14,12 +14,6 @@ jobs:
         uses: dycw/action-run-hooks@latest
         with:
           repos: |-
-            pre-commit/pre-commit-hooks
-      - if: github.event_name == 'pull_request'
-        name: Run 'pre-commit' hooks
-        uses: dycw/action-run-hooks@latest
-        with:
-          repos: |-
             dycw/actions
             pre-commit/pre-commit-hooks
   pyright:
