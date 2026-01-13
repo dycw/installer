@@ -491,6 +491,70 @@ def setup_sd(
 ##
 
 
+def setup_shellcheck(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'shellcheck'."""
+    with yield_tar_asset(
+        "koalaman",
+        "shellcheck",
+        token=token,
+        match_system=True,
+        match_machine=True,
+        not_endswith=["xz"],
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as temp:
+        src = temp / "shellcheck"
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
+def setup_shfmt(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'shfmt'."""
+    dest = Path(path_binaries, "shfmt")
+    setup_asset(
+        "mvdan",
+        "sh",
+        dest,
+        token=token,
+        match_system=True,
+        match_machine=True,
+        timeout=timeout,
+        chunk_size=chunk_size,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+    )
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
 def setup_sops(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
@@ -534,6 +598,8 @@ __all__ = [
     "setup_ripgrep",
     "setup_rsync",
     "setup_sd",
+    "setup_shellcheck",
+    "setup_shfmt",
     "setup_sops",
     "setup_starship",
 ]
