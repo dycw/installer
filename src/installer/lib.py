@@ -222,7 +222,7 @@ def setup_eza(
             repo = "cargo-quickinstall"
             tag = "eza"
             match_c_std_lib = False
-            not_endswith = None
+            not_endswith = ["sig"]
         case "Linux":
             owner = "eza-community"
             repo = "eza"
