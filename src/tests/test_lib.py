@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from re import escape, search
+from subprocess import CalledProcessError
+from sys import version_info
 from typing import TYPE_CHECKING
 
+from pytest import mark
 from utilities.pytest import throttle_test
 from utilities.subprocess import run
 from utilities.text import strip_and_dedent
@@ -351,6 +354,7 @@ class TestSetupStarship:
 
 
 class TestSetupTaplo:
+    @mark.xfail(condition=version_info >= (3, 14), raises=CalledProcessError)
     @throttle_test(delta=HOUR)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
