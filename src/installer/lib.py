@@ -533,6 +533,7 @@ def setup_neovim(
         token=token,
         match_system=True,
         match_machine=True,
+        not_endswith=["appimage", "zsync"],
         timeout=timeout,
         chunk_size=chunk_size,
     ) as temp:
