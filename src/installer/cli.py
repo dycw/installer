@@ -18,6 +18,7 @@ from installer.lib import (
     setup_git,
     setup_jq,
     setup_just,
+    setup_neovim,
     setup_restic,
     setup_ripgrep,
     setup_rsync,
@@ -375,6 +376,37 @@ def just_sub_cmd(
         return
     basic_config(obj=LOGGER)
     setup_just(
+        token=download.token,
+        timeout=download.timeout,
+        path_binaries=path_binaries.path_binaries,
+        chunk_size=download.chunk_size,
+        sudo=sudo.sudo,
+        perms=perms.perms,
+        owner=perms.owner,
+        group=perms.group,
+    )
+
+
+@_main.command(name="neovim", **CONTEXT_SETTINGS)
+@click_options(
+    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
+)
+@click_options(
+    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
+)
+@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+def neovim_sub_cmd(
+    *,
+    download: DownloadSettings,
+    path_binaries: PathBinariesSettings,
+    perms: PermsSettings,
+    sudo: SudoSettings,
+) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_neovim(
         token=download.token,
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,

@@ -3,6 +3,7 @@ from __future__ import annotations
 from re import escape, search
 from typing import TYPE_CHECKING
 
+from pytest import mark
 from utilities.pytest import throttle_test
 from utilities.subprocess import run
 from utilities.text import strip_and_dedent
@@ -20,6 +21,7 @@ from installer.lib import (
     setup_fzf,
     setup_jq,
     setup_just,
+    setup_neovim,
     setup_restic,
     setup_ripgrep,
     setup_sd,
@@ -221,6 +223,22 @@ class TestSetupJust:
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
             Usage: just [OPTIONS] [ARGUMENTS]...
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupNeovim:
+    @throttle_test(delta=HOUR)
+    @mark.only
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_neovim(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "nvim"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage:
+              nvim [options] [file ...]
         """)
         assert search(escape(pattern), result.out)
 

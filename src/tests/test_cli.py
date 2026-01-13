@@ -18,6 +18,7 @@ class TestCLI:
             param(["git"]),
             param(["jq"]),
             param(["just"]),
+            param(["neovim"]),
             param(["restic"]),
             param(["ripgrep"]),
             param(["rsync"]),

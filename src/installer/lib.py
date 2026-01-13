@@ -4,7 +4,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING, assert_never
 
 from typed_settings import Secret
-from utilities.subprocess import APT_UPDATE, apt_install_cmd, cp, maybe_sudo_cmd, run
+from utilities.subprocess import (
+    APT_UPDATE,
+    apt_install_cmd,
+    cp,
+    maybe_sudo_cmd,
+    run,
+    symlink,
+)
 from utilities.tabulate import func_param_desc
 from utilities.text import repr_str
 
@@ -508,6 +515,37 @@ def setup_just(
 ##
 
 
+def setup_neovim(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'neovim'."""
+    with yield_tar_asset(
+        "neovim",
+        "neovim",
+        token=token,
+        match_system=True,
+        match_machine=True,
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as temp:
+        dest_dir = Path(path_binaries, "nvim-dir")
+        cp(temp, dest_dir, sudo=sudo, perms=perms, owner=owner, group=group)
+        dest_bin = Path(path_binaries, "nvim")
+        symlink(dest_dir / "bin/nvim", dest_bin, sudo=sudo)
+    LOGGER.info("Downloaded to %r", str(dest_bin))
+
+
+##
+
+
 def setup_restic(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
@@ -847,6 +885,7 @@ __all__ = [
     "setup_git",
     "setup_jq",
     "setup_just",
+    "setup_neovim",
     "setup_restic",
     "setup_ripgrep",
     "setup_rsync",
