@@ -20,6 +20,7 @@ from installer.lib import (
     setup_fzf,
     setup_jq,
     setup_just,
+    setup_neovim,
     setup_restic,
     setup_ripgrep,
     setup_sd,
@@ -221,6 +222,21 @@ class TestSetupJust:
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
             Usage: just [OPTIONS] [ARGUMENTS]...
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupNeovim:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_neovim(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "nvim"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage:
+              nvim [options] [file ...]
         """)
         assert search(escape(pattern), result.out)
 
