@@ -235,6 +235,44 @@ def setup_direnv(
 ##
 
 
+def setup_dust(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'dust'."""
+    match SYSTEM_NAME:
+        case "Darwin":
+            match_machine = False
+        case "Linux":
+            match_machine = True
+        case never:
+            assert_never(never)
+    with yield_tar_asset(
+        "bootandy",
+        "dust",
+        token=token,
+        match_system=True,
+        match_c_std_lib=True,
+        match_machine=match_machine,
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as temp:
+        src = temp / "dust"
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
 def setup_eza(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
@@ -770,6 +808,7 @@ __all__ = [
     "setup_asset",
     "setup_delta",
     "setup_direnv",
+    "setup_dust",
     "setup_eza",
     "setup_fd",
     "setup_fzf",
