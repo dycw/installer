@@ -4,7 +4,6 @@ from pathlib import Path
 
 from typed_settings import EnvLoader, Secret, load_settings, option, secret, settings
 
-from installer.constants import MACHINE_TYPE, SYSTEM_NAME
 from installer.utilities import convert_token
 
 LOADER = EnvLoader("")
@@ -24,13 +23,9 @@ DOWNLOAD_SETTINGS = load_settings(DownloadSettings, [LOADER])
 
 @settings
 class MatchSettings:
-    match_system: bool = option(
-        default=False, help=f"Match the system name {SYSTEM_NAME!r}"
-    )
-    match_c_std_lib: bool = option(default=False, help="Match the C std. lib.")
-    match_machine: bool = option(
-        default=False, help=f"Match the machine type {MACHINE_TYPE!r}"
-    )
+    match_system: bool = option(default=False, help="Match the system name")
+    match_c_std_lib: bool = option(default=False, help="Match the C standard library")
+    match_machine: bool = option(default=False, help="Match the machine type")
     not_matches: list[str] = option(
         factory=list, help="Asset name patterns to not match again"
     )

@@ -14,6 +14,7 @@ from installer.lib import (
     setup_direnv,
     setup_fd,
     setup_fzf,
+    setup_jq,
     setup_just,
     setup_restic,
     setup_ripgrep,
@@ -151,6 +152,21 @@ class TestSetupFzf:
             * See man page for more information: fzf --man
 
             Usage: fzf [options]
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupJq:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_jq(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "jq"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            NAME:
+               jq - jq - encrypted file editor with AWS KMS, GCP KMS, Azure Key Vault, age, and GPG support
         """)
         assert search(escape(pattern), result.out)
 
