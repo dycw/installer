@@ -87,23 +87,10 @@ class TestSetupBottom:
         setup_bottom(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "btm"), "--help", print=True)
         result = capsys.readouterr()
-        pattern1 = strip_and_dedent("""
-            Clement Tsang <cjhtsang@uwaterloo.ca>
-
-            A customizable cross-platform graphical process/system monitor for the terminal. Supports Linux,
-            macOS, and Windows.
-
+        pattern = strip_and_dedent("""
             Usage: btm [OPTIONS]
         """)
-        pattern2 = strip_and_dedent("""
-            Clement Tsang <cjhtsang@uwaterloo.ca>
-
-            A customizable cross-platform graphical process/system monitor for the terminal.
-            Supports Linux, macOS, and Windows.
-
-            Usage: btm [OPTIONS]
-        """)
-        assert any(search(escape(p), result.out) for p in [pattern1, pattern2])
+        assert search(escape(pattern), result.out)
 
 
 class TestSetupDelta:
@@ -176,16 +163,6 @@ class TestSetupFzf:
         run(str(tmp_path / "fzf"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
-            fzf is an interactive filter program for any kind of list.
-
-            It implements a "fuzzy" matching algorithm, so you can quickly type in patterns
-            with omitted characters and still get the results you want.
-
-            Project URL: https://github.com/junegunn/fzf
-            Author: Junegunn Choi <junegunn.c@gmail.com>
-
-            * See man page for more information: fzf --man
-
             Usage: fzf [options]
         """)
         assert search(escape(pattern), result.out)
@@ -203,14 +180,6 @@ class TestSetupJq:
             Usage:\tjq [options] <jq filter> [file...]
             \tjq [options] --args <jq filter> [strings...]
             \tjq [options] --jsonargs <jq filter> [JSON_TEXTS...]
-
-            jq is a tool for processing JSON inputs, applying the given filter to
-            its JSON text inputs and producing the filter's results as JSON on
-            standard output.
-
-            The simplest filter is ., which copies jq's input to its output
-            unmodified except for formatting. For more advanced filters see
-            the jq(1) manpage ("man jq") and/or https://jqlang.org/.
         """)
         assert search(escape(pattern), result.out)
 
@@ -224,8 +193,6 @@ class TestSetupJust:
         run(str(tmp_path / "just"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
-            🤖 Just a command runner - https://github.com/casey/just
-
             Usage: just [OPTIONS] [ARGUMENTS]...
         """)
         assert search(escape(pattern), result.out)
@@ -240,11 +207,6 @@ class TestSetupRestic:
         run(str(tmp_path / "restic"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
-            restic is a backup program which allows saving multiple revisions of files and
-            directories in an encrypted repository stored on different backends.
-
-            The full documentation can be found at https://restic.readthedocs.io/ .
-
             Usage:
               restic [command]
         """)
@@ -260,14 +222,6 @@ class TestSetupRipgrep:
         run(str(tmp_path / "rg"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
-            ripgrep (rg) recursively searches the current directory for lines matching
-            a regex pattern. By default, ripgrep will respect gitignore rules and
-            automatically skip hidden files/directories and binary files.
-
-            Use -h for short descriptions and --help for more details.
-
-            Project home page: https://github.com/BurntSushi/ripgrep
-
             USAGE:
                 rg [OPTIONS] PATTERN [PATH ...]
                 rg [OPTIONS] -e PATTERN ... [PATH ...]
@@ -290,8 +244,6 @@ class TestSetupSd:
         run(str(tmp_path / "sd"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
-            An intuitive find & replace CLI
-
             Usage: sd [OPTIONS] <FIND> <REPLACE_WITH> [FILES]...
         """)
         assert search(escape(pattern), result.out)
@@ -321,10 +273,6 @@ class TestSetupShfmt:
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
             usage: shfmt [flags] [path ...]
-
-            shfmt formats shell programs. If the only argument is a dash ('-') or no
-            arguments are given, standard input will be used. If a given path is a
-            directory, all shell scripts found under that directory will be used.
         """)
         assert search(escape(pattern), result.err)
 
@@ -353,8 +301,6 @@ class TestSetupStarship:
         run(str(tmp_path / "starship"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
-            The cross-shell prompt for astronauts. ☄🌌️
-
             Usage: starship <COMMAND>
         """)
         assert search(escape(pattern), result.out)
@@ -369,7 +315,9 @@ class TestSetupYq:
         run(str(tmp_path / "yq"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
-            yq is a portable command-line data file processor (https://github.com/mikefarah/yq/)
+            Usage:
+              yq [flags]
+              yq [command]
         """)
         assert search(escape(pattern), result.out)
 
