@@ -26,6 +26,7 @@ class TestCLI:
             param(["sops"]),
             param(["starship"]),
             param(["yq"]),
+            param(["zoxide"]),
         ],
     )
     def test_main(self, *, args: list[str]) -> None:
