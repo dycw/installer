@@ -133,8 +133,7 @@ class TestSetupDust:
         run(str(tmp_path / "dust"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
-            Usage:
-              dust [options] [files...]
+            Usage: dust [OPTIONS] [PATH]...
         """)
         assert search(escape(pattern), result.out)
 

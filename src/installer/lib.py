@@ -252,10 +252,10 @@ def setup_dust(
         "dust",
         token=token,
         match_system=True,
-        match_machine=True,
         timeout=timeout,
         chunk_size=chunk_size,
-    ) as src:
+    ) as temp:
+        src = temp / "dust"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
     LOGGER.info("Downloaded to %r", str(dest))
