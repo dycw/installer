@@ -11,6 +11,7 @@ from utilities.whenever import HOUR
 from installer.lib import (
     setup_age,
     setup_bottom,
+    setup_delta,
     setup_direnv,
     setup_eza,
     setup_fd,
@@ -103,6 +104,22 @@ class TestSetupBottom:
             Usage: btm [OPTIONS]
         """)
         assert any(search(escape(p), result.out) for p in [pattern1, pattern2])
+
+
+class TestSetupDelta:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_delta(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "delta"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            A viewer for git and diff output
+
+            Usage: delta [OPTIONS] [MINUS_FILE] [PLUS_FILE]
+        """)
+        assert search(escape(pattern), result.out)
 
 
 class TestSetupDirenv:

@@ -157,6 +157,37 @@ def setup_bottom(
 ##
 
 
+def setup_delta(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'delta'."""
+    with yield_tar_asset(
+        "dandavison",
+        "delta",
+        token=token,
+        match_system=True,
+        match_c_std_lib=True,
+        match_machine=True,
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as temp:
+        src = temp / "delta"
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
 def setup_direnv(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
@@ -737,6 +768,7 @@ def setup_zoxide(
 __all__ = [
     "setup_age",
     "setup_asset",
+    "setup_delta",
     "setup_direnv",
     "setup_eza",
     "setup_fd",
