@@ -19,6 +19,7 @@ from installer.settings import (
     PERMS_SETTINGS,
     SHELL_RC_SETTINGS,
     SUDO_SETTINGS,
+    TAG_SETTINGS,
 )
 from installer.utilities import ensure_shell_rc
 
@@ -34,6 +35,7 @@ def setup_asset(
     path: PathLike,
     /,
     *,
+    tag: str | None = TAG_SETTINGS.tag,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
@@ -55,7 +57,7 @@ def setup_asset(
             f"{asset_owner=}",
             f"{asset_repo=}",
             f"{path=}",
-            f"{token=}",
+            f"{tag=},{token=}",
             f"{match_system=}",
             f"{match_c_std_lib=}",
             f"{match_machine=}",
@@ -72,6 +74,7 @@ def setup_asset(
     with yield_asset(
         asset_owner,
         asset_repo,
+        tag=tag,
         token=token,
         match_system=match_system,
         match_c_std_lib=match_c_std_lib,

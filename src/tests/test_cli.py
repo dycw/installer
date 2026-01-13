@@ -11,6 +11,7 @@ class TestCLI:
             param(["age"]),
             param(["btm"]),
             param(["direnv"]),
+            param(["eza"]),
             param(["fd"]),
             param(["fzf"]),
             param(["git"]),
