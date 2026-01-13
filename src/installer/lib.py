@@ -115,7 +115,7 @@ def setup_age(
                 dest = Path(path_binaries, src.name)
                 cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
                 downloads.append(dest)
-        LOGGER.info("Downloaded to %s", ", ".join(map(repr_str, downloads)))
+    LOGGER.info("Downloaded to %s", ", ".join(map(repr_str, downloads)))
 
 
 ##
@@ -195,6 +195,53 @@ def setup_direnv(
             case never:
                 assert_never(never)
         ensure_shell_rc(line, etc="direnv" if etc else None)
+
+
+##
+
+
+def setup_eza(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'eza'."""
+    match SYSTEM_NAME:
+        case "Darwin":
+            with yield_tar_asset(
+                "cargo-bins",
+                "cargo-quickinstall",
+                tag="eza",
+                token=token,
+                match_system=True,
+                match_machine=True,
+                not_endswith=["sig"],
+                timeout=timeout,
+                chunk_size=chunk_size,
+            ) as src:
+                dest = Path(path_binaries, src.name)
+                cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+        case "Linux":
+            with yield_tar_asset(
+                "eza-community",
+                "eza",
+                token=token,
+                match_system=True,
+                match_machine=True,
+                timeout=timeout,
+                chunk_size=chunk_size,
+            ) as src:
+                dest = Path(path_binaries, src.name)
+                cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+        case never:
+            assert_never(never)
+    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -687,6 +734,7 @@ __all__ = [
     "setup_age",
     "setup_asset",
     "setup_direnv",
+    "setup_eza",
     "setup_fd",
     "setup_fzf",
     "setup_git",

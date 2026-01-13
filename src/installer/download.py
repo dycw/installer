@@ -12,11 +12,13 @@ from github.Auth import Token
 from requests import get
 from utilities.inflect import counted_noun
 from utilities.iterables import OneNonUniqueError, one
+from utilities.tabulate import func_param_desc
 from utilities.tempfile import TemporaryDirectory, TemporaryFile
 
+from installer import __version__
 from installer.constants import C_STD_LIB_GROUP, MACHINE_TYPE_GROUP, SYSTEM_NAME_GROUP
 from installer.logging import LOGGER
-from installer.settings import DOWNLOAD_SETTINGS, MATCH_SETTINGS
+from installer.settings import DOWNLOAD_SETTINGS, MATCH_SETTINGS, TAG_SETTINGS
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -31,6 +33,7 @@ def yield_asset(
     repo: str,
     /,
     *,
+    tag: str | None = TAG_SETTINGS.tag,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
@@ -41,9 +44,29 @@ def yield_asset(
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
 ) -> Iterator[Path]:
     """Yield a GitHub asset."""
+    LOGGER.info(
+        func_param_desc(
+            yield_asset,
+            __version__,
+            f"{owner=}",
+            f"{repo=}",
+            f"{tag=}",
+            f"{token=}",
+            f"{match_system=}",
+            f"{match_c_std_lib=}",
+            f"{match_machine=}",
+            f"{not_matches=}",
+            f"{not_endswith=}",
+            f"{timeout=}",
+            f"{chunk_size=}",
+        )
+    )
     gh = Github(auth=None if token is None else Token(token.get_secret_value()))
     repository = gh.get_repo(f"{owner}/{repo}")
-    release = repository.get_latest_release()
+    if tag is None:
+        release = repository.get_latest_release()
+    else:
+        release = next(r for r in repository.get_releases() if search(tag, r.tag_name))
     assets = list(release.get_assets())
     LOGGER.info("Got %s: %s", counted_noun(assets, "asset"), [a.name for a in assets])
     if match_system:
@@ -132,6 +155,7 @@ def yield_bz2_asset(
     repo: str,
     /,
     *,
+    tag: str | None = TAG_SETTINGS.tag,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
@@ -141,10 +165,27 @@ def yield_bz2_asset(
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
 ) -> Iterator[Path]:
+    LOGGER.info(
+        func_param_desc(
+            yield_bz2_asset,
+            __version__,
+            f"{owner=}",
+            f"{repo=}",
+            f"{token=}",
+            f"{match_system=}",
+            f"{match_c_std_lib=}",
+            f"{match_machine=}",
+            f"{not_matches=}",
+            f"{not_endswith=}",
+            f"{timeout=}",
+            f"{chunk_size=}",
+        )
+    )
     with (
         yield_asset(
             owner,
             repo,
+            tag=tag,
             token=token,
             match_system=match_system,
             match_c_std_lib=match_c_std_lib,
@@ -171,6 +212,7 @@ def yield_tar_asset(
     repo: str,
     /,
     *,
+    tag: str | None = TAG_SETTINGS.tag,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
@@ -180,10 +222,28 @@ def yield_tar_asset(
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
 ) -> Iterator[Path]:
+    LOGGER.info(
+        func_param_desc(
+            yield_tar_asset,
+            __version__,
+            f"{owner=}",
+            f"{repo=}",
+            f"{tag=}",
+            f"{token=}",
+            f"{match_system=}",
+            f"{match_c_std_lib=}",
+            f"{match_machine=}",
+            f"{not_matches=}",
+            f"{not_endswith=}",
+            f"{timeout=}",
+            f"{chunk_size=}",
+        )
+    )
     with (
         yield_asset(
             owner,
             repo,
+            tag=tag,
             token=token,
             match_system=match_system,
             match_c_std_lib=match_c_std_lib,

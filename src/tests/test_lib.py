@@ -12,6 +12,7 @@ from installer.lib import (
     setup_age,
     setup_bottom,
     setup_direnv,
+    setup_eza,
     setup_fd,
     setup_fzf,
     setup_jq,
@@ -114,6 +115,21 @@ class TestSetupDirenv:
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
             Usage: direnv COMMAND [...ARGS]
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupEza:
+    @throttle_test(delta=2 * HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_eza(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "eza"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage:
+              eza [options] [files...]
         """)
         assert search(escape(pattern), result.out)
 
