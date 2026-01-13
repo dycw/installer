@@ -325,7 +325,7 @@ requires-dist = [
     { name = "pygithub", specifier = ">=2.8.1,<3" },
     { name = "rich", specifier = ">=14.2.0,<15" },
     { name = "shellingham", specifier = ">=1.5.4,<2" },
-    { name = "tabulate", specifier = ">=0.9.0" },
+    { name = "tabulate", specifier = ">=0.9.0,<1" },
     { name = "typed-settings", extras = ["attrs", "click"], specifier = ">=25.3.0,<26" },
 ]
 
