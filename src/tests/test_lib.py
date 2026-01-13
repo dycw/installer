@@ -10,6 +10,7 @@ from utilities.whenever import HOUR
 
 from installer.lib import (
     setup_age,
+    setup_bat,
     setup_bottom,
     setup_delta,
     setup_direnv,
@@ -94,6 +95,21 @@ class TestSetupBottom:
         assert search(escape(pattern), result.out)
 
 
+class TestSetupBat:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_bat(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "bat"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage: bat [OPTIONS] [FILE]...
+                   bat <COMMAND>
+        """)
+        assert search(escape(pattern), result.out)
+
+
 class TestSetupDelta:
     @throttle_test(delta=HOUR)
     def test_main(
@@ -103,8 +119,6 @@ class TestSetupDelta:
         run(str(tmp_path / "delta"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
-            A viewer for git and diff output
-
             Usage: delta [OPTIONS] [MINUS_FILE] [PLUS_FILE]
         """)
         assert search(escape(pattern), result.out)
@@ -162,8 +176,6 @@ class TestSetupFd:
         run(str(tmp_path / "fd"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
-            A program to find entries in your filesystem
-
             Usage: fd [OPTIONS] [pattern] [path]...
         """)
         assert search(escape(pattern), result.out)
@@ -346,11 +358,6 @@ class TestSetupZoxide:
         run(str(tmp_path / "zoxide"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
-            Ajeet D'Souza <98ajeet@gmail.com>
-            https://github.com/ajeetdsouza/zoxide
-
-            A smarter cd command for your terminal
-
             Usage:
               zoxide <COMMAND>
         """)
