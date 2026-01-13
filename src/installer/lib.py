@@ -328,6 +328,7 @@ def setup_jq(
         token=token,
         match_system=True,
         match_machine=True,
+        not_endswith=["linux64"],
         timeout=timeout,
         chunk_size=chunk_size,
         sudo=sudo,
