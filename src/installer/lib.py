@@ -218,22 +218,22 @@ def setup_eza(
     """Setup 'eza'."""
     match SYSTEM_NAME:
         case "Darwin":
-            owner = "cargo-bins"
-            repo = "cargo-quickinstall"
+            asset_owner = "cargo-bins"
+            asset_repo = "cargo-quickinstall"
             tag = "eza"
             match_c_std_lib = False
             not_endswith = ["sig"]
         case "Linux":
-            owner = "eza-community"
-            repo = "eza"
+            asset_owner = "eza-community"
+            asset_repo = "eza"
             tag = None
             match_c_std_lib = True
             not_endswith = ["zip"]
         case never:
             assert_never(never)
     with yield_tar_asset(
-        owner,
-        repo,
+        asset_owner,
+        asset_repo,
         tag=tag,
         token=token,
         match_system=True,
