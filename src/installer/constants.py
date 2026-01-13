@@ -37,11 +37,29 @@ def _get_unique_group[T: AbstractSet[str]](
     return one(g for g in groups if any(map(predicate, g)))
 
 
-def _get_c_std_lib_group(system: System, /) -> set[str] | None:
-    if system == "Darwin":
+def _get_system_name_group() -> set[str]:
+    groups: list[set[str]] = [{"darwin", "macos"}, {"linux"}]
+    system_ = SYSTEM_NAME.lower()
+
+    def predicate(text: str, /) -> bool:
+        return text.lower() == system_
+
+    try:
+        return _get_unique_group(groups, predicate)
+    except OneEmptyError:
+        msg = f"Invalid system name; must be in {groups} but got {system_!r}"
+        raise ValueError(msg) from None
+
+
+SYSTEM_NAME_GROUP = _get_system_name_group()
+
+
+def _get_c_std_lib_group() -> set[str] | None:
+    try:
+        result = run("ldd", "--version", return_=True)
+    except FileNotFoundError:
         return None
     groups: list[set[str]] = [{"gnu", "glibc"}, {"musl"}]
-    result = run("ldd", "--version", return_=True)
 
     def predicate(text: str, /) -> bool:
         return search(text, result, flags=IGNORECASE) is not None
@@ -53,10 +71,7 @@ def _get_c_std_lib_group(system: System, /) -> set[str] | None:
         raise ValueError(msg) from None
 
 
-C_STD_LIB_GROUP = _get_c_std_lib_group(SYSTEM_NAME)
-
-
-MACHINE_TYPE = machine()
+C_STD_LIB_GROUP = _get_c_std_lib_group()
 
 
 def _get_machine_type_group() -> set[str]:
@@ -64,14 +79,15 @@ def _get_machine_type_group() -> set[str]:
         {"amd64", "intel64", "x64", "x86_64"},
         {"aarch64", "arm64"},
     ]
+    machine_ = machine().lower()
 
     def predicate(text: str, /) -> bool:
-        return text == MACHINE_TYPE
+        return text.lower() == machine_
 
     try:
         return _get_unique_group(groups, predicate)
     except OneEmptyError:
-        msg = f"Invalid machine type; must be in {groups} but got {MACHINE_TYPE!r}"
+        msg = f"Invalid machine type; must be in {groups} but got {machine_!r}"
         raise ValueError(msg) from None
 
 
@@ -80,8 +96,8 @@ MACHINE_TYPE_GROUP = _get_machine_type_group()
 
 __all__ = [
     "C_STD_LIB_GROUP",
-    "MACHINE_TYPE",
     "MACHINE_TYPE_GROUP",
     "SHELL",
     "SYSTEM_NAME",
+    "SYSTEM_NAME_GROUP",
 ]

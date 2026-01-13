@@ -308,6 +308,40 @@ def setup_git(*, sudo: bool = SUDO_SETTINGS.sudo) -> None:
 ##
 
 
+def setup_jq(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'shfmt'."""
+    dest = Path(path_binaries, "jq")
+    setup_asset(
+        "jqlang",
+        "jq",
+        dest,
+        token=token,
+        match_system=True,
+        match_machine=True,
+        not_endswith=["linux64"],
+        timeout=timeout,
+        chunk_size=chunk_size,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+    )
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
 def setup_just(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
@@ -509,7 +543,7 @@ def setup_shellcheck(
         token=token,
         match_system=True,
         match_machine=True,
-        not_endswith=["xz"],
+        not_endswith=["tar.xz"],
         timeout=timeout,
         chunk_size=chunk_size,
     ) as temp:
@@ -586,6 +620,40 @@ def setup_sops(
     LOGGER.info("Downloaded to %r", str(dest))
 
 
+##
+
+
+def setup_yq(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'yq'."""
+    dest = Path(path_binaries, "yq")
+    setup_asset(
+        "mikefarah",
+        "yq",
+        dest,
+        token=token,
+        match_system=True,
+        match_machine=True,
+        not_endswith=["tar.gz"],
+        timeout=timeout,
+        chunk_size=chunk_size,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+    )
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
 __all__ = [
     "setup_age",
     "setup_asset",
@@ -593,6 +661,7 @@ __all__ = [
     "setup_fd",
     "setup_fzf",
     "setup_git",
+    "setup_jq",
     "setup_just",
     "setup_restic",
     "setup_ripgrep",
@@ -602,4 +671,5 @@ __all__ = [
     "setup_shfmt",
     "setup_sops",
     "setup_starship",
+    "setup_yq",
 ]

@@ -14,7 +14,7 @@ from utilities.inflect import counted_noun
 from utilities.iterables import OneNonUniqueError, one
 from utilities.tempfile import TemporaryDirectory, TemporaryFile
 
-from installer.constants import C_STD_LIB_GROUP, MACHINE_TYPE_GROUP, SYSTEM_NAME
+from installer.constants import C_STD_LIB_GROUP, MACHINE_TYPE_GROUP, SYSTEM_NAME_GROUP
 from installer.logging import LOGGER
 from installer.settings import DOWNLOAD_SETTINGS, MATCH_SETTINGS
 
@@ -47,10 +47,14 @@ def yield_asset(
     assets = list(release.get_assets())
     LOGGER.info("Got %s: %s", counted_noun(assets, "asset"), [a.name for a in assets])
     if match_system:
-        assets = [a for a in assets if search(SYSTEM_NAME, a.name, flags=IGNORECASE)]
+        assets = [
+            a
+            for a in assets
+            if any(search(c, a.name, flags=IGNORECASE) for c in SYSTEM_NAME_GROUP)
+        ]
         LOGGER.info(
-            "Post system name %r, got %s: %s",
-            SYSTEM_NAME,
+            "Post system name group %s, got %s: %s",
+            SYSTEM_NAME_GROUP,
             counted_noun(assets, "asset"),
             [a.name for a in assets],
         )
@@ -61,7 +65,7 @@ def yield_asset(
             if any(search(c, a.name, flags=IGNORECASE) for c in C_STD_LIB_GROUP)
         ]
         LOGGER.info(
-            "Post C std. lib. group %s, got %s: %s",
+            "Post C standard library group %s, got %s: %s",
             C_STD_LIB_GROUP,
             counted_noun(assets, "asset"),
             [a.name for a in assets],

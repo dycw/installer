@@ -14,6 +14,7 @@ class TestCLI:
             param(["fd"]),
             param(["fzf"]),
             param(["git"]),
+            param(["jq"]),
             param(["just"]),
             param(["restic"]),
             param(["ripgrep"]),
@@ -24,6 +25,7 @@ class TestCLI:
             param(["shfmt"]),
             param(["sops"]),
             param(["starship"]),
+            param(["yq"]),
         ],
     )
     def test_main(self, *, args: list[str]) -> None:

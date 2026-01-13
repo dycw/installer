@@ -25,7 +25,7 @@
   name = "dycw-installer"
   readme = "README.md"
   requires-python = ">= 3.12"
-  version = "0.2.6"
+  version = "0.2.7"
 
   [project.scripts]
     installer = "installer.cli:_main"

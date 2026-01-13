@@ -14,6 +14,7 @@ from installer.lib import (
     setup_direnv,
     setup_fd,
     setup_fzf,
+    setup_jq,
     setup_just,
     setup_restic,
     setup_ripgrep,
@@ -22,6 +23,7 @@ from installer.lib import (
     setup_shfmt,
     setup_sops,
     setup_starship,
+    setup_yq,
 )
 
 if TYPE_CHECKING:
@@ -151,6 +153,30 @@ class TestSetupFzf:
             * See man page for more information: fzf --man
 
             Usage: fzf [options]
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupJq:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_jq(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "jq"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage:\tjq [options] <jq filter> [file...]
+            \tjq [options] --args <jq filter> [strings...]
+            \tjq [options] --jsonargs <jq filter> [JSON_TEXTS...]
+
+            jq is a tool for processing JSON inputs, applying the given filter to
+            its JSON text inputs and producing the filter's results as JSON on
+            standard output.
+
+            The simplest filter is ., which copies jq's input to its output
+            unmodified except for formatting. For more advanced filters see
+            the jq(1) manpage ("man jq") and/or https://jqlang.org/.
         """)
         assert search(escape(pattern), result.out)
 
@@ -296,5 +322,19 @@ class TestSetupStarship:
             The cross-shell prompt for astronauts. ☄🌌️
 
             Usage: starship <COMMAND>
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupYq:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_yq(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "yq"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            yq is a portable command-line data file processor (https://github.com/mikefarah/yq/)
         """)
         assert search(escape(pattern), result.out)
