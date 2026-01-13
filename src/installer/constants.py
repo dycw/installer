@@ -8,12 +8,27 @@ from typing import TYPE_CHECKING
 from utilities.iterables import OneEmptyError, one
 from utilities.shellingham import get_shell
 from utilities.subprocess import run
+from utilities.typing import get_args
+
+from installer.types import System
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
 
 SHELL = get_shell()
+
+
+def _get_system_name() -> System:
+    sys = system()
+    systems: tuple[System, ...] = get_args(System)
+    if sys in systems:
+        return sys
+    msg = f"Invalid system name; must be in {systems} but got {sys!r}"
+    raise ValueError(msg)
+
+
+SYSTEM_NAME = _get_system_name()
 
 
 def _get_unique_group[T: AbstractSet[str]](
@@ -24,7 +39,7 @@ def _get_unique_group[T: AbstractSet[str]](
 
 def _get_system_name_group() -> set[str]:
     groups: list[set[str]] = [{"darwin", "macos"}, {"linux"}]
-    system_ = system().lower()
+    system_ = SYSTEM_NAME.lower()
 
     def predicate(text: str, /) -> bool:
         return text.lower() == system_
@@ -79,4 +94,10 @@ def _get_machine_type_group() -> set[str]:
 MACHINE_TYPE_GROUP = _get_machine_type_group()
 
 
-__all__ = ["C_STD_LIB_GROUP", "MACHINE_TYPE_GROUP", "SHELL", "SYSTEM_NAME_GROUP"]
+__all__ = [
+    "C_STD_LIB_GROUP",
+    "MACHINE_TYPE_GROUP",
+    "SHELL",
+    "SYSTEM_NAME",
+    "SYSTEM_NAME_GROUP",
+]

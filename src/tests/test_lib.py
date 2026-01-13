@@ -165,8 +165,17 @@ class TestSetupJq:
         run(str(tmp_path / "jq"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
-            NAME:
-               jq - jq - encrypted file editor with AWS KMS, GCP KMS, Azure Key Vault, age, and GPG support
+            Usage:\tjq [options] <jq filter> [file...]
+            \tjq [options] --args <jq filter> [strings...]
+            \tjq [options] --jsonargs <jq filter> [JSON_TEXTS...]
+
+            jq is a tool for processing JSON inputs, applying the given filter to
+            its JSON text inputs and producing the filter's results as JSON on
+            standard output.
+
+            The simplest filter is ., which copies jq's input to its output
+            unmodified except for formatting. For more advanced filters see
+            the jq(1) manpage ("man jq") and/or https://jqlang.org/.
         """)
         assert search(escape(pattern), result.out)
 

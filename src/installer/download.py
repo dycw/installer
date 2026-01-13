@@ -46,8 +46,6 @@ def yield_asset(
     release = repository.get_latest_release()
     assets = list(release.get_assets())
     LOGGER.info("Got %s: %s", counted_noun(assets, "asset"), [a.name for a in assets])
-    breakpoint()
-
     if match_system:
         assets = [
             a
@@ -60,7 +58,6 @@ def yield_asset(
             counted_noun(assets, "asset"),
             [a.name for a in assets],
         )
-    breakpoint()
     if match_c_std_lib and (C_STD_LIB_GROUP is not None):
         assets = [
             a
@@ -73,7 +70,6 @@ def yield_asset(
             counted_noun(assets, "asset"),
             [a.name for a in assets],
         )
-    breakpoint()
     if match_machine:
         assets = [
             a
@@ -86,7 +82,6 @@ def yield_asset(
             counted_noun(assets, "asset"),
             [a.name for a in assets],
         )
-    breakpoint()
     if not_matches is not None:
         assets = [
             a for a in assets if all(search(p, a.name) is None for p in not_matches)
