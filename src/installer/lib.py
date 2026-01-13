@@ -218,33 +218,33 @@ def setup_eza(
     """Setup 'eza'."""
     match SYSTEM_NAME:
         case "Darwin":
-            with yield_tar_asset(
-                "cargo-bins",
-                "cargo-quickinstall",
-                tag="eza",
-                token=token,
-                match_system=True,
-                match_machine=True,
-                not_endswith=["sig"],
-                timeout=timeout,
-                chunk_size=chunk_size,
-            ) as src:
-                dest = Path(path_binaries, src.name)
-                cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+            owner = "cargo-bins"
+            repo = "cargo-quickinstall"
+            tag = "eza"
+            match_c_std_lib = False
+            not_endswith = None
         case "Linux":
-            with yield_tar_asset(
-                "eza-community",
-                "eza",
-                token=token,
-                match_system=True,
-                match_machine=True,
-                timeout=timeout,
-                chunk_size=chunk_size,
-            ) as src:
-                dest = Path(path_binaries, src.name)
-                cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+            owner = "eza-community"
+            repo = "eza"
+            tag = None
+            match_c_std_lib = True
+            not_endswith = ["zip"]
         case never:
             assert_never(never)
+    with yield_tar_asset(
+        owner,
+        repo,
+        tag=tag,
+        token=token,
+        match_system=True,
+        match_c_std_lib=match_c_std_lib,
+        match_machine=True,
+        not_endswith=not_endswith,
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as src:
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
     LOGGER.info("Downloaded to %r", str(dest))
 
 
