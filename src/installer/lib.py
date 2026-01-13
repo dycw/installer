@@ -460,6 +460,36 @@ def setup_rsync(*, sudo: bool = SUDO_SETTINGS.sudo) -> None:
 ##
 
 
+def setup_sd(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'sd'."""
+    with yield_tar_asset(
+        "chmln",
+        "sd",
+        token=token,
+        match_system=True,
+        match_machine=True,
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as temp:
+        src = temp / "sd"
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
 def setup_sops(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
@@ -502,6 +532,7 @@ __all__ = [
     "setup_restic",
     "setup_ripgrep",
     "setup_rsync",
+    "setup_sd",
     "setup_sops",
     "setup_starship",
 ]
