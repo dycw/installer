@@ -115,7 +115,9 @@ class TestSetupDelta:
         run(str(tmp_path / "delta"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
-            Usage: delta COMMAND [...ARGS]
+            A viewer for git and diff output
+
+            Usage: delta [OPTIONS] [MINUS_FILE] [PLUS_FILE]
         """)
         assert search(escape(pattern), result.out)
 
