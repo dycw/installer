@@ -252,6 +252,7 @@ def setup_dust(
         "dust",
         token=token,
         match_system=True,
+        match_c_std_lib=True,
         timeout=timeout,
         chunk_size=chunk_size,
     ) as temp:
