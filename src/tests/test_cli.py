@@ -20,6 +20,8 @@ class TestCLI:
             param(["rsync"]),
             param(["run", "asset-owner", "asset-repo", "binary-name"]),
             param(["sd"]),
+            param(["shellcheck"]),
+            param(["shfmt"]),
             param(["sops"]),
             param(["starship"]),
         ],

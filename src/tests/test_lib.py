@@ -18,6 +18,8 @@ from installer.lib import (
     setup_restic,
     setup_ripgrep,
     setup_sd,
+    setup_shellcheck,
+    setup_shfmt,
     setup_sops,
     setup_starship,
 )
@@ -233,6 +235,38 @@ class TestSetupSd:
             Usage: sd [OPTIONS] <FIND> <REPLACE_WITH> [FILES]...
         """)
         assert search(escape(pattern), result.out)
+
+
+class TestSetupShellcheck:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_shellcheck(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "shellcheck"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage: shellcheck [OPTIONS...] FILES...
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupShfmt:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_shfmt(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "shfmt"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            usage: shfmt [flags] [path ...]
+
+            shfmt formats shell programs. If the only argument is a dash ('-') or no
+            arguments are given, standard input will be used. If a given path is a
+            directory, all shell scripts found under that directory will be used.
+        """)
+        assert search(escape(pattern), result.err)
 
 
 class TestSetupSops:
