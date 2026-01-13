@@ -23,6 +23,7 @@ from installer.lib import (
     setup_shfmt,
     setup_sops,
     setup_starship,
+    setup_yq,
 )
 
 if TYPE_CHECKING:
@@ -321,5 +322,19 @@ class TestSetupStarship:
             The cross-shell prompt for astronauts. ☄🌌️
 
             Usage: starship <COMMAND>
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupYq:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_yq(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "yq"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            yq is a portable command-line data file processor (https://github.com/mikefarah/yq/)
         """)
         assert search(escape(pattern), result.out)
