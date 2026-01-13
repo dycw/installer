@@ -32,6 +32,7 @@ from installer.lib import (
     setup_sops,
     setup_starship,
     setup_taplo,
+    setup_uv,
     setup_yq,
     setup_zoxide,
 )
@@ -368,6 +369,21 @@ class TestSetupTaplo:
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
             Usage: taplo [OPTIONS] <COMMAND>
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupUv:
+    @mark.only
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_uv(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "uv"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage: uv [OPTIONS] <COMMAND>
         """)
         assert search(escape(pattern), result.out)
 
