@@ -3,6 +3,7 @@ from __future__ import annotations
 from re import escape, search
 from typing import TYPE_CHECKING
 
+from pytest import mark
 from utilities.pytest import throttle_test
 from utilities.subprocess import run
 from utilities.text import strip_and_dedent
@@ -397,6 +398,7 @@ class TestSetupUv:
 
 class TestSetupWatchexec:
     @throttle_test(delta=HOUR)
+    @mark.only
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -404,7 +406,9 @@ class TestSetupWatchexec:
         run(str(tmp_path / "watchexec"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
-            Usage: watchexec [OPTIONS] [COMMAND]...
+            Usage:
+              watchexec [flags]
+              watchexec [command]
         """)
         assert search(escape(pattern), result.out)
 
