@@ -39,10 +39,10 @@ from installer.apps.settings import (
     PathBinariesSettings,
     PermsSettings,
     ShellRcSettings,
-    SudoSettings,
     TagSettings,
 )
 from installer.logging import LOGGER
+from installer.settings import SudoSettings
 
 
 @argument("asset-owner", type=str)
