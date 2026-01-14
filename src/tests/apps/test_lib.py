@@ -406,9 +406,7 @@ class TestSetupWatchexec:
         run(str(tmp_path / "watchexec"), "--help", print=True)
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
-            Usage:
-              watchexec [flags]
-              watchexec [command]
+            Usage: watchexec [OPTIONS] [COMMAND]...
         """)
         assert search(escape(pattern), result.out)
 
