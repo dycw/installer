@@ -483,7 +483,7 @@ def ripgrep_sub_cmd(
     )
 
 
-@_main.command(name="uv", **CONTEXT_SETTINGS)
+@_main.command(name="ruff", **CONTEXT_SETTINGS)
 @click_options(
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
