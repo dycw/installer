@@ -19,7 +19,6 @@ from installer.apps.cli import (
     ripgrep_sub_cmd,
     rsync_sub_cmd,
     ruff_sub_cmd,
-    run_sub_cmd,
     sd_sub_cmd,
     shellcheck_sub_cmd,
     shfmt_sub_cmd,
@@ -65,9 +64,6 @@ _ = _main.command(name="taplo", **CONTEXT_SETTINGS)(taplo_sub_cmd)
 _ = _main.command(name="uv", **CONTEXT_SETTINGS)(uv_sub_cmd)
 _ = _main.command(name="yq", **CONTEXT_SETTINGS)(yq_sub_cmd)
 _ = _main.command(name="zoxide", **CONTEXT_SETTINGS)(zoxide_sub_cmd)
-
-
-_ = _main.command(name="run", **CONTEXT_SETTINGS)(run_sub_cmd)
 
 
 _ = _main.command(name="setup-authorized-keys", **CONTEXT_SETTINGS)(
