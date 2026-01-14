@@ -710,7 +710,7 @@ def setup_ruff(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'ruff'."""
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "astral-sh",
         "ruff",
         token=token,
@@ -871,7 +871,7 @@ def setup_uv(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'uv'."""
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "astral-sh",
         "uv",
         token=token,
