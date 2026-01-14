@@ -9,7 +9,7 @@ from utilities.tabulate import func_param_desc
 from utilities.text import strip_and_dedent
 
 from installer import __version__
-from installer.configs.constants import SSH
+from installer.configs.constants import REL_SSH
 from installer.configs.settings import SSHD_SETTINGS
 from installer.logging import LOGGER
 from installer.settings import SUDO_SETTINGS
@@ -23,7 +23,7 @@ def setup_authorized_keys(keys: list[str], /, *, root: PathLike = "/") -> None:
         func_param_desc(setup_authorized_keys, __version__, f"{keys=}", f"{root=}")
     )
     root = Path(root)
-    with writer(root / SSH / "authorized_keys", overwrite=True) as temp:
+    with writer(root / REL_SSH / "authorized_keys", overwrite=True) as temp:
         _ = temp.write_text("\n".join(keys))
 
 
@@ -33,8 +33,9 @@ def setup_authorized_keys(keys: list[str], /, *, root: PathLike = "/") -> None:
 def setup_ssh_config(*, root: PathLike = "/") -> None:
     LOGGER.info(func_param_desc(setup_ssh_config, __version__, f"{root=}"))
     root = Path(root)
-    path = root / SSH / "config.d/*.conf"
-    with writer(root / SSH / "config", overwrite=True) as temp:
+    ssh = root / REL_SSH
+    path = ssh / "config.d/*.conf"
+    with writer(ssh / "config", overwrite=True) as temp:
         _ = temp.write_text(f"Include {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
 
