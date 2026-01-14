@@ -22,12 +22,14 @@ from installer.lib import (
     setup_restic,
     setup_ripgrep,
     setup_rsync,
+    setup_ruff,
     setup_sd,
     setup_shellcheck,
     setup_shfmt,
     setup_sops,
     setup_starship,
     setup_taplo,
+    setup_uv,
     setup_yq,
     setup_zoxide,
 )
@@ -481,6 +483,37 @@ def ripgrep_sub_cmd(
     )
 
 
+@_main.command(name="ruff", **CONTEXT_SETTINGS)
+@click_options(
+    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
+)
+@click_options(
+    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
+)
+@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+def ruff_sub_cmd(
+    *,
+    download: DownloadSettings,
+    path_binaries: PathBinariesSettings,
+    perms: PermsSettings,
+    sudo: SudoSettings,
+) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_ruff(
+        token=download.token,
+        timeout=download.timeout,
+        path_binaries=path_binaries.path_binaries,
+        chunk_size=download.chunk_size,
+        sudo=sudo.sudo,
+        perms=perms.perms,
+        owner=perms.owner,
+        group=perms.group,
+    )
+
+
 @_main.command(name="rsync", **CONTEXT_SETTINGS)
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def rsync_sub_cmd(*, sudo: SudoSettings) -> None:
@@ -669,6 +702,37 @@ def taplo_sub_cmd(
         return
     basic_config(obj=LOGGER)
     setup_taplo(
+        token=download.token,
+        timeout=download.timeout,
+        path_binaries=path_binaries.path_binaries,
+        chunk_size=download.chunk_size,
+        sudo=sudo.sudo,
+        perms=perms.perms,
+        owner=perms.owner,
+        group=perms.group,
+    )
+
+
+@_main.command(name="uv", **CONTEXT_SETTINGS)
+@click_options(
+    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
+)
+@click_options(
+    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
+)
+@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+def uv_sub_cmd(
+    *,
+    download: DownloadSettings,
+    path_binaries: PathBinariesSettings,
+    perms: PermsSettings,
+    sudo: SudoSettings,
+) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_uv(
         token=download.token,
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,

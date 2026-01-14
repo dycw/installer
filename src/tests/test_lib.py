@@ -26,12 +26,14 @@ from installer.lib import (
     setup_neovim,
     setup_restic,
     setup_ripgrep,
+    setup_ruff,
     setup_sd,
     setup_shellcheck,
     setup_shfmt,
     setup_sops,
     setup_starship,
     setup_taplo,
+    setup_uv,
     setup_yq,
     setup_zoxide,
 )
@@ -282,6 +284,20 @@ class TestSetupRipgrep:
         assert search(escape(pattern), result.out)
 
 
+class TestSetupRuff:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_ruff(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "ruff"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage: ruff [OPTIONS] <COMMAND>
+        """)
+        assert search(escape(pattern), result.out)
+
+
 class TestSetupSd:
     @throttle_test(delta=HOUR)
     def test_main(
@@ -368,6 +384,20 @@ class TestSetupTaplo:
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
             Usage: taplo [OPTIONS] <COMMAND>
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupUv:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_uv(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "uv"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage: uv [OPTIONS] <COMMAND>
         """)
         assert search(escape(pattern), result.out)
 
