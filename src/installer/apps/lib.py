@@ -132,6 +132,37 @@ def setup_age(
 ##
 
 
+def setup_bat(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'bat'."""
+    with yield_gzip_asset(
+        "sharkdp",
+        "bat",
+        token=token,
+        match_system=True,
+        match_c_std_lib=True,
+        match_machine=True,
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as temp:
+        src = temp / "bat"
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
 def setup_bottom(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
@@ -164,32 +195,18 @@ def setup_bottom(
 ##
 
 
-def setup_bat(
-    *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-) -> None:
-    """Setup 'bat'."""
-    with yield_gzip_asset(
-        "sharkdp",
-        "bat",
-        token=token,
-        match_system=True,
-        match_c_std_lib=True,
-        match_machine=True,
-        timeout=timeout,
-        chunk_size=chunk_size,
-    ) as temp:
-        src = temp / "bat"
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
+def setup_curl(*, sudo: bool = SUDO_SETTINGS.sudo) -> None:
+    """Setup 'curl'."""
+    match SYSTEM_NAME:
+        case "Darwin":
+            msg = f"Unsupported system: {SYSTEM_NAME!r}"
+            raise ValueError(msg)
+        case "Linux":
+            run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
+            run(*maybe_sudo_cmd(*apt_install_cmd("curl"), sudo=sudo))
+            LOGGER.info("Installed 'curl'")
+        case never:
+            assert_never(never)
 
 
 ##
@@ -263,7 +280,7 @@ def setup_direnv(
             case "fish":
                 line = "direnv hook fish | source"
             case "posix":
-                msg = f"Invalid shell: {SHELL=}"
+                msg = f"Unsupported shell: {SHELL=}"
                 raise TypeError(msg)
             case never:
                 assert_never(never)
@@ -424,7 +441,7 @@ def setup_fzf(
             case "fish":
                 line = "fzf --fish | source"
             case "posix":
-                msg = f"Invalid shell: {SHELL=}"
+                msg = f"Unsupported shell: {SHELL=}"
                 raise TypeError(msg)
             case never:
                 assert_never(never)
@@ -642,7 +659,7 @@ def setup_starship(
             case "fish":
                 line = "starship init fish | source"
             case "posix":
-                msg = f"Invalid shell: {SHELL=}"
+                msg = f"Unsupported shell: {SHELL=}"
                 raise TypeError(msg)
             case never:
                 assert_never(never)
@@ -959,7 +976,7 @@ def setup_zoxide(
             case "fish":
                 line = "zoxide init fish | source"
             case "posix":
-                msg = f"Invalid shell: {SHELL=}"
+                msg = f"Unsupported shell: {SHELL=}"
                 raise TypeError(msg)
             case never:
                 assert_never(never)
@@ -970,6 +987,8 @@ __all__ = [
     "setup_age",
     "setup_asset",
     "setup_bat",
+    "setup_bottom",
+    "setup_curl",
     "setup_delta",
     "setup_direnv",
     "setup_dust",

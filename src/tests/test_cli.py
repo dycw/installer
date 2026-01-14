@@ -10,9 +10,12 @@ class TestCLI:
         [
             ##
             param(["age"]),
+            param(["bat"]),
             param(["btm"]),
+            param(["curl"]),
             param(["delta"]),
             param(["direnv"]),
+            param(["dust"]),
             param(["eza"]),
             param(["fd"]),
             param(["fzf"]),

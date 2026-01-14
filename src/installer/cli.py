@@ -5,7 +5,9 @@ from utilities.click import CONTEXT_SETTINGS
 
 from installer.apps.cli import (
     age_sub_cmd,
+    bat_sub_cmd,
     bottom_sub_cmd,
+    curl_sub_cmd,
     delta_sub_cmd,
     direnv_sub_cmd,
     eza_sub_cmd,
@@ -41,7 +43,9 @@ def _main() -> None: ...
 
 
 _ = _main.command(name="age", **CONTEXT_SETTINGS)(age_sub_cmd)
+_ = _main.command(name="bat", **CONTEXT_SETTINGS)(bat_sub_cmd)
 _ = _main.command(name="btm", **CONTEXT_SETTINGS)(bottom_sub_cmd)
+_ = _main.command(name="curl", **CONTEXT_SETTINGS)(curl_sub_cmd)
 _ = _main.command(name="delta", **CONTEXT_SETTINGS)(delta_sub_cmd)
 _ = _main.command(name="direnv", **CONTEXT_SETTINGS)(direnv_sub_cmd)
 _ = _main.command(name="eza", **CONTEXT_SETTINGS)(eza_sub_cmd)

@@ -6,7 +6,9 @@ from utilities.os import is_pytest
 
 from installer.apps.lib import (
     setup_age,
+    setup_bat,
     setup_bottom,
+    setup_curl,
     setup_delta,
     setup_direnv,
     setup_eza,
@@ -79,6 +81,36 @@ def age_sub_cmd(
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+def bat_sub_cmd(
+    *,
+    download: DownloadSettings,
+    path_binaries: PathBinariesSettings,
+    perms: PermsSettings,
+    sudo: SudoSettings,
+) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_bat(
+        token=download.token,
+        timeout=download.timeout,
+        path_binaries=path_binaries.path_binaries,
+        chunk_size=download.chunk_size,
+        sudo=sudo.sudo,
+        perms=perms.perms,
+        owner=perms.owner,
+        group=perms.group,
+    )
+
+
+@click_options(
+    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
+)
+@click_options(
+    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
+)
+@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def bottom_sub_cmd(
     *,
     download: DownloadSettings,
@@ -99,6 +131,14 @@ def bottom_sub_cmd(
         owner=perms.owner,
         group=perms.group,
     )
+
+
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+def curl_sub_cmd(*, sudo: SudoSettings) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_curl(sudo=sudo.sudo)
 
 
 @click_options(
