@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from utilities.atomicwrites import writer
 from utilities.subprocess import tee
@@ -13,20 +14,27 @@ from installer.configs.settings import SSHD_SETTINGS
 from installer.logging import LOGGER
 from installer.settings import SUDO_SETTINGS
 
+if TYPE_CHECKING:
+    from utilities.types import PathLike
 
-def setup_authorized_keys(keys: list[str], /) -> None:
-    LOGGER.info(func_param_desc(setup_authorized_keys, __version__, f"{keys=}"))
-    with writer(SSH / "authorized_keys", overwrite=True) as temp:
+
+def setup_authorized_keys(keys: list[str], /, *, root: PathLike = "/") -> None:
+    LOGGER.info(
+        func_param_desc(setup_authorized_keys, __version__, f"{keys=}", f"{root=}")
+    )
+    root = Path(root)
+    with writer(root / SSH / "authorized_keys", overwrite=True) as temp:
         _ = temp.write_text("\n".join(keys))
 
 
 ##
 
 
-def setup_ssh_config() -> None:
-    LOGGER.info(func_param_desc(setup_ssh_config, __version__))
-    path = SSH / "config.d/*.conf"
-    with writer(SSH / "config", overwrite=True) as temp:
+def setup_ssh_config(*, root: PathLike = "/") -> None:
+    LOGGER.info(func_param_desc(setup_ssh_config, __version__, f"{root=}"))
+    root = Path(root)
+    path = root / SSH / "config.d/*.conf"
+    with writer(root / SSH / "config", overwrite=True) as temp:
         _ = temp.write_text(f"Include {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -36,15 +44,21 @@ def setup_ssh_config() -> None:
 
 def setup_sshd_config(
     *,
+    root: PathLike = "/",
     permit_root_login: bool = SSHD_SETTINGS.permit_root_login,
     sudo: bool = SUDO_SETTINGS.sudo,
 ) -> None:
     LOGGER.info(
         func_param_desc(
-            setup_sshd_config, __version__, f"{permit_root_login=}", f"{sudo=}"
+            setup_sshd_config,
+            __version__,
+            f"{root=}",
+            f"{permit_root_login=}",
+            f"{sudo=}",
         )
     )
-    path = Path("/etc/ssh/sshd_config.d/default.conf")
+    root = Path(root)
+    path = root / "etc/ssh/sshd_config.d/default.conf"
     yes_no = "yes" if permit_root_login else "no"
     text = strip_and_dedent(f"""
         PasswordAuthentication no
