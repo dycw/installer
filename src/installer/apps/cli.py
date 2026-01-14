@@ -6,9 +6,12 @@ from utilities.os import is_pytest
 
 from installer.apps.lib import (
     setup_age,
+    setup_bat,
     setup_bottom,
+    setup_curl,
     setup_delta,
     setup_direnv,
+    setup_dust,
     setup_eza,
     setup_fd,
     setup_fzf,
@@ -79,6 +82,36 @@ def age_sub_cmd(
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+def bat_sub_cmd(
+    *,
+    download: DownloadSettings,
+    path_binaries: PathBinariesSettings,
+    perms: PermsSettings,
+    sudo: SudoSettings,
+) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_bat(
+        token=download.token,
+        timeout=download.timeout,
+        path_binaries=path_binaries.path_binaries,
+        chunk_size=download.chunk_size,
+        sudo=sudo.sudo,
+        perms=perms.perms,
+        owner=perms.owner,
+        group=perms.group,
+    )
+
+
+@click_options(
+    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
+)
+@click_options(
+    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
+)
+@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def bottom_sub_cmd(
     *,
     download: DownloadSettings,
@@ -99,6 +132,14 @@ def bottom_sub_cmd(
         owner=perms.owner,
         group=perms.group,
     )
+
+
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+def curl_sub_cmd(*, sudo: SudoSettings) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_curl(sudo=sudo.sudo)
 
 
 @click_options(
@@ -162,6 +203,36 @@ def direnv_sub_cmd(
         group=perms.group,
         skip_shell_rc=shell_rc.skip_shell_rc,
         etc=shell_rc.etc,
+    )
+
+
+@click_options(
+    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
+)
+@click_options(
+    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
+)
+@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+def dust_sub_cmd(
+    *,
+    download: DownloadSettings,
+    path_binaries: PathBinariesSettings,
+    perms: PermsSettings,
+    sudo: SudoSettings,
+) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_dust(
+        token=download.token,
+        timeout=download.timeout,
+        path_binaries=path_binaries.path_binaries,
+        chunk_size=download.chunk_size,
+        sudo=sudo.sudo,
+        perms=perms.perms,
+        owner=perms.owner,
+        group=perms.group,
     )
 
 
@@ -735,9 +806,12 @@ def zoxide_sub_cmd(
 
 __all__ = [
     "age_sub_cmd",
+    "bat_sub_cmd",
     "bottom_sub_cmd",
+    "curl_sub_cmd",
     "delta_sub_cmd",
     "direnv_sub_cmd",
+    "dust_sub_cmd",
     "eza_sub_cmd",
     "fd_sub_cmd",
     "fzf_sub_cmd",
