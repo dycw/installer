@@ -83,17 +83,6 @@ SHELL_RC_SETTINGS = load_settings(ShellRcSettings, [LOADER])
 
 
 @settings
-class SudoSettings:
-    sudo: bool = option(default=False, help="Run as 'sudo'")
-
-
-SUDO_SETTINGS = load_settings(SudoSettings, [LOADER])
-
-
-##
-
-
-@settings
 class TagSettings:
     tag: str | None = secret(default=None, help="The GitHub release tag")
 
@@ -107,14 +96,11 @@ __all__ = [
     "PATH_BINARIES_SETTINGS",
     "PERMS_SETTINGS",
     "SHELL_RC_SETTINGS",
-    "SUDO_SETTINGS",
     "TAG_SETTINGS",
-    "DownloadSettings",
     "DownloadSettings",
     "MatchSettings",
     "PathBinariesSettings",
     "PermsSettings",
     "ShellRcSettings",
-    "SudoSettings",
     "TagSettings",
 ]

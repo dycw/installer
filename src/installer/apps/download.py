@@ -20,8 +20,8 @@ from installer.apps.constants import (
     MACHINE_TYPE_GROUP,
     SYSTEM_NAME_GROUP,
 )
+from installer.apps.settings import DOWNLOAD_SETTINGS, MATCH_SETTINGS, TAG_SETTINGS
 from installer.logging import LOGGER
-from installer.settings import DOWNLOAD_SETTINGS, MATCH_SETTINGS, TAG_SETTINGS
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

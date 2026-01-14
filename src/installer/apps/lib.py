@@ -24,10 +24,10 @@ from installer.apps.settings import (
     PATH_BINARIES_SETTINGS,
     PERMS_SETTINGS,
     SHELL_RC_SETTINGS,
-    SUDO_SETTINGS,
     TAG_SETTINGS,
 )
 from installer.logging import LOGGER
+from installer.settings import SUDO_SETTINGS
 from installer.utilities import ensure_shell_rc
 
 if TYPE_CHECKING:

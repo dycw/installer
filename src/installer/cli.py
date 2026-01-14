@@ -30,6 +30,7 @@ from installer.apps.cli import (
     yq_sub_cmd,
     zoxide_sub_cmd,
 )
+from installer.configs.cli import setup_ssh_sub_cmd, setup_sshd_sub_cmd
 
 
 @group(**CONTEXT_SETTINGS)
@@ -63,6 +64,10 @@ _ = _main.command(name="zoxide", **CONTEXT_SETTINGS)(zoxide_sub_cmd)
 
 
 _ = _main.command(name="run", **CONTEXT_SETTINGS)(run_sub_cmd)
+
+
+_ = _main.command(name="setup-ssh", **CONTEXT_SETTINGS)(setup_ssh_sub_cmd)
+_ = _main.command(name="setup-sshd", **CONTEXT_SETTINGS)(setup_sshd_sub_cmd)
 
 
 if __name__ == "__main__":
