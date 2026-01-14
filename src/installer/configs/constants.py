@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-SSH = Path.home() / ".ssh"
+REL_HOME = Path.home().relative_to("/")
+REL_SSH = REL_HOME / ".ssh"
 
 
-__all__ = ["SSH"]
+__all__ = ["REL_HOME", "REL_SSH"]
