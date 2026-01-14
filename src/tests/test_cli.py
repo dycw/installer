@@ -34,8 +34,6 @@ class TestCLI:
             param(["yq"]),
             param(["zoxide"]),
             ##
-            param(["run", "asset-owner", "asset-repo", "binary-name"]),
-            ##
             param(["setup-authorized-keys"]),
             param(["setup-authorized-keys", "key1"]),
             param(["setup-authorized-keys", "key1", "key2"]),

@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from click import argument
 from typed_settings import click_options
 from utilities.logging import basic_config
 from utilities.os import is_pytest
 
 from installer.apps.lib import (
     setup_age,
-    setup_asset,
     setup_bottom,
     setup_delta,
     setup_direnv,
@@ -35,57 +33,12 @@ from installer.apps.lib import (
 from installer.apps.settings import (
     LOADER,
     DownloadSettings,
-    MatchSettings,
     PathBinariesSettings,
     PermsSettings,
     ShellRcSettings,
-    TagSettings,
 )
 from installer.logging import LOGGER
 from installer.settings import SudoSettings
-
-
-@argument("asset-owner", type=str)
-@argument("asset-repo", type=str)
-@argument("binary-name", type=str)
-@click_options(MatchSettings, [LOADER], show_envvars_in_help=True, argname="common")
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
-@click_options(TagSettings, [LOADER], show_envvars_in_help=True, argname="tag")
-def run_sub_cmd(
-    *,
-    asset_owner: str,
-    asset_repo: str,
-    binary_name: str,
-    common: MatchSettings,
-    download: DownloadSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
-    tag: TagSettings,
-) -> None:
-    if is_pytest():
-        return
-    basic_config(obj=LOGGER)
-    setup_asset(
-        asset_owner,
-        asset_repo,
-        binary_name,
-        tag=tag.tag,
-        token=download.token,
-        match_system=common.match_system,
-        match_c_std_lib=common.match_c_std_lib,
-        match_machine=common.match_machine,
-        not_endswith=common.not_endswith,
-        timeout=download.timeout,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
-    )
 
 
 @click_options(
@@ -796,7 +749,6 @@ __all__ = [
     "ripgrep_sub_cmd",
     "rsync_sub_cmd",
     "ruff_sub_cmd",
-    "run_sub_cmd",
     "sd_sub_cmd",
     "shellcheck_sub_cmd",
     "shfmt_sub_cmd",
