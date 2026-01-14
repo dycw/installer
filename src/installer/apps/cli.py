@@ -30,6 +30,7 @@ from installer.apps.lib import (
     setup_starship,
     setup_taplo,
     setup_uv,
+    setup_watchexec,
     setup_yq,
     setup_zoxide,
 )
@@ -74,6 +75,9 @@ def age_sub_cmd(
     )
 
 
+##
+
+
 @click_options(
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
@@ -102,6 +106,9 @@ def bat_sub_cmd(
         owner=perms.owner,
         group=perms.group,
     )
+
+
+##
 
 
 @click_options(
@@ -134,12 +141,18 @@ def bottom_sub_cmd(
     )
 
 
+##
+
+
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def curl_sub_cmd(*, sudo: SudoSettings) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
     setup_curl(sudo=sudo.sudo)
+
+
+##
 
 
 @click_options(
@@ -170,6 +183,9 @@ def delta_sub_cmd(
         owner=perms.owner,
         group=perms.group,
     )
+
+
+##
 
 
 @click_options(
@@ -206,6 +222,9 @@ def direnv_sub_cmd(
     )
 
 
+##
+
+
 @click_options(
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
@@ -234,6 +253,9 @@ def dust_sub_cmd(
         owner=perms.owner,
         group=perms.group,
     )
+
+
+##
 
 
 @click_options(
@@ -266,6 +288,9 @@ def eza_sub_cmd(
     )
 
 
+##
+
+
 @click_options(
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
@@ -294,6 +319,9 @@ def fd_sub_cmd(
         owner=perms.owner,
         group=perms.group,
     )
+
+
+##
 
 
 @click_options(
@@ -330,6 +358,9 @@ def fzf_sub_cmd(
     )
 
 
+##
+
+
 @click_options(
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
@@ -360,12 +391,18 @@ def jq_sub_cmd(
     )
 
 
+##
+
+
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def git_sub_cmd(*, sudo: SudoSettings) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
     setup_git(sudo=sudo.sudo)
+
+
+##
 
 
 @click_options(
@@ -398,6 +435,9 @@ def just_sub_cmd(
     )
 
 
+##
+
+
 @click_options(
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
@@ -426,6 +466,9 @@ def neovim_sub_cmd(
         owner=perms.owner,
         group=perms.group,
     )
+
+
+##
 
 
 @click_options(
@@ -458,6 +501,9 @@ def restic_sub_cmd(
     )
 
 
+##
+
+
 @click_options(
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
@@ -486,6 +532,9 @@ def ripgrep_sub_cmd(
         owner=perms.owner,
         group=perms.group,
     )
+
+
+##
 
 
 @click_options(
@@ -518,12 +567,18 @@ def ruff_sub_cmd(
     )
 
 
+##
+
+
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def rsync_sub_cmd(*, sudo: SudoSettings) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
     setup_rsync(sudo=sudo.sudo)
+
+
+##
 
 
 @click_options(
@@ -556,6 +611,9 @@ def sd_sub_cmd(
     )
 
 
+##
+
+
 @click_options(
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
@@ -584,6 +642,9 @@ def shellcheck_sub_cmd(
         owner=perms.owner,
         group=perms.group,
     )
+
+
+##
 
 
 @click_options(
@@ -616,6 +677,9 @@ def shfmt_sub_cmd(
     )
 
 
+##
+
+
 @click_options(
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
@@ -644,6 +708,9 @@ def sops_sub_cmd(
         owner=perms.owner,
         group=perms.group,
     )
+
+
+##
 
 
 @click_options(
@@ -680,6 +747,9 @@ def starship_sub_cmd(
     )
 
 
+##
+
+
 @click_options(
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
@@ -708,6 +778,9 @@ def taplo_sub_cmd(
         owner=perms.owner,
         group=perms.group,
     )
+
+
+##
 
 
 @click_options(
@@ -740,6 +813,42 @@ def uv_sub_cmd(
     )
 
 
+##
+
+
+@click_options(
+    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
+)
+@click_options(
+    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
+)
+@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+def watchexec_sub_cmd(
+    *,
+    download: DownloadSettings,
+    path_binaries: PathBinariesSettings,
+    perms: PermsSettings,
+    sudo: SudoSettings,
+) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_watchexec(
+        token=download.token,
+        timeout=download.timeout,
+        path_binaries=path_binaries.path_binaries,
+        chunk_size=download.chunk_size,
+        sudo=sudo.sudo,
+        perms=perms.perms,
+        owner=perms.owner,
+        group=perms.group,
+    )
+
+
+##
+
+
 @click_options(
     DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
 )
@@ -768,6 +877,9 @@ def yq_sub_cmd(
         owner=perms.owner,
         group=perms.group,
     )
+
+
+##
 
 
 @click_options(
@@ -830,6 +942,7 @@ __all__ = [
     "starship_sub_cmd",
     "taplo_sub_cmd",
     "uv_sub_cmd",
+    "watchexec_sub_cmd",
     "yq_sub_cmd",
     "zoxide_sub_cmd",
 ]

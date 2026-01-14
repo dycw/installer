@@ -3,6 +3,7 @@ from __future__ import annotations
 from re import escape, search
 from typing import TYPE_CHECKING
 
+from pytest import mark
 from utilities.pytest import throttle_test
 from utilities.subprocess import run
 from utilities.text import strip_and_dedent
@@ -31,6 +32,7 @@ from installer.apps.lib import (
     setup_starship,
     setup_taplo,
     setup_uv,
+    setup_watchexec,
     setup_yq,
     setup_zoxide,
 )
@@ -390,6 +392,23 @@ class TestSetupUv:
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
             Usage: uv [OPTIONS] <COMMAND>
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupWatchexec:
+    @throttle_test(delta=HOUR)
+    @mark.only
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_watchexec(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "watchexec"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage:
+              watchexec [flags]
+              watchexec [command]
         """)
         assert search(escape(pattern), result.out)
 

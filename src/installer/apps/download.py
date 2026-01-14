@@ -11,6 +11,7 @@ from utilities.bz2 import yield_bz2_contents
 from utilities.gzip import yield_gzip_contents
 from utilities.inflect import counted_noun
 from utilities.iterables import OneNonUniqueError, one
+from utilities.lzma import yield_lzma_contents
 from utilities.tabulate import func_param_desc
 from utilities.tempfile import TemporaryDirectory
 
@@ -259,4 +260,59 @@ def yield_gzip_asset(
         yield temp2
 
 
-__all__ = ["yield_asset", "yield_bz2_asset", "yield_gzip_asset", "yield_gzip_asset"]
+##
+
+
+@contextmanager
+def yield_lzma_asset(
+    owner: str,
+    repo: str,
+    /,
+    *,
+    tag: str | None = TAG_SETTINGS.tag,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    match_system: bool = MATCH_SETTINGS.match_system,
+    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
+    match_machine: bool = MATCH_SETTINGS.match_machine,
+    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
+    not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+) -> Iterator[Path]:
+    LOGGER.info(
+        func_param_desc(
+            yield_lzma_asset,
+            __version__,
+            f"{owner=}",
+            f"{repo=}",
+            f"{tag=}",
+            f"{token=}",
+            f"{match_system=}",
+            f"{match_c_std_lib=}",
+            f"{match_machine=}",
+            f"{not_matches=}",
+            f"{not_endswith=}",
+            f"{timeout=}",
+            f"{chunk_size=}",
+        )
+    )
+    with (
+        yield_asset(
+            owner,
+            repo,
+            tag=tag,
+            token=token,
+            match_system=match_system,
+            match_c_std_lib=match_c_std_lib,
+            match_machine=match_machine,
+            not_matches=not_matches,
+            not_endswith=not_endswith,
+            timeout=timeout,
+            chunk_size=chunk_size,
+        ) as temp1,
+        yield_lzma_contents(temp1) as temp2,
+    ):
+        yield temp2
+
+
+__all__ = ["yield_asset", "yield_bz2_asset", "yield_gzip_asset", "yield_lzma_asset"]
