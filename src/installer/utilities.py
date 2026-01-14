@@ -3,15 +3,21 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, assert_never
 
-from typed_settings import Secret
+from typed_settings import EnvLoader, Secret
 from utilities.atomicwrites import writer
 from utilities.text import strip_and_dedent
 
-from installer.constants import SHELL
+from installer.apps.constants import SHELL
 from installer.logging import LOGGER
 
 if TYPE_CHECKING:
     from utilities.types import PathLike
+
+
+LOADER = EnvLoader("")
+
+
+##
 
 
 def convert_token(x: str | None, /) -> Secret[str] | None:
@@ -84,4 +90,4 @@ def ensure_shell_rc(text: str, /, *, etc: str | None = None) -> None:
                 assert_never(never)
 
 
-__all__ = ["convert_token", "ensure_line", "ensure_shell_rc"]
+__all__ = ["LOADER", "convert_token", "ensure_line", "ensure_shell_rc"]

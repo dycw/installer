@@ -8,6 +8,7 @@ class TestCLI:
     @mark.parametrize(
         "args",
         [
+            ##
             param(["age"]),
             param(["btm"]),
             param(["delta"]),
@@ -23,7 +24,6 @@ class TestCLI:
             param(["ripgrep"]),
             param(["rsync"]),
             param(["ruff"]),
-            param(["run", "asset-owner", "asset-repo", "binary-name"]),
             param(["sd"]),
             param(["shellcheck"]),
             param(["shfmt"]),
@@ -33,6 +33,14 @@ class TestCLI:
             param(["uv"]),
             param(["yq"]),
             param(["zoxide"]),
+            ##
+            param(["run", "asset-owner", "asset-repo", "binary-name"]),
+            ##
+            param(["setup-authorized-keys"]),
+            param(["setup-authorized-keys", "key1"]),
+            param(["setup-authorized-keys", "key1", "key2"]),
+            param(["setup-ssh-config"]),
+            param(["setup-sshd-config"]),
         ],
     )
     def test_main(self, *, args: list[str]) -> None:
