@@ -4,7 +4,6 @@ from os import environ
 from pathlib import Path
 
 from typed_settings import EnvLoader, Secret, load_settings, option, secret, settings
-from utilities.pytest import IS_CI
 
 from installer.utilities import convert_token
 
@@ -14,7 +13,7 @@ LOADER = EnvLoader("")
 @settings
 class DownloadSettings:
     token: Secret[str] | None = secret(
-        default=Secret(environ["GITHUB_TOKEN"]) if IS_CI else None,
+        default=None if (t := environ.get("GITHUB_TOKEN")) is None else Secret(t),
         converter=convert_token,
         help="The GitHub token",
     )
