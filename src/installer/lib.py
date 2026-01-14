@@ -17,12 +17,7 @@ from utilities.text import repr_str
 
 from installer import __version__
 from installer.constants import SHELL, SYSTEM_NAME
-from installer.download import (
-    yield_asset,
-    yield_bz2_asset,
-    yield_gzip_asset,
-    yield_tar_asset,
-)
+from installer.download import yield_asset, yield_bz2_asset, yield_gzip_asset
 from installer.logging import LOGGER
 from installer.settings import (
     DOWNLOAD_SETTINGS,
@@ -115,7 +110,7 @@ def setup_age(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'age'."""
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "FiloSottile",
         "age",
         token=token,
@@ -149,7 +144,7 @@ def setup_bottom(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'bottom'."""
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "ClementTsang",
         "bottom",
         token=token,
@@ -181,7 +176,7 @@ def setup_bat(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'bat'."""
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "sharkdp",
         "bat",
         token=token,
@@ -212,7 +207,7 @@ def setup_delta(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'delta'."""
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "dandavison",
         "delta",
         token=token,
@@ -297,7 +292,7 @@ def setup_dust(
             match_machine = True
         case never:
             assert_never(never)
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "bootandy",
         "dust",
         token=token,
@@ -343,7 +338,7 @@ def setup_eza(
             not_endswith = ["zip"]
         case never:
             assert_never(never)
-    with yield_tar_asset(
+    with yield_gzip_asset(
         asset_owner,
         asset_repo,
         tag=tag,
@@ -375,7 +370,7 @@ def setup_fd(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'fd'."""
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "sharkdp",
         "fd",
         token=token,
@@ -408,7 +403,7 @@ def setup_fzf(
     etc: bool = SHELL_RC_SETTINGS.etc,
 ) -> None:
     """Setup 'fzf'."""
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "junegunn",
         "fzf",
         token=token,
@@ -502,7 +497,7 @@ def setup_just(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'just'."""
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "casey",
         "just",
         token=token,
@@ -532,7 +527,7 @@ def setup_neovim(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'neovim'."""
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "neovim",
         "neovim",
         token=token,
@@ -593,7 +588,7 @@ def setup_ripgrep(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'ripgrep'."""
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "burntsushi",
         "ripgrep",
         token=token,
@@ -626,7 +621,7 @@ def setup_starship(
     etc: bool = SHELL_RC_SETTINGS.etc,
 ) -> None:
     """Setup 'starship'."""
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "starship",
         "starship",
         token=token,
@@ -715,7 +710,7 @@ def setup_ruff(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'ruff'."""
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "astral-sh",
         "ruff",
         token=token,
@@ -747,7 +742,7 @@ def setup_sd(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'sd'."""
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "chmln",
         "sd",
         token=token,
@@ -778,7 +773,7 @@ def setup_shellcheck(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'shellcheck'."""
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "koalaman",
         "shellcheck",
         token=token,
@@ -876,7 +871,7 @@ def setup_uv(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'uv'."""
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "astral-sh",
         "uv",
         token=token,
@@ -944,7 +939,7 @@ def setup_zoxide(
     etc: bool = SHELL_RC_SETTINGS.etc,
 ) -> None:
     """Setup 'zoxide'."""
-    with yield_tar_asset(
+    with yield_gzip_asset(
         "ajeetdsouza",
         "zoxide",
         token=token,
