@@ -3,11 +3,9 @@ from __future__ import annotations
 from os import environ
 from pathlib import Path
 
-from typed_settings import EnvLoader, Secret, load_settings, option, secret, settings
+from typed_settings import Secret, load_settings, option, secret, settings
 
-from installer.utilities import convert_token
-
-LOADER = EnvLoader("")
+from installer.utilities import LOADER, convert_token
 
 
 @settings
@@ -24,6 +22,9 @@ class DownloadSettings:
 DOWNLOAD_SETTINGS = load_settings(DownloadSettings, [LOADER])
 
 
+##
+
+
 @settings
 class MatchSettings:
     match_system: bool = option(default=False, help="Match the system name")
@@ -38,6 +39,9 @@ class MatchSettings:
 MATCH_SETTINGS = load_settings(MatchSettings, [LOADER])
 
 
+##
+
+
 @settings
 class PathBinariesSettings:
     path_binaries: Path = option(
@@ -48,6 +52,9 @@ class PathBinariesSettings:
 PATH_BINARIES_SETTINGS = load_settings(PathBinariesSettings, [LOADER])
 
 
+##
+
+
 @settings
 class PermsSettings:
     perms: str = option(default="u=rwx,g=rx,o=rx", help="Change permissions")
@@ -56,6 +63,9 @@ class PermsSettings:
 
 
 PERMS_SETTINGS = load_settings(PermsSettings, [LOADER])
+
+
+##
 
 
 @settings
@@ -69,12 +79,18 @@ class ShellRcSettings:
 SHELL_RC_SETTINGS = load_settings(ShellRcSettings, [LOADER])
 
 
+##
+
+
 @settings
 class SudoSettings:
     sudo: bool = option(default=False, help="Run as 'sudo'")
 
 
 SUDO_SETTINGS = load_settings(SudoSettings, [LOADER])
+
+
+##
 
 
 @settings
@@ -87,7 +103,6 @@ TAG_SETTINGS = load_settings(TagSettings, [LOADER])
 
 __all__ = [
     "DOWNLOAD_SETTINGS",
-    "LOADER",
     "MATCH_SETTINGS",
     "PATH_BINARIES_SETTINGS",
     "PERMS_SETTINGS",

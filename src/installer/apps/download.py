@@ -15,7 +15,11 @@ from utilities.tabulate import func_param_desc
 from utilities.tempfile import TemporaryDirectory
 
 from installer import __version__
-from installer.constants import C_STD_LIB_GROUP, MACHINE_TYPE_GROUP, SYSTEM_NAME_GROUP
+from installer.apps.constants import (
+    C_STD_LIB_GROUP,
+    MACHINE_TYPE_GROUP,
+    SYSTEM_NAME_GROUP,
+)
 from installer.logging import LOGGER
 from installer.settings import DOWNLOAD_SETTINGS, MATCH_SETTINGS, TAG_SETTINGS
 

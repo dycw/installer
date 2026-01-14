@@ -16,10 +16,9 @@ from utilities.tabulate import func_param_desc
 from utilities.text import repr_str
 
 from installer import __version__
-from installer.constants import SHELL, SYSTEM_NAME
-from installer.download import yield_asset, yield_bz2_asset, yield_gzip_asset
-from installer.logging import LOGGER
-from installer.settings import (
+from installer.apps.constants import SHELL, SYSTEM_NAME
+from installer.apps.download import yield_asset, yield_bz2_asset, yield_gzip_asset
+from installer.apps.settings import (
     DOWNLOAD_SETTINGS,
     MATCH_SETTINGS,
     PATH_BINARIES_SETTINGS,
@@ -28,6 +27,7 @@ from installer.settings import (
     SUDO_SETTINGS,
     TAG_SETTINGS,
 )
+from installer.logging import LOGGER
 from installer.utilities import ensure_shell_rc
 
 if TYPE_CHECKING:
