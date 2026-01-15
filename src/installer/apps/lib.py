@@ -17,7 +17,12 @@ from utilities.text import repr_str
 
 from installer import __version__
 from installer.apps.constants import SHELL, SYSTEM_NAME
-from installer.apps.download import yield_asset, yield_bz2_asset, yield_gzip_asset
+from installer.apps.download import (
+    yield_asset,
+    yield_bz2_asset,
+    yield_gzip_asset,
+    yield_lzma_asset,
+)
 from installer.apps.settings import (
     DOWNLOAD_SETTINGS,
     MATCH_SETTINGS,
@@ -900,6 +905,38 @@ def setup_uv(
         chunk_size=chunk_size,
     ) as temp:
         src = temp / "uv"
+        dest = Path(path_binaries, src.name)
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
+def setup_watchexec(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'watchexec'."""
+    with yield_lzma_asset(
+        "watchexec",
+        "watchexec",
+        token=token,
+        match_system=True,
+        match_c_std_lib=True,
+        match_machine=True,
+        not_endswith=["b3", "deb", "rpm", "sha256", "sha512"],
+        timeout=timeout,
+        chunk_size=chunk_size,
+    ) as temp:
+        src = temp / "watchexec"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
     LOGGER.info("Downloaded to %r", str(dest))

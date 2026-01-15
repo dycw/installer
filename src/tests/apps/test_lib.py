@@ -31,6 +31,7 @@ from installer.apps.lib import (
     setup_starship,
     setup_taplo,
     setup_uv,
+    setup_watchexec,
     setup_yq,
     setup_zoxide,
 )
@@ -390,6 +391,20 @@ class TestSetupUv:
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
             Usage: uv [OPTIONS] <COMMAND>
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupWatchexec:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_watchexec(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "watchexec"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage: watchexec [OPTIONS] [COMMAND]...
         """)
         assert search(escape(pattern), result.out)
 

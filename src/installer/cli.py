@@ -29,6 +29,7 @@ from installer.apps.cli import (
     starship_sub_cmd,
     taplo_sub_cmd,
     uv_sub_cmd,
+    watchexec_sub_cmd,
     yq_sub_cmd,
     zoxide_sub_cmd,
 )
@@ -68,6 +69,7 @@ _ = _main.command(name="sops", **CONTEXT_SETTINGS)(sops_sub_cmd)
 _ = _main.command(name="starship", **CONTEXT_SETTINGS)(starship_sub_cmd)
 _ = _main.command(name="taplo", **CONTEXT_SETTINGS)(taplo_sub_cmd)
 _ = _main.command(name="uv", **CONTEXT_SETTINGS)(uv_sub_cmd)
+_ = _main.command(name="watchexec", **CONTEXT_SETTINGS)(watchexec_sub_cmd)
 _ = _main.command(name="yq", **CONTEXT_SETTINGS)(yq_sub_cmd)
 _ = _main.command(name="zoxide", **CONTEXT_SETTINGS)(zoxide_sub_cmd)
 
