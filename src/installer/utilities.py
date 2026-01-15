@@ -3,22 +3,18 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, assert_never
 
-from typed_settings import EnvLoader, Secret
+import utilities.subprocess
+from typed_settings import Secret
 from utilities.atomicwrites import writer
 from utilities.re import extract_groups
 from utilities.text import strip_and_dedent
 
 from installer.apps.constants import SHELL
 from installer.logging import LOGGER
+from installer.settings import SSH_SETTINGS
 
 if TYPE_CHECKING:
-    from utilities.types import PathLike
-
-
-LOADER = EnvLoader("")
-
-
-##
+    from utilities.types import LoggerLike, PathLike, Retry
 
 
 def convert_token(x: str | None, /) -> Secret[str] | None:
@@ -94,9 +90,35 @@ def ensure_shell_rc(text: str, /, *, etc: str | None = None) -> None:
 ##
 
 
+def get_home(
+    *,
+    ssh: str | None = SSH_SETTINGS.ssh,
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
+) -> Path:
+    if ssh is None:
+        return Path.home()
+    user, hostname = split_ssh(ssh)
+    result = utilities.subprocess.ssh(
+        user,
+        hostname,
+        "getent",
+        "passwd",
+        user,
+        return_=True,
+        retry=retry,
+        logger=logger,
+    )
+    _, _, _, _, _, home, _ = result.split(":")
+    return Path(home)
+
+
+##
+
+
 def split_ssh(text: str, /) -> tuple[str, str]:
     user, hostname = extract_groups(r"(.+)@(.+)$", text)
     return user, hostname
 
 
-__all__ = ["LOADER", "convert_token", "ensure_line", "ensure_shell_rc", "split_ssh"]
+__all__ = ["convert_token", "ensure_line", "ensure_shell_rc", "get_home", "split_ssh"]

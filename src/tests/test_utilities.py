@@ -5,7 +5,8 @@ from click.testing import CliRunner
 from pytest import MonkeyPatch, mark, param
 from typed_settings import Secret, click_options, secret, settings
 
-from installer.utilities import LOADER, convert_token, split_ssh
+from installer.settings import LOADER
+from installer.utilities import convert_token, split_ssh
 
 
 @settings
