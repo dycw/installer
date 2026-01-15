@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from pathlib import Path
+from shlex import join
 from typing import TYPE_CHECKING, assert_never
 
+import utilities.subprocess
 from typed_settings import Secret
 from utilities.subprocess import (
     APT_UPDATE,
+    BASH_LS,
     apt_install_cmd,
     cp,
     maybe_sudo_cmd,
@@ -33,12 +36,12 @@ from installer.apps.settings import (
 )
 from installer.logging import LOGGER
 from installer.settings import SUDO_SETTINGS
-from installer.utilities import ensure_shell_rc
+from installer.utilities import ensure_shell_rc, split_ssh
 
 if TYPE_CHECKING:
     from typed_settings import Secret
     from utilities.permissions import PermissionsLike
-    from utilities.types import PathLike
+    from utilities.types import LoggerLike, PathLike, Retry
 
 
 def setup_asset(
@@ -200,16 +203,37 @@ def setup_bottom(
 ##
 
 
-def setup_curl(*, sudo: bool = SUDO_SETTINGS.sudo) -> None:
+def setup_curl(
+    *,
+    ssh: str | None = None,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    retry: Retry | None = None,
+    logger: LoggerLike | None = None,
+) -> None:
     """Setup 'curl'."""
-    match SYSTEM_NAME:
-        case "Darwin":
+    match SYSTEM_NAME, ssh:
+        case "Darwin", _:
             msg = f"Unsupported system: {SYSTEM_NAME!r}"
             raise ValueError(msg)
-        case "Linux":
+        case "Linux", None:
             run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
             run(*maybe_sudo_cmd(*apt_install_cmd("curl"), sudo=sudo))
             LOGGER.info("Installed 'curl'")
+        case "Linux", str():
+            user, hostname = split_ssh(ssh)
+            cmds: list[list[str]] = [
+                maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
+                maybe_sudo_cmd(*apt_install_cmd("curl"), sudo=sudo),
+            ]
+            utilities.subprocess.ssh(
+                user,
+                hostname,
+                *BASH_LS,
+                input="\n".join(map(join, cmds)),
+                retry=retry,
+                logger=logger,
+            )
+            LOGGER.info("Installed 'curl' on '%s'", ssh)
         case never:
             assert_never(never)
 

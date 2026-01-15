@@ -83,6 +83,19 @@ SHELL_RC_SETTINGS = load_settings(ShellRcSettings, [LOADER])
 
 
 @settings
+class SSHSettings:
+    ssh: str | None = option(default=None, help="SSH user & hostname")
+    retry: tuple[int, int] | None = option(default=None, help="Retry SSH")
+    logger: str | None = option(default=None, help="SSH logger")
+
+
+SSH_SETTINGS = load_settings(SSHSettings, [LOADER])
+
+
+##
+
+
+@settings
 class TagSettings:
     tag: str | None = secret(default=None, help="The GitHub release tag")
 
@@ -96,11 +109,13 @@ __all__ = [
     "PATH_BINARIES_SETTINGS",
     "PERMS_SETTINGS",
     "SHELL_RC_SETTINGS",
+    "SSH_SETTINGS",
     "TAG_SETTINGS",
     "DownloadSettings",
     "MatchSettings",
     "PathBinariesSettings",
     "PermsSettings",
+    "SSHSettings",
     "ShellRcSettings",
     "TagSettings",
 ]
