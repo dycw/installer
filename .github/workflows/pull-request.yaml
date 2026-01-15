@@ -26,16 +26,11 @@ jobs:
   pytest:
     env:
       CI: "1"
+      GITHUB_TOKEN: ${{github.token}}
     name: pytest (${{matrix.os}}, ${{matrix.python-version}},
       ${{matrix.resolution}})
     runs-on: ${{matrix.os}}
     steps:
-      - name: Run 'pytest'
-        uses: dycw/action-pytest@latest
-        with:
-          python-version: ${{matrix.python-version}}
-          resolution: ${{matrix.resolution}}
-          token-github: ${{github.token}}
       - name: Run 'pytest'
         uses: dycw/action-pytest@latest
         with:
