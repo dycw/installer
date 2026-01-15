@@ -473,6 +473,38 @@ def setup_git(*, sudo: bool = SUDO_SETTINGS.sudo) -> None:
 ##
 
 
+def setup_gitweb(
+    *,
+    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
+    timeout: int = DOWNLOAD_SETTINGS.timeout,
+    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
+    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
+    owner: str | int | None = PERMS_SETTINGS.owner,
+    group: str | int | None = PERMS_SETTINGS.group,
+) -> None:
+    """Setup 'shfmt'."""
+    dest = Path(path_binaries, "gitweb")
+    setup_asset(
+        "yoannfleurydev",
+        "gitweb",
+        dest,
+        token=token,
+        match_system=True,
+        timeout=timeout,
+        chunk_size=chunk_size,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+    )
+    LOGGER.info("Downloaded to %r", str(dest))
+
+
+##
+
+
 def setup_jq(
     *,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
@@ -1033,6 +1065,7 @@ __all__ = [
     "setup_fd",
     "setup_fzf",
     "setup_git",
+    "setup_gitweb",
     "setup_jq",
     "setup_just",
     "setup_neovim",

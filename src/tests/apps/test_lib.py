@@ -18,6 +18,7 @@ from installer.apps.lib import (
     setup_eza,
     setup_fd,
     setup_fzf,
+    setup_gitweb,
     setup_jq,
     setup_just,
     setup_neovim,
@@ -196,6 +197,20 @@ class TestSetupFzf:
         result = capsys.readouterr()
         pattern = strip_and_dedent("""
             Usage: fzf [options]
+        """)
+        assert search(escape(pattern), result.out)
+
+
+class TestSetupGitWeb:
+    @throttle_test(delta=HOUR)
+    def test_main(
+        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+    ) -> None:
+        setup_gitweb(token=token, path_binaries=tmp_path)
+        run(str(tmp_path / "gitweb"), "--help", print=True)
+        result = capsys.readouterr()
+        pattern = strip_and_dedent("""
+            Usage: gitweb [OPTIONS] [pattern] [path]...
         """)
         assert search(escape(pattern), result.out)
 
