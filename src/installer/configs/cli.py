@@ -19,7 +19,7 @@ from installer.settings import LOADER, SSHSettings, SudoSettings
 @click_options(RootSettings, [LOADER], show_envvars_in_help=True, argname="root")
 @click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 def setup_authorized_keys_sub_cmd(
-    keys: tuple[str, ...], /, *, root: RootSettings, ssh: SSHSettings
+    *, keys: tuple[str, ...], root: RootSettings, ssh: SSHSettings
 ) -> None:
     if is_pytest():
         return
