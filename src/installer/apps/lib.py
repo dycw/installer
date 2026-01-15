@@ -214,15 +214,15 @@ def setup_curl(
     logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> None:
     """Setup 'curl'."""
-    match SYSTEM_NAME, ssh:
-        case "Darwin", _:
+    match ssh, SYSTEM_NAME:
+        case None, "Darwin":
             msg = f"Unsupported system: {SYSTEM_NAME!r}"
             raise ValueError(msg)
-        case "Linux", None:
+        case None, "Linux":
             run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
             run(*maybe_sudo_cmd(*apt_install_cmd("curl"), sudo=sudo))
             LOGGER.info("Installed 'curl'")
-        case "Linux", str():
+        case str(), _:
             user, hostname = split_ssh(ssh)
             cmds: list[list[str]] = [
                 maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
@@ -738,15 +738,15 @@ def setup_rsync(
     logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> None:
     """Setup 'rsync'."""
-    match SYSTEM_NAME, ssh:
-        case "Darwin", _:
+    match ssh, SYSTEM_NAME:
+        case None, "Darwin":
             msg = f"Unsupported system: {SYSTEM_NAME!r}"
             raise ValueError(msg)
-        case "Linux", None:
+        case None, "Linux":
             run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
             run(*maybe_sudo_cmd(*apt_install_cmd("rsync"), sudo=sudo))
             LOGGER.info("Installed 'rsync'")
-        case "Linux", str():
+        case str(), _:
             user, hostname = split_ssh(ssh)
             cmds: list[list[str]] = [
                 maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
