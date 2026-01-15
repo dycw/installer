@@ -5,7 +5,7 @@ from click.testing import CliRunner
 from pytest import MonkeyPatch, mark, param
 from typed_settings import Secret, click_options, secret, settings
 
-from installer.utilities import LOADER, convert_token, split_ssh
+from installer.utilities import LOADER, convert_token
 
 
 @settings
@@ -57,17 +57,3 @@ class TestConvertToken:
         result = CliRunner().invoke(_cli_with_secret)
         assert result.exit_code == 0
         assert result.stdout == f"token = {expected}\n"
-
-
-class TestSplitSSH:
-    @mark.parametrize(
-        ("ssh", "exp_user", "exp_hostname"),
-        [
-            param("user@hostname", "user", "hostname"),
-            param("user@hostname.subnet", "user", "hostname.subnet"),
-        ],
-    )
-    def test_main(self, *, ssh: str, exp_user: str, exp_hostname: str) -> None:
-        res_user, res_hostname = split_ssh(ssh)
-        assert res_user == exp_user
-        assert res_hostname == exp_hostname

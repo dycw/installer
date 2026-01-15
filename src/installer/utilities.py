@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, assert_never
 
 from typed_settings import EnvLoader, Secret
 from utilities.atomicwrites import writer
-from utilities.re import extract_groups
 from utilities.text import strip_and_dedent
 
 from installer.apps.constants import SHELL
@@ -91,12 +90,4 @@ def ensure_shell_rc(text: str, /, *, etc: str | None = None) -> None:
                 assert_never(never)
 
 
-##
-
-
-def split_ssh(text: str, /) -> tuple[str, str]:
-    user, hostname = extract_groups(r"(.+)@(.+)$", text)
-    return user, hostname
-
-
-__all__ = ["LOADER", "convert_token", "ensure_line", "ensure_shell_rc", "split_ssh"]
+__all__ = ["LOADER", "convert_token", "ensure_line", "ensure_shell_rc"]
