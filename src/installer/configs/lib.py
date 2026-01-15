@@ -1,16 +1,17 @@
 from __future__ import annotations
 
 from pathlib import Path
+from shlex import join
 from typing import TYPE_CHECKING
 
 import utilities.subprocess
 from utilities.atomicwrites import writer
-from utilities.subprocess import tee, tee_cmd
+from utilities.subprocess import BASH_LS, mkdir_cmd, tee, tee_cmd
 from utilities.tabulate import func_param_desc
 from utilities.text import strip_and_dedent
 
 from installer import __version__
-from installer.configs.constants import AUTHORIZED_KEYS, REL_SSH, SSH
+from installer.configs.constants import RELATIVE_HOME
 from installer.configs.settings import SSHD_SETTINGS
 from installer.logging import LOGGER
 from installer.settings import SSH_SETTINGS, SUDO_SETTINGS
@@ -34,6 +35,7 @@ def setup_authorized_keys(
             setup_authorized_keys,
             __version__,
             f"{keys=}",
+            f"{ssh=}",
             f"{root=}",
             f"{retry=}",
             f"{logger=}",
@@ -41,27 +43,65 @@ def setup_authorized_keys(
     )
     text = "\n".join(keys)
     if ssh is None:
-        dest = Path(root, Path.home().relative_to("/"), SSH, AUTHORIZED_KEYS)
+        home = Path(root, RELATIVE_HOME)
+        dest = home / ".ssh/authorized_keys"
         with writer(dest, overwrite=True) as temp:
             _ = temp.write_text(text)
     else:
         user, hostname = split_ssh(ssh)
         home = get_home(ssh=ssh, retry=retry, logger=logger)
-        dest = home / SSH / AUTHORIZED_KEYS
-        utilities.subprocess.ssh(user, hostname, *tee_cmd())
+        dest = home / ".ssh/authorized_keys"
+        utilities.subprocess.ssh(
+            user, hostname, *tee_cmd(dest), input=text, retry=retry, logger=logger
+        )
 
 
 ##
 
 
-def setup_ssh_config(*, root: PathLike = "/") -> None:
-    LOGGER.info(func_param_desc(setup_ssh_config, __version__, f"{root=}"))
-    root = Path(root)
-    ssh = root / REL_SSH
-    path = ssh / "config.d/*.conf"
-    with writer(ssh / "config", overwrite=True) as temp:
-        _ = temp.write_text(f"Include {path}")
-    path.parent.mkdir(parents=True, exist_ok=True)
+def setup_ssh_config(
+    *,
+    ssh: str | None = SSH_SETTINGS.ssh,
+    root: PathLike = "/",
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
+) -> None:
+    LOGGER.info(
+        func_param_desc(
+            setup_ssh_config,
+            __version__,
+            f"{ssh=}",
+            f"{root=}",
+            f"{retry=}",
+            f"{logger=}",
+        )
+    )
+    if ssh is None:
+        home = Path(root, RELATIVE_HOME)
+        config = home / ".ssh/config"
+        config_d = home / ".ssh/config.d"
+        config_d.mkdir(parents=True, exist_ok=True)
+        text = f"Include {config_d}/*.conf"
+        with writer(config, overwrite=True) as temp:
+            _ = temp.write_text(text)
+    else:
+        user, hostname = split_ssh(ssh)
+        home = get_home(ssh=ssh, retry=retry, logger=logger)
+        config = home / ".ssh/config"
+        config_d = home / ".ssh/config.d"
+        cmds: list[list[str]] = [mkdir_cmd(config, parent=True), mkdir_cmd(config_d)]
+        utilities.subprocess.ssh(
+            user,
+            hostname,
+            *BASH_LS,
+            input="\n".join(map(join, cmds)),
+            retry=retry,
+            logger=logger,
+        )
+        text = f"Include {config_d}/*.conf"
+        utilities.subprocess.ssh(
+            user, hostname, *tee_cmd(config), input=text, retry=retry, logger=logger
+        )
 
 
 ##

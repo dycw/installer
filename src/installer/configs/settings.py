@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typed_settings import load_settings, option, settings
 
-from installer.utilities import LOADER
+from installer.settings import LOADER
 
 
 @settings

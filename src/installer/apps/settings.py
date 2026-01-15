@@ -5,7 +5,8 @@ from pathlib import Path
 
 from typed_settings import Secret, load_settings, option, secret, settings
 
-from installer.utilities import LOADER, convert_token
+from installer.settings import LOADER
+from installer.utilities import convert_token
 
 
 @settings
