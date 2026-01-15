@@ -1,16 +1,21 @@
 from __future__ import annotations
 
 from pathlib import Path
+from shlex import join
 from typing import TYPE_CHECKING, assert_never
 
+import utilities.subprocess
 from typed_settings import Secret
 from utilities.subprocess import (
     APT_UPDATE,
+    BASH_LS,
     apt_install_cmd,
     cp,
+    curl_cmd,
     maybe_sudo_cmd,
     run,
     symlink,
+    yield_ssh_temp_dir,
 )
 from utilities.tabulate import func_param_desc
 from utilities.text import repr_str
@@ -29,16 +34,17 @@ from installer.apps.settings import (
     PATH_BINARIES_SETTINGS,
     PERMS_SETTINGS,
     SHELL_RC_SETTINGS,
+    SSH_SETTINGS,
     TAG_SETTINGS,
 )
 from installer.logging import LOGGER
 from installer.settings import SUDO_SETTINGS
-from installer.utilities import ensure_shell_rc
+from installer.utilities import ensure_shell_rc, split_ssh
 
 if TYPE_CHECKING:
     from typed_settings import Secret
     from utilities.permissions import PermissionsLike
-    from utilities.types import PathLike
+    from utilities.types import LoggerLike, PathLike, Retry
 
 
 def setup_asset(
@@ -200,16 +206,37 @@ def setup_bottom(
 ##
 
 
-def setup_curl(*, sudo: bool = SUDO_SETTINGS.sudo) -> None:
+def setup_curl(
+    *,
+    ssh: str | None = SSH_SETTINGS.ssh,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
+) -> None:
     """Setup 'curl'."""
-    match SYSTEM_NAME:
-        case "Darwin":
+    match SYSTEM_NAME, ssh:
+        case "Darwin", _:
             msg = f"Unsupported system: {SYSTEM_NAME!r}"
             raise ValueError(msg)
-        case "Linux":
+        case "Linux", None:
             run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
             run(*maybe_sudo_cmd(*apt_install_cmd("curl"), sudo=sudo))
             LOGGER.info("Installed 'curl'")
+        case "Linux", str():
+            user, hostname = split_ssh(ssh)
+            cmds: list[list[str]] = [
+                maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
+                maybe_sudo_cmd(*apt_install_cmd("curl"), sudo=sudo),
+            ]
+            utilities.subprocess.ssh(
+                user,
+                hostname,
+                *BASH_LS,
+                input="\n".join(map(join, cmds)),
+                retry=retry,
+                logger=logger,
+            )
+            LOGGER.info("Installed 'curl' on '%s'", hostname)
         case never:
             assert_never(never)
 
@@ -703,16 +730,37 @@ def setup_taplo(
 ##
 
 
-def setup_rsync(*, sudo: bool = SUDO_SETTINGS.sudo) -> None:
+def setup_rsync(
+    *,
+    ssh: str | None = SSH_SETTINGS.ssh,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
+) -> None:
     """Setup 'rsync'."""
-    match SYSTEM_NAME:
-        case "Darwin":
+    match SYSTEM_NAME, ssh:
+        case "Darwin", _:
             msg = f"Unsupported system: {SYSTEM_NAME!r}"
             raise ValueError(msg)
-        case "Linux":
+        case "Linux", None:
             run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
             run(*maybe_sudo_cmd(*apt_install_cmd("rsync"), sudo=sudo))
             LOGGER.info("Installed 'rsync'")
+        case "Linux", str():
+            user, hostname = split_ssh(ssh)
+            cmds: list[list[str]] = [
+                maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
+                maybe_sudo_cmd(*apt_install_cmd("rsync"), sudo=sudo),
+            ]
+            utilities.subprocess.ssh(
+                user,
+                hostname,
+                *BASH_LS,
+                input="\n".join(map(join, cmds)),
+                retry=retry,
+                logger=logger,
+            )
+            LOGGER.info("Installed 'curl' on '%s'", hostname)
         case never:
             assert_never(never)
 
@@ -883,6 +931,7 @@ def setup_sops(
 
 def setup_uv(
     *,
+    ssh: str | None = SSH_SETTINGS.ssh,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
@@ -891,23 +940,50 @@ def setup_uv(
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> None:
     """Setup 'uv'."""
-    with yield_gzip_asset(
-        "astral-sh",
-        "uv",
-        token=token,
-        match_system=True,
-        match_c_std_lib=True,
-        match_machine=True,
-        not_endswith=["sha256"],
-        timeout=timeout,
-        chunk_size=chunk_size,
-    ) as temp:
-        src = temp / "uv"
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
+    if ssh is None:
+        with yield_gzip_asset(
+            "astral-sh",
+            "uv",
+            token=token,
+            match_system=True,
+            match_c_std_lib=True,
+            match_machine=True,
+            not_endswith=["sha256"],
+            timeout=timeout,
+            chunk_size=chunk_size,
+        ) as temp:
+            src = temp / "uv"
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+        LOGGER.info("Downloaded to %r", str(dest))
+    else:
+        user, hostname = split_ssh(ssh)
+        with yield_ssh_temp_dir(user, hostname, retry=retry, logger=logger) as temp:
+            path = temp / "install.sh"
+            cmds: list[list[str]] = [
+                curl_cmd("https://astral.sh/uv/install.sh", output=path),
+                maybe_sudo_cmd(
+                    "env",
+                    f"UV_INSTALL_DIR={path_binaries}",
+                    "UV_NO_MODIFY_PATH=1",
+                    "sh",
+                    str(path),
+                    sudo=sudo,
+                ),
+            ]
+            utilities.subprocess.ssh(
+                user,
+                hostname,
+                *BASH_LS,
+                input="\n".join(map(join, cmds)),
+                retry=retry,
+                logger=logger,
+            )
+        LOGGER.info("Downloaded to %r on '%s'", str(path_binaries), hostname)
 
 
 ##

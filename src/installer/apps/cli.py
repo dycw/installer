@@ -40,6 +40,7 @@ from installer.apps.settings import (
     PathBinariesSettings,
     PermsSettings,
     ShellRcSettings,
+    SSHSettings,
 )
 from installer.logging import LOGGER
 from installer.settings import SudoSettings
@@ -144,12 +145,13 @@ def bottom_sub_cmd(
 ##
 
 
+@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
-def curl_sub_cmd(*, sudo: SudoSettings) -> None:
+def curl_sub_cmd(*, ssh: SSHSettings, sudo: SudoSettings) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
-    setup_curl(sudo=sudo.sudo)
+    setup_curl(ssh=ssh.ssh, sudo=sudo.sudo, retry=ssh.retry, logger=ssh.logger)
 
 
 ##
@@ -570,12 +572,13 @@ def ruff_sub_cmd(
 ##
 
 
+@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
-def rsync_sub_cmd(*, sudo: SudoSettings) -> None:
+def rsync_sub_cmd(*, ssh: SSHSettings, sudo: SudoSettings) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
-    setup_rsync(sudo=sudo.sudo)
+    setup_rsync(ssh=ssh.ssh, sudo=sudo.sudo, retry=ssh.retry, logger=ssh.logger)
 
 
 ##
@@ -790,18 +793,21 @@ def taplo_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def uv_sub_cmd(
     *,
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
+    ssh: SSHSettings,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
     setup_uv(
+        ssh=ssh.ssh,
         token=download.token,
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,
@@ -810,6 +816,8 @@ def uv_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
+        retry=ssh.retry,
+        logger=ssh.logger,
     )
 
 
