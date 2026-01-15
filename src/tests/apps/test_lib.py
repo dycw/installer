@@ -3,8 +3,7 @@ from __future__ import annotations
 from re import escape, search
 from typing import TYPE_CHECKING
 
-from utilities.constants import HOUR
-from utilities.pytest import throttle_test
+from utilities.pytest import run_test_frac, throttle_test
 from utilities.subprocess import run
 from utilities.text import strip_and_dedent
 
@@ -35,6 +34,7 @@ from installer.apps.lib import (
     setup_yq,
     setup_zoxide,
 )
+from tests.conftest import RUN_TEST_FRAC, THROTTLE_DURATION
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -44,7 +44,8 @@ if TYPE_CHECKING:
 
 
 class TestSetupAge:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -87,7 +88,8 @@ class TestSetupAge:
 
 
 class TestSetupBottom:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -101,7 +103,8 @@ class TestSetupBottom:
 
 
 class TestSetupBat:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -116,7 +119,8 @@ class TestSetupBat:
 
 
 class TestSetupDelta:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -130,7 +134,8 @@ class TestSetupDelta:
 
 
 class TestSetupDirenv:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -144,7 +149,8 @@ class TestSetupDirenv:
 
 
 class TestSetupDust:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -158,7 +164,8 @@ class TestSetupDust:
 
 
 class TestSetupEza:
-    @throttle_test(duration=2 * HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=2 * THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -173,7 +180,8 @@ class TestSetupEza:
 
 
 class TestSetupFd:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -187,7 +195,8 @@ class TestSetupFd:
 
 
 class TestSetupFzf:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -201,7 +210,8 @@ class TestSetupFzf:
 
 
 class TestSetupJq:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -217,7 +227,8 @@ class TestSetupJq:
 
 
 class TestSetupJust:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -231,7 +242,8 @@ class TestSetupJust:
 
 
 class TestSetupNeovim:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -246,7 +258,8 @@ class TestSetupNeovim:
 
 
 class TestSetupRestic:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -261,7 +274,8 @@ class TestSetupRestic:
 
 
 class TestSetupRipgrep:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -283,7 +297,8 @@ class TestSetupRipgrep:
 
 
 class TestSetupRuff:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -297,7 +312,8 @@ class TestSetupRuff:
 
 
 class TestSetupSd:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -311,7 +327,8 @@ class TestSetupSd:
 
 
 class TestSetupShellcheck:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -325,7 +342,8 @@ class TestSetupShellcheck:
 
 
 class TestSetupShfmt:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -339,7 +357,8 @@ class TestSetupShfmt:
 
 
 class TestSetupSops:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -354,7 +373,8 @@ class TestSetupSops:
 
 
 class TestSetupStarship:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -368,7 +388,8 @@ class TestSetupStarship:
 
 
 class TestSetupTaplo:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -382,7 +403,8 @@ class TestSetupTaplo:
 
 
 class TestSetupUv:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -396,7 +418,8 @@ class TestSetupUv:
 
 
 class TestSetupWatchexec:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -410,7 +433,8 @@ class TestSetupWatchexec:
 
 
 class TestSetupYq:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
@@ -426,7 +450,8 @@ class TestSetupYq:
 
 
 class TestSetupZoxide:
-    @throttle_test(duration=HOUR)
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
