@@ -932,7 +932,7 @@ def setup_watchexec(
         match_system=True,
         match_c_std_lib=True,
         match_machine=True,
-        not_endswith=["b3", "sha256", "sha512"],
+        not_endswith=["b3", "deb", "rpm", "sha256", "sha512"],
         timeout=timeout,
         chunk_size=chunk_size,
     ) as temp:
