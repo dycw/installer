@@ -146,7 +146,7 @@ def setup_sshd_config(
             hostname,
             *maybe_sudo_cmd(*tee_cmd(path), sudo=sudo),
             input=text,
-            retry=None,
+            retry=SSH_SETTINGS,
             logger=LOGGER,
             print=True,
         )
