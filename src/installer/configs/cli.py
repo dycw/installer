@@ -23,23 +23,33 @@ def setup_authorized_keys_sub_cmd(
     if is_pytest():
         return
     basic_config(obj=LOGGER)
-    setup_authorized_keys(list(keys), ssh=ssh.ssh)
+    setup_authorized_keys(list(keys), ssh=ssh.ssh, retry=ssh.retry, logger=ssh.logger)
 
 
-def setup_ssh_config_sub_cmd() -> None:
+@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
+def setup_ssh_config_sub_cmd(*, ssh: SSHSettings) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
-    setup_ssh_config()
+    setup_ssh_config(ssh=ssh.ssh, retry=ssh.retry, logger=ssh.logger)
 
 
+@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SSHDSettings, [LOADER], show_envvars_in_help=True, argname="sshd")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
-def setup_sshd_sub_cmd(*, sshd: SSHDSettings, sudo: SudoSettings) -> None:
+def setup_sshd_sub_cmd(
+    *, ssh: SSHSettings, sshd: SSHDSettings, sudo: SudoSettings
+) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
-    setup_sshd_config(permit_root_login=sshd.permit_root_login, sudo=sudo.sudo)
+    setup_sshd_config(
+        permit_root_login=sshd.permit_root_login,
+        ssh=ssh.ssh,
+        sudo=sudo.sudo,
+        retry=ssh.retry,
+        logger=ssh.logger,
+    )
 
 
 __all__ = [

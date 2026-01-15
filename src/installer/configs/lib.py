@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import utilities.subprocess
 from utilities.atomicwrites import writer
-from utilities.subprocess import BASH_LS, mkdir_cmd, tee, tee_cmd
+from utilities.subprocess import BASH_LS, maybe_sudo_cmd, mkdir_cmd, tee, tee_cmd
 from utilities.tabulate import func_param_desc
 from utilities.text import strip_and_dedent
 
@@ -109,21 +109,25 @@ def setup_ssh_config(
 
 def setup_sshd_config(
     *,
-    root: PathLike = "/",
     permit_root_login: bool = SSHD_SETTINGS.permit_root_login,
+    ssh: str | None = SSH_SETTINGS.ssh,
+    root: PathLike = "/",
     sudo: bool = SUDO_SETTINGS.sudo,
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> None:
     LOGGER.info(
         func_param_desc(
             setup_sshd_config,
             __version__,
-            f"{root=}",
             f"{permit_root_login=}",
+            f"{ssh=}",
+            f"{root=}",
+            f"{retry=}",
+            f"{logger=}",
             f"{sudo=}",
         )
     )
-    root = Path(root)
-    path = root / "etc/ssh/sshd_config.d/default.conf"
     yes_no = "yes" if permit_root_login else "no"
     text = strip_and_dedent(f"""
         PasswordAuthentication no
@@ -131,7 +135,20 @@ def setup_sshd_config(
         PubkeyAcceptedAlgorithms ssh-ed25519
         PubkeyAuthentication yes
     """)
-    tee(path, text, sudo=sudo)
+    if ssh is None:
+        path = Path(root, "etc/ssh/sshd_config.d/default.conf")
+        tee(path, text, sudo=sudo)
+    else:
+        user, hostname = split_ssh(ssh)
+        path = Path("/etc/ssh/sshd_config.d/default.conf")
+        utilities.subprocess.ssh(
+            user,
+            hostname,
+            *maybe_sudo_cmd(*tee_cmd(path), sudo=sudo),
+            input=text,
+            retry=retry,
+            logger=logger,
+        )
 
 
 __all__ = ["setup_authorized_keys", "setup_ssh_config", "setup_sshd_config"]
