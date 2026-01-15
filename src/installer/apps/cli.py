@@ -40,7 +40,6 @@ from installer.apps.settings import (
     PathBinariesSettings,
     PermsSettings,
     ShellRcSettings,
-    SSHSettings,
 )
 from installer.logging import LOGGER
 from installer.settings import SudoSettings
@@ -145,13 +144,12 @@ def bottom_sub_cmd(
 ##
 
 
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
-def curl_sub_cmd(*, ssh: SSHSettings, sudo: SudoSettings) -> None:
+def curl_sub_cmd(*, sudo: SudoSettings) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
-    setup_curl(ssh=ssh.ssh, sudo=sudo.sudo, retry=ssh.retry, logger=ssh.logger)
+    setup_curl(sudo=sudo.sudo)
 
 
 ##
