@@ -12,7 +12,7 @@ from utilities.text import strip_and_dedent
 
 from installer import __version__
 from installer.configs.constants import RELATIVE_HOME
-from installer.configs.settings import SSHD_SETTINGS
+from installer.configs.settings import ROOT_SETTINGS, SSHD_SETTINGS
 from installer.logging import LOGGER
 from installer.settings import SSH_SETTINGS, SUDO_SETTINGS
 from installer.utilities import get_home, split_ssh
@@ -26,7 +26,7 @@ def setup_authorized_keys(
     /,
     *,
     ssh: str | None = SSH_SETTINGS.ssh,
-    root: PathLike = "/",
+    root: PathLike = ROOT_SETTINGS.root,
     retry: Retry | None = SSH_SETTINGS.retry,
     logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> None:
@@ -62,7 +62,7 @@ def setup_authorized_keys(
 def setup_ssh_config(
     *,
     ssh: str | None = SSH_SETTINGS.ssh,
-    root: PathLike = "/",
+    root: PathLike = ROOT_SETTINGS.root,
     retry: Retry | None = SSH_SETTINGS.retry,
     logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> None:
@@ -111,7 +111,7 @@ def setup_sshd_config(
     *,
     permit_root_login: bool = SSHD_SETTINGS.permit_root_login,
     ssh: str | None = SSH_SETTINGS.ssh,
-    root: PathLike = "/",
+    root: PathLike = ROOT_SETTINGS.root,
     sudo: bool = SUDO_SETTINGS.sudo,
     retry: Retry | None = SSH_SETTINGS.retry,
     logger: LoggerLike | None = SSH_SETTINGS.logger,
@@ -131,7 +131,7 @@ def setup_sshd_config(
     yes_no = "yes" if permit_root_login else "no"
     text = strip_and_dedent(f"""
         PasswordAuthentication no
-        PermitRootLogin ${yes_no}
+        PermitRootLogin {yes_no}
         PubkeyAcceptedAlgorithms ssh-ed25519
         PubkeyAuthentication yes
     """)
