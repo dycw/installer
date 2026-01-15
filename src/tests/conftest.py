@@ -11,6 +11,7 @@ from utilities.hypothesis import setup_hypothesis_profiles
 if TYPE_CHECKING:
     from utilities.types import Duration
 
+
 setup_hypothesis_profiles()
 
 

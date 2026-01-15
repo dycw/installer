@@ -128,13 +128,7 @@ def setup_sshd_config(
             f"{sudo=}",
         )
     )
-    yes_no = "yes" if permit_root_login else "no"
-    text = strip_and_dedent(f"""
-        PasswordAuthentication no
-        PermitRootLogin {yes_no}
-        PubkeyAcceptedAlgorithms ssh-ed25519
-        PubkeyAuthentication yes
-    """)
+    text = sshd_config(permit_root_login=permit_root_login)
     if ssh is None:
         path = Path(root, "etc/ssh/sshd_config.d/default.conf")
         tee(path, text, sudo=sudo)
@@ -151,4 +145,19 @@ def setup_sshd_config(
         )
 
 
-__all__ = ["setup_authorized_keys", "setup_ssh_config", "setup_sshd_config"]
+def sshd_config(*, permit_root_login: bool = SSHD_SETTINGS.permit_root_login) -> str:
+    yes_no = "yes" if permit_root_login else "no"
+    return strip_and_dedent(f"""
+        PasswordAuthentication no
+        PermitRootLogin {yes_no}
+        PubkeyAcceptedAlgorithms ssh-ed25519
+        PubkeyAuthentication yes
+    """)
+
+
+__all__ = [
+    "setup_authorized_keys",
+    "setup_ssh_config",
+    "setup_sshd_config",
+    "sshd_config",
+]
