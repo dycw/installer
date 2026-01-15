@@ -12,16 +12,18 @@ from installer.configs.lib import (
 )
 from installer.configs.settings import SSHDSettings
 from installer.logging import LOGGER
-from installer.settings import SudoSettings
-from installer.utilities import LOADER
+from installer.settings import LOADER, SSHSettings, SudoSettings
 
 
 @argument("keys", type=str, nargs=-1)
-def setup_authorized_keys_sub_cmd(keys: tuple[str, ...]) -> None:
+@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
+def setup_authorized_keys_sub_cmd(
+    keys: tuple[str, ...], /, *, ssh: SSHSettings
+) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
-    setup_authorized_keys(list(keys))
+    setup_authorized_keys(list(keys), ssh=ssh.ssh)
 
 
 def setup_ssh_config_sub_cmd() -> None:

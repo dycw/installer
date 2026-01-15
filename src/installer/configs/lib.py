@@ -3,28 +3,52 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import utilities.subprocess
 from utilities.atomicwrites import writer
-from utilities.subprocess import tee
+from utilities.subprocess import tee, tee_cmd
 from utilities.tabulate import func_param_desc
 from utilities.text import strip_and_dedent
 
 from installer import __version__
-from installer.configs.constants import REL_SSH
+from installer.configs.constants import AUTHORIZED_KEYS, REL_SSH, SSH
 from installer.configs.settings import SSHD_SETTINGS
 from installer.logging import LOGGER
-from installer.settings import SUDO_SETTINGS
+from installer.settings import SSH_SETTINGS, SUDO_SETTINGS
+from installer.utilities import get_home, split_ssh
 
 if TYPE_CHECKING:
-    from utilities.types import PathLike
+    from utilities.types import LoggerLike, PathLike, Retry
 
 
-def setup_authorized_keys(keys: list[str], /, *, root: PathLike = "/") -> None:
+def setup_authorized_keys(
+    keys: list[str],
+    /,
+    *,
+    ssh: str | None = SSH_SETTINGS.ssh,
+    root: PathLike = "/",
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
+) -> None:
     LOGGER.info(
-        func_param_desc(setup_authorized_keys, __version__, f"{keys=}", f"{root=}")
+        func_param_desc(
+            setup_authorized_keys,
+            __version__,
+            f"{keys=}",
+            f"{root=}",
+            f"{retry=}",
+            f"{logger=}",
+        )
     )
-    root = Path(root)
-    with writer(root / REL_SSH / "authorized_keys", overwrite=True) as temp:
-        _ = temp.write_text("\n".join(keys))
+    text = "\n".join(keys)
+    if ssh is None:
+        dest = Path(root, Path.home().relative_to("/"), SSH, AUTHORIZED_KEYS)
+        with writer(dest, overwrite=True) as temp:
+            _ = temp.write_text(text)
+    else:
+        user, hostname = split_ssh(ssh)
+        home = get_home(ssh=ssh, retry=retry, logger=logger)
+        dest = home / SSH / AUTHORIZED_KEYS
+        utilities.subprocess.ssh(user, hostname, *tee_cmd())
 
 
 ##

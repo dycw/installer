@@ -1,8 +1,24 @@
 from __future__ import annotations
 
-from typed_settings import load_settings, option, settings
+from typed_settings import EnvLoader, load_settings, option, settings
 
-from installer.utilities import LOADER
+LOADER = EnvLoader("")
+
+
+##
+
+
+@settings
+class SSHSettings:
+    ssh: str | None = option(default=None, help="SSH user & hostname")
+    retry: tuple[int, int] | None = option(default=None, help="Retry SSH")
+    logger: str | None = option(default=None, help="SSH logger")
+
+
+SSH_SETTINGS = load_settings(SSHSettings, [LOADER])
+
+
+##
 
 
 @settings
@@ -13,4 +29,4 @@ class SudoSettings:
 SUDO_SETTINGS = load_settings(SudoSettings, [LOADER])
 
 
-__all__ = ["SUDO_SETTINGS", "SudoSettings"]
+__all__ = ["LOADER", "SSH_SETTINGS", "SUDO_SETTINGS", "SSHSettings", "SudoSettings"]

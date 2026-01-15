@@ -35,15 +35,13 @@ from installer.apps.lib import (
     setup_zoxide,
 )
 from installer.apps.settings import (
-    LOADER,
     DownloadSettings,
     PathBinariesSettings,
     PermsSettings,
     ShellRcSettings,
-    SSHSettings,
 )
 from installer.logging import LOGGER
-from installer.settings import SudoSettings
+from installer.settings import LOADER, SSHSettings, SudoSettings
 
 
 @click_options(

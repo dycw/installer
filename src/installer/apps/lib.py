@@ -34,11 +34,10 @@ from installer.apps.settings import (
     PATH_BINARIES_SETTINGS,
     PERMS_SETTINGS,
     SHELL_RC_SETTINGS,
-    SSH_SETTINGS,
     TAG_SETTINGS,
 )
 from installer.logging import LOGGER
-from installer.settings import SUDO_SETTINGS
+from installer.settings import SSH_SETTINGS, SUDO_SETTINGS
 from installer.utilities import ensure_shell_rc, split_ssh
 
 if TYPE_CHECKING:
