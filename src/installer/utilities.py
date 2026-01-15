@@ -121,4 +121,4 @@ def split_ssh(text: str, /) -> tuple[str, str]:
     return user, hostname
 
 
-__all__ = ["convert_token", "ensure_line", "ensure_shell_rc", "split_ssh"]
+__all__ = ["convert_token", "ensure_line", "ensure_shell_rc", "get_home", "split_ssh"]
