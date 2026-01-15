@@ -20,6 +20,7 @@ class TestCLI:
             param(["fd"]),
             param(["fzf"]),
             param(["git"]),
+            param(["gitweb"]),
             param(["jq"]),
             param(["just"]),
             param(["neovim"]),

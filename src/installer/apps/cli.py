@@ -16,6 +16,7 @@ from installer.apps.lib import (
     setup_fd,
     setup_fzf,
     setup_git,
+    setup_gitweb,
     setup_jq,
     setup_just,
     setup_neovim,
@@ -400,6 +401,39 @@ def git_sub_cmd(*, sudo: SudoSettings) -> None:
         return
     basic_config(obj=LOGGER)
     setup_git(sudo=sudo.sudo)
+
+
+##
+
+
+@click_options(
+    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
+)
+@click_options(
+    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
+)
+@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+def gitweb_sub_cmd(
+    *,
+    download: DownloadSettings,
+    path_binaries: PathBinariesSettings,
+    perms: PermsSettings,
+    sudo: SudoSettings,
+) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_gitweb(
+        token=download.token,
+        timeout=download.timeout,
+        path_binaries=path_binaries.path_binaries,
+        chunk_size=download.chunk_size,
+        sudo=sudo.sudo,
+        perms=perms.perms,
+        owner=perms.owner,
+        group=perms.group,
+    )
 
 
 ##
@@ -928,6 +962,7 @@ __all__ = [
     "fd_sub_cmd",
     "fzf_sub_cmd",
     "git_sub_cmd",
+    "gitweb_sub_cmd",
     "jq_sub_cmd",
     "just_sub_cmd",
     "neovim_sub_cmd",

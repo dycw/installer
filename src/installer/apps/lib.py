@@ -485,21 +485,28 @@ def setup_gitweb(
     group: str | int | None = PERMS_SETTINGS.group,
 ) -> None:
     """Setup 'shfmt'."""
-    dest = Path(path_binaries, "gitweb")
-    setup_asset(
-        "yoannfleurydev",
-        "gitweb",
-        dest,
-        token=token,
-        match_system=True,
-        timeout=timeout,
-        chunk_size=chunk_size,
-        sudo=sudo,
-        perms=perms,
-        owner=owner,
-        group=group,
-    )
-    LOGGER.info("Downloaded to %r", str(dest))
+    match SYSTEM_NAME:
+        case "Darwin":
+            msg = f"Unsupported system: {SYSTEM_NAME!r}"
+            raise ValueError(msg)
+        case "Linux":
+            dest = Path(path_binaries, "gitweb")
+            setup_asset(
+                "yoannfleurydev",
+                "gitweb",
+                dest,
+                token=token,
+                match_system=True,
+                timeout=timeout,
+                chunk_size=chunk_size,
+                sudo=sudo,
+                perms=perms,
+                owner=owner,
+                group=group,
+            )
+            LOGGER.info("Downloaded to %r", str(dest))
+        case never:
+            assert_never(never)
 
 
 ##

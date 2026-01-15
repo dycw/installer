@@ -3,7 +3,8 @@ from __future__ import annotations
 from re import escape, search
 from typing import TYPE_CHECKING
 
-from utilities.pytest import throttle_test
+from pytest import mark
+from utilities.pytest import skipif_mac, throttle_test
 from utilities.subprocess import run
 from utilities.text import strip_and_dedent
 from utilities.whenever import HOUR
@@ -202,6 +203,8 @@ class TestSetupFzf:
 
 
 class TestSetupGitWeb:
+    @mark.only
+    @skipif_mac
     @throttle_test(delta=HOUR)
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture

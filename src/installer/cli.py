@@ -15,6 +15,7 @@ from installer.apps.cli import (
     fd_sub_cmd,
     fzf_sub_cmd,
     git_sub_cmd,
+    gitweb_sub_cmd,
     jq_sub_cmd,
     just_sub_cmd,
     neovim_sub_cmd,
@@ -54,8 +55,9 @@ _ = _main.command(name="dust", **CONTEXT_SETTINGS)(dust_sub_cmd)
 _ = _main.command(name="eza", **CONTEXT_SETTINGS)(eza_sub_cmd)
 _ = _main.command(name="fd", **CONTEXT_SETTINGS)(fd_sub_cmd)
 _ = _main.command(name="fzf", **CONTEXT_SETTINGS)(fzf_sub_cmd)
-_ = _main.command(name="jq", **CONTEXT_SETTINGS)(jq_sub_cmd)
 _ = _main.command(name="git", **CONTEXT_SETTINGS)(git_sub_cmd)
+_ = _main.command(name="gitweb", **CONTEXT_SETTINGS)(gitweb_sub_cmd)
+_ = _main.command(name="jq", **CONTEXT_SETTINGS)(jq_sub_cmd)
 _ = _main.command(name="just", **CONTEXT_SETTINGS)(just_sub_cmd)
 _ = _main.command(name="neovim", **CONTEXT_SETTINGS)(neovim_sub_cmd)
 _ = _main.command(name="restic", **CONTEXT_SETTINGS)(restic_sub_cmd)
