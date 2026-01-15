@@ -35,6 +35,12 @@ jobs:
         with:
           python-version: ${{matrix.python-version}}
           resolution: ${{matrix.resolution}}
+          token-github: ${{github.token}}
+      - name: Run 'pytest'
+        uses: dycw/action-pytest@latest
+        with:
+          python-version: ${{matrix.python-version}}
+          resolution: ${{matrix.resolution}}
     strategy:
       fail-fast: false
       matrix:
