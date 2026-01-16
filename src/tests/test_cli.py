@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from pytest import mark, param
 from utilities.subprocess import run
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class TestCLI:
@@ -46,3 +51,8 @@ class TestCLI:
     )
     def test_main(self, *, args: list[str]) -> None:
         run("installer", *args)
+
+    def test_git_clone(self, *, tmp_path: Path) -> None:
+        key = tmp_path / "key.txt"
+        key.touch()
+        run("installer", "git-clone", str(key), "owner", "repo", cwd=tmp_path)
