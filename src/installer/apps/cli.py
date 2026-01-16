@@ -394,12 +394,13 @@ def jq_sub_cmd(
 ##
 
 
+@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
-def git_sub_cmd(*, sudo: SudoSettings) -> None:
+def git_sub_cmd(*, ssh: SSHSettings, sudo: SudoSettings) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
-    setup_git(sudo=sudo.sudo)
+    setup_git(ssh=ssh.ssh, sudo=sudo.sudo, retry=ssh.retry, logger=ssh.logger)
 
 
 ##

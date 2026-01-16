@@ -46,6 +46,46 @@ if TYPE_CHECKING:
     from utilities.types import LoggerLike, PathLike, Retry
 
 
+def setup_apt_package(
+    package: str,
+    /,
+    *,
+    ssh: str | None = SSH_SETTINGS.ssh,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
+) -> None:
+    """Setup an 'apt' package."""
+    match ssh, SYSTEM_NAME:
+        case None, "Darwin":
+            msg = f"Unsupported system: {SYSTEM_NAME!r}"
+            raise ValueError(msg)
+        case None, "Linux":
+            run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
+            run(*maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo))
+            LOGGER.info("Installed %r", package)
+        case str(), _:
+            user, hostname = split_ssh(ssh)
+            cmds: list[list[str]] = [
+                maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
+                maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo),
+            ]
+            utilities.subprocess.ssh(
+                user,
+                hostname,
+                *BASH_LS,
+                input="\n".join(map(join, cmds)),
+                retry=retry,
+                logger=logger,
+            )
+            LOGGER.info("Installed %r on %r", package, hostname)
+        case never:
+            assert_never(never)
+
+
+##
+
+
 def setup_asset(
     asset_owner: str,
     asset_repo: str,
@@ -213,31 +253,7 @@ def setup_curl(
     logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> None:
     """Setup 'curl'."""
-    match ssh, SYSTEM_NAME:
-        case None, "Darwin":
-            msg = f"Unsupported system: {SYSTEM_NAME!r}"
-            raise ValueError(msg)
-        case None, "Linux":
-            run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
-            run(*maybe_sudo_cmd(*apt_install_cmd("curl"), sudo=sudo))
-            LOGGER.info("Installed 'curl'")
-        case str(), _:
-            user, hostname = split_ssh(ssh)
-            cmds: list[list[str]] = [
-                maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
-                maybe_sudo_cmd(*apt_install_cmd("curl"), sudo=sudo),
-            ]
-            utilities.subprocess.ssh(
-                user,
-                hostname,
-                *BASH_LS,
-                input="\n".join(map(join, cmds)),
-                retry=retry,
-                logger=logger,
-            )
-            LOGGER.info("Installed 'curl' on '%s'", hostname)
-        case never:
-            assert_never(never)
+    setup_apt_package("curl", ssh=ssh, sudo=sudo, retry=retry, logger=logger)
 
 
 ##
@@ -482,18 +498,15 @@ def setup_fzf(
 ##
 
 
-def setup_git(*, sudo: bool = SUDO_SETTINGS.sudo) -> None:
+def setup_git(
+    *,
+    ssh: str | None = SSH_SETTINGS.ssh,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
+) -> None:
     """Setup 'git'."""
-    match SYSTEM_NAME:
-        case "Darwin":
-            msg = f"Unsupported system: {SYSTEM_NAME!r}"
-            raise ValueError(msg)
-        case "Linux":
-            run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
-            run(*maybe_sudo_cmd(*apt_install_cmd("git"), sudo=sudo))
-            LOGGER.info("Installed 'git'")
-        case never:
-            assert_never(never)
+    setup_apt_package("git", ssh=ssh, sudo=sudo, retry=retry, logger=logger)
 
 
 ##
@@ -737,31 +750,7 @@ def setup_rsync(
     logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> None:
     """Setup 'rsync'."""
-    match ssh, SYSTEM_NAME:
-        case None, "Darwin":
-            msg = f"Unsupported system: {SYSTEM_NAME!r}"
-            raise ValueError(msg)
-        case None, "Linux":
-            run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
-            run(*maybe_sudo_cmd(*apt_install_cmd("rsync"), sudo=sudo))
-            LOGGER.info("Installed 'rsync'")
-        case str(), _:
-            user, hostname = split_ssh(ssh)
-            cmds: list[list[str]] = [
-                maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
-                maybe_sudo_cmd(*apt_install_cmd("rsync"), sudo=sudo),
-            ]
-            utilities.subprocess.ssh(
-                user,
-                hostname,
-                *BASH_LS,
-                input="\n".join(map(join, cmds)),
-                retry=retry,
-                logger=logger,
-            )
-            LOGGER.info("Installed 'curl' on '%s'", hostname)
-        case never:
-            assert_never(never)
+    setup_apt_package("rsync", ssh=ssh, sudo=sudo, retry=retry, logger=logger)
 
 
 ##
@@ -1097,6 +1086,7 @@ def setup_zoxide(
 
 __all__ = [
     "setup_age",
+    "setup_apt_package",
     "setup_asset",
     "setup_bat",
     "setup_bottom",
