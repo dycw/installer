@@ -51,7 +51,7 @@ def setup_authorized_keys(
             _ = temp.write_text(text)
     else:
         user, hostname = split_ssh(ssh)
-        home = get_home(ssh=ssh, retry=retry, logger=logger)
+        home = get_home(ssh=ssh, batch_mode=batch_mode, retry=retry, logger=logger)
         dest = home / ".ssh/authorized_keys"
         utilities.subprocess.ssh(
             user,
