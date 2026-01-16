@@ -9,6 +9,17 @@ LOADER = EnvLoader("")
 
 
 @settings
+class BatchSettings:
+    batch_mode: bool = option(default=True, help="SSH batch mode")
+
+
+BATCH_SETTINGS = load_settings(BatchSettings, [LOADER])
+
+
+##
+
+
+@settings
 class SSHSettings:
     ssh: str | None = option(default=None, help="SSH user & hostname")
     retry: tuple[int, int] | None = option(default=None, help="Retry SSH")
@@ -29,4 +40,12 @@ class SudoSettings:
 SUDO_SETTINGS = load_settings(SudoSettings, [LOADER])
 
 
-__all__ = ["LOADER", "SSH_SETTINGS", "SUDO_SETTINGS", "SSHSettings", "SudoSettings"]
+__all__ = [
+    "BATCH_SETTINGS",
+    "LOADER",
+    "SSH_SETTINGS",
+    "SUDO_SETTINGS",
+    "BatchSettings",
+    "SSHSettings",
+    "SudoSettings",
+]

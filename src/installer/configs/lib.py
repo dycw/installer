@@ -14,7 +14,7 @@ from installer import __version__
 from installer.configs.constants import RELATIVE_HOME
 from installer.configs.settings import ROOT_SETTINGS, SSHD_SETTINGS
 from installer.logging import LOGGER
-from installer.settings import SSH_SETTINGS, SUDO_SETTINGS
+from installer.settings import BATCH_SETTINGS, SSH_SETTINGS, SUDO_SETTINGS
 from installer.utilities import get_home, split_ssh
 
 if TYPE_CHECKING:
@@ -27,6 +27,7 @@ def setup_authorized_keys(
     *,
     ssh: str | None = SSH_SETTINGS.ssh,
     root: PathLike = ROOT_SETTINGS.root,
+    batch_mode: bool = BATCH_SETTINGS.batch_mode,
     retry: Retry | None = SSH_SETTINGS.retry,
     logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> None:
@@ -37,6 +38,7 @@ def setup_authorized_keys(
             f"{keys=}",
             f"{ssh=}",
             f"{root=}",
+            f"{batch_mode=}",
             f"{retry=}",
             f"{logger=}",
         )
@@ -52,7 +54,13 @@ def setup_authorized_keys(
         home = get_home(ssh=ssh, retry=retry, logger=logger)
         dest = home / ".ssh/authorized_keys"
         utilities.subprocess.ssh(
-            user, hostname, *tee_cmd(dest), input=text, retry=retry, logger=logger
+            user,
+            hostname,
+            *tee_cmd(dest),
+            batch_mode=batch_mode,
+            input=text,
+            retry=retry,
+            logger=logger,
         )
 
 
