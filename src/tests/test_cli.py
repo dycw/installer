@@ -52,7 +52,7 @@ class TestCLI:
     def test_main(self, *, args: list[str]) -> None:
         run("installer", *args)
 
-    def test_git_clone_with(self, *, tmp_path: Path) -> None:
+    def test_git_clone(self, *, tmp_path: Path) -> None:
         key = tmp_path / "key.txt"
         key.touch()
-        run("installer", "git-clone-with", str(key), "owner", "repo", cwd=tmp_path)
+        run("installer", "git-clone", str(key), "owner", "repo", cwd=tmp_path)

@@ -3,8 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import utilities.subprocess
 from utilities.atomicwrites import writer
-from utilities.subprocess import cp, git_clone
+from utilities.subprocess import cp
 from utilities.tabulate import func_param_desc
 
 from installer import __version__
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
     from utilities.types import PathLike
 
 
-def git_clone_with(
+def git_clone(
     key: PathLike,
     host: str,
     owner: str,
@@ -31,7 +32,7 @@ def git_clone_with(
 ) -> None:
     LOGGER.info(
         func_param_desc(
-            git_clone_with,
+            git_clone,
             __version__,
             f"{key=}",
             f"{host=}",
@@ -45,7 +46,9 @@ def git_clone_with(
     key = Path(key)
     setup_ssh_config()
     _setup_deploy_key(key, host, port=port)
-    git_clone(f"git@{key.stem}:{owner}/{repo}", dest, branch=branch)
+    utilities.subprocess.git_clone(
+        f"git@{key.stem}:{owner}/{repo}", dest, branch=branch
+    )
 
 
 def _setup_deploy_key(
@@ -83,4 +86,4 @@ def _get_path_deploy_key(stem: str, /) -> Path:
     return Path.home() / ".ssh/deploy-keys" / stem
 
 
-__all__ = ["git_clone_with"]
+__all__ = ["git_clone"]
