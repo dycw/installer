@@ -33,6 +33,7 @@ from installer.apps.cli import (
     yq_sub_cmd,
     zoxide_sub_cmd,
 )
+from installer.clone.cli import git_clone_with_sub_cmd
 from installer.configs.cli import (
     setup_authorized_keys_sub_cmd,
     setup_ssh_config_sub_cmd,
@@ -72,6 +73,9 @@ _ = _main.command(name="uv", **CONTEXT_SETTINGS)(uv_sub_cmd)
 _ = _main.command(name="watchexec", **CONTEXT_SETTINGS)(watchexec_sub_cmd)
 _ = _main.command(name="yq", **CONTEXT_SETTINGS)(yq_sub_cmd)
 _ = _main.command(name="zoxide", **CONTEXT_SETTINGS)(zoxide_sub_cmd)
+
+
+_ = _main.command(name="git-clone-with", **CONTEXT_SETTINGS)(git_clone_with_sub_cmd)
 
 
 _ = _main.command(name="setup-authorized-keys", **CONTEXT_SETTINGS)(

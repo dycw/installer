@@ -10,7 +10,7 @@ from installer.settings import LOADER
 @settings
 class CloneSettings:
     port: int | None = option(default=None, help="Clone port")
-    path_clone: Path = option(default=Path.cwd(), help="Path to clone to")
+    dest: Path = option(default=Path.cwd(), help="Path to clone to")
     branch: str | None = option(default=None, help="Branch to check out")
 
 

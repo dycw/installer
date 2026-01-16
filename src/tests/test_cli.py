@@ -37,6 +37,8 @@ class TestCLI:
             param(["yq"]),
             param(["zoxide"]),
             ##
+            param(["git-clone-with", "key", "host", "owner", "repo"]),
+            ##
             param(["setup-authorized-keys"]),
             param(["setup-authorized-keys", "key1"]),
             param(["setup-authorized-keys", "key1", "key2"]),

@@ -19,33 +19,33 @@ if TYPE_CHECKING:
 
 
 def git_clone_with(
-    path_key: PathLike,
+    key: PathLike,
     host: str,
     owner: str,
     repo: str,
     /,
     *,
     port: int | None = CLONE_SETTINGS.port,
-    path_clone: PathLike = CLONE_SETTINGS.path_clone,
+    dest: PathLike = CLONE_SETTINGS.dest,
     branch: str | None = CLONE_SETTINGS.branch,
 ) -> None:
     LOGGER.info(
         func_param_desc(
             git_clone_with,
             __version__,
-            f"{path_key=}",
+            f"{key=}",
             f"{host=}",
             f"{owner=}",
             f"{repo=}",
             f"{port=}",
-            f"{path_clone=}",
+            f"{dest=}",
             f"{branch=}",
         )
     )
-    path_key = Path(path_key)
+    key = Path(key)
     setup_ssh_config()
-    _setup_deploy_key(path_key, host, port=port)
-    git_clone(f"git@{path_key.stem}:{owner}/{repo}", path_clone, branch=branch)
+    _setup_deploy_key(key, host, port=port)
+    git_clone(f"git@{key.stem}:{owner}/{repo}", dest, branch=branch)
 
 
 def _setup_deploy_key(
