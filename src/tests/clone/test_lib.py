@@ -12,4 +12,4 @@ class TestSetupDeployKey:
     def test_main(self, *, tmp_path: Path) -> None:
         path = tmp_path / "key.txt"
         path.touch()
-        _setup_deploy_key(path, "host", root=tmp_path)
+        _setup_deploy_key(path, root=tmp_path)
