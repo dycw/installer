@@ -11,7 +11,7 @@ from utilities.text import strip_and_dedent
 
 from installer.apps.constants import SHELL
 from installer.logging import LOGGER
-from installer.settings import SSH_SETTINGS
+from installer.settings import BATCH_SETTINGS, SSH_SETTINGS
 
 if TYPE_CHECKING:
     from utilities.types import LoggerLike, PathLike, Retry
@@ -93,6 +93,7 @@ def ensure_shell_rc(text: str, /, *, etc: str | None = None) -> None:
 def get_home(
     *,
     ssh: str | None = SSH_SETTINGS.ssh,
+    batch_mode: bool = BATCH_SETTINGS.batch_mode,
     retry: Retry | None = SSH_SETTINGS.retry,
     logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> Path:
@@ -105,6 +106,7 @@ def get_home(
         "getent",
         "passwd",
         user,
+        batch_mode=batch_mode,
         return_=True,
         retry=retry,
         logger=logger,
