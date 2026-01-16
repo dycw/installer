@@ -43,7 +43,7 @@ def setup_authorized_keys(
             f"{logger=}",
         )
     )
-    text = "\n".join(keys)
+    text = "\n".join(keys) + "\n"
     if ssh is None:
         home = Path(root, RELATIVE_HOME)
         dest = home / ".ssh/authorized_keys"
@@ -89,7 +89,7 @@ def setup_ssh_config(
         config = home / ".ssh/config"
         config_d = home / ".ssh/config.d"
         config_d.mkdir(parents=True, exist_ok=True)
-        text = f"Include {config_d}/*.conf"
+        text = f"Include {config_d}/*.conf\n"
         with writer(config, overwrite=True) as temp:
             _ = temp.write_text(text)
     else:
@@ -106,7 +106,7 @@ def setup_ssh_config(
             retry=retry,
             logger=logger,
         )
-        text = f"Include {config_d}/*.conf"
+        text = f"Include {config_d}/*.conf\n"
         utilities.subprocess.ssh(
             user, hostname, *tee_cmd(config), input=text, retry=retry, logger=logger
         )
