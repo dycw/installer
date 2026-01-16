@@ -11,8 +11,8 @@ from utilities.tabulate import func_param_desc
 from utilities.text import strip_and_dedent
 
 from installer import __version__
-from installer.configs.constants import RELATIVE_HOME
 from installer.configs.settings import ROOT_SETTINGS, SSHD_SETTINGS
+from installer.constants import RELATIVE_HOME
 from installer.logging import LOGGER
 from installer.settings import BATCH_SETTINGS, SSH_SETTINGS, SUDO_SETTINGS
 from installer.utilities import get_home, split_ssh
