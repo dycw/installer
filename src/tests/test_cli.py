@@ -55,4 +55,4 @@ class TestCLI:
     def test_git_clone(self, *, tmp_path: Path) -> None:
         key = tmp_path / "key.txt"
         key.touch()
-        run("installer", "git-clone", str(key), "owner", "repo", cwd=tmp_path)
+        run("installer", "git-clone", str(key), "host", "owner", "repo", cwd=tmp_path)

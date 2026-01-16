@@ -11,6 +11,8 @@ from utilities.tabulate import func_param_desc
 from installer import __version__
 from installer.clone.settings import CLONE_SETTINGS
 from installer.configs.lib import setup_ssh_config
+from installer.configs.settings import ROOT_SETTINGS
+from installer.constants import RELATIVE_HOME
 from installer.logging import LOGGER
 
 if TYPE_CHECKING:
@@ -26,6 +28,7 @@ def git_clone(
     repo: str,
     /,
     *,
+    root: PathLike = ROOT_SETTINGS.root,
     port: int | None = CLONE_SETTINGS.port,
     dest: PathLike = CLONE_SETTINGS.dest,
     branch: str | None = CLONE_SETTINGS.branch,
@@ -38,6 +41,7 @@ def git_clone(
             f"{host=}",
             f"{owner=}",
             f"{repo=}",
+            f"{root=}",
             f"{port=}",
             f"{dest=}",
             f"{branch=}",
@@ -45,33 +49,44 @@ def git_clone(
     )
     key = Path(key)
     setup_ssh_config()
-    _setup_deploy_key(key, host, port=port)
+    _setup_deploy_key(key, host, root=root, port=port)
     utilities.subprocess.git_clone(
         f"git@{key.stem}:{owner}/{repo}", dest, branch=branch
     )
 
 
 def _setup_deploy_key(
-    path: PathLike, host: str, /, *, port: int | None = CLONE_SETTINGS.port
+    path: PathLike,
+    host: str,
+    /,
+    *,
+    root: PathLike = ROOT_SETTINGS.root,
+    port: int | None = CLONE_SETTINGS.port,
 ) -> None:
     path = Path(path)
     stem = path.stem
-    path_config = _get_path_config(stem)
+    path_config = _get_path_config(stem, root=root)
     text = "\n".join(_yield_config_lines(stem, host, port=port)) + "\n"
     with writer(path_config, overwrite=True) as temp:
         _ = temp.write_text(text)
-    dest = _get_path_deploy_key(stem)
+    dest = _get_path_deploy_key(stem, root=root)
     cp(path, dest, perms="u=rw,g=,o=")
 
 
-def _get_path_config(stem: str, /) -> Path:
-    return Path.home() / f".ssh/config.d/{stem}.conf"
+def _get_path_config(stem: str, /, *, root: PathLike = ROOT_SETTINGS.root) -> Path:
+    home = Path(root, RELATIVE_HOME)
+    return home / f".ssh/config.d/{stem}.conf"
 
 
 def _yield_config_lines(
-    stem: str, host: str, /, *, port: int | None = CLONE_SETTINGS.port
+    stem: str,
+    host: str,
+    /,
+    *,
+    root: PathLike = ROOT_SETTINGS.root,
+    port: int | None = CLONE_SETTINGS.port,
 ) -> Iterator[str]:
-    path_key = _get_path_deploy_key(stem)
+    path_key = _get_path_deploy_key(stem, root=root)
     yield f"Host {stem}"
     indent = 4 * " "
     yield f"{indent}User git"
@@ -82,8 +97,9 @@ def _yield_config_lines(
     yield f"{indent}IdentitiesOnly yes"
 
 
-def _get_path_deploy_key(stem: str, /) -> Path:
-    return Path.home() / ".ssh/deploy-keys" / stem
+def _get_path_deploy_key(stem: str, /, *, root: PathLike = ROOT_SETTINGS.root) -> Path:
+    home = Path(root, RELATIVE_HOME)
+    return home / ".ssh/deploy-keys" / stem
 
 
 __all__ = ["git_clone"]

@@ -11,6 +11,7 @@ from utilities.os import is_pytest
 
 from installer.clone.lib import git_clone
 from installer.clone.settings import CloneSettings
+from installer.configs.settings import RootSettings
 from installer.logging import LOGGER
 from installer.settings import LOADER
 
@@ -23,14 +24,28 @@ if TYPE_CHECKING:
 @argument("owner", type=str)
 @argument("repo", type=str)
 @click_options(CloneSettings, [LOADER], show_envvars_in_help=True, argname="clone")
+@click_options(RootSettings, [LOADER], show_envvars_in_help=True, argname="root")
 def git_clone_sub_cmd(
-    *, key: PathLike, host: str, owner: str, repo: str, clone: CloneSettings
+    *,
+    key: PathLike,
+    host: str,
+    owner: str,
+    repo: str,
+    clone: CloneSettings,
+    root: RootSettings,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
     git_clone(
-        key, host, owner, repo, port=clone.port, dest=clone.dest, branch=clone.branch
+        key,
+        host,
+        owner,
+        repo,
+        root=root.root,
+        port=clone.port,
+        dest=clone.dest,
+        branch=clone.branch,
     )
 
 
