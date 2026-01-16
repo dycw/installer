@@ -20,29 +20,22 @@ if TYPE_CHECKING:
 
 
 @argument("key", type=click.Path(exists=True, dir_okay=False, path_type=Path))
-@argument("host", type=str)
 @argument("owner", type=str)
 @argument("repo", type=str)
 @click_options(CloneSettings, [LOADER], show_envvars_in_help=True, argname="clone")
 @click_options(RootSettings, [LOADER], show_envvars_in_help=True, argname="root")
 def git_clone_sub_cmd(
-    *,
-    key: PathLike,
-    host: str,
-    owner: str,
-    repo: str,
-    clone: CloneSettings,
-    root: RootSettings,
+    *, key: PathLike, owner: str, repo: str, clone: CloneSettings, root: RootSettings
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
     git_clone(
         key,
-        host,
         owner,
         repo,
         root=root.root,
+        host=clone.host,
         port=clone.port,
         dest=clone.dest,
         branch=clone.branch,

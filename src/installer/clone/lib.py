@@ -23,12 +23,12 @@ if TYPE_CHECKING:
 
 def git_clone(
     key: PathLike,
-    host: str,
     owner: str,
     repo: str,
     /,
     *,
     root: PathLike = ROOT_SETTINGS.root,
+    host: str = CLONE_SETTINGS.host,
     port: int | None = CLONE_SETTINGS.port,
     dest: PathLike = CLONE_SETTINGS.dest,
     branch: str | None = CLONE_SETTINGS.branch,
@@ -38,10 +38,10 @@ def git_clone(
             git_clone,
             __version__,
             f"{key=}",
-            f"{host=}",
             f"{owner=}",
             f"{repo=}",
             f"{root=}",
+            f"{host=}",
             f"{port=}",
             f"{dest=}",
             f"{branch=}",
@@ -49,7 +49,7 @@ def git_clone(
     )
     key = Path(key)
     setup_ssh_config()
-    _setup_deploy_key(key, host, root=root, port=port)
+    _setup_deploy_key(key, root=root, host=host, port=port)
     utilities.subprocess.git_clone(
         f"git@{key.stem}:{owner}/{repo}", dest, branch=branch
     )
@@ -57,16 +57,16 @@ def git_clone(
 
 def _setup_deploy_key(
     path: PathLike,
-    host: str,
     /,
     *,
     root: PathLike = ROOT_SETTINGS.root,
+    host: str = CLONE_SETTINGS.host,
     port: int | None = CLONE_SETTINGS.port,
 ) -> None:
     path = Path(path)
     stem = path.stem
     path_config = _get_path_config(stem, root=root)
-    text = "\n".join(_yield_config_lines(stem, host, port=port)) + "\n"
+    text = "\n".join(_yield_config_lines(stem, host=host, port=port)) + "\n"
     with writer(path_config, overwrite=True) as temp:
         _ = temp.write_text(text)
     dest = _get_path_deploy_key(stem, root=root)
@@ -80,10 +80,10 @@ def _get_path_config(stem: str, /, *, root: PathLike = ROOT_SETTINGS.root) -> Pa
 
 def _yield_config_lines(
     stem: str,
-    host: str,
     /,
     *,
     root: PathLike = ROOT_SETTINGS.root,
+    host: str = CLONE_SETTINGS.host,
     port: int | None = CLONE_SETTINGS.port,
 ) -> Iterator[str]:
     path_key = _get_path_deploy_key(stem, root=root)

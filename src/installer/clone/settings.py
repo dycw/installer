@@ -9,7 +9,8 @@ from installer.settings import LOADER
 
 @settings
 class CloneSettings:
-    port: int | None = option(default=None, help="Clone port")
+    host: str = option(default="github.com", help="Repository host")
+    port: int | None = option(default=None, help="Repository port")
     dest: Path = option(default=Path.cwd(), help="Path to clone to")
     branch: str | None = option(default=None, help="Branch to check out")
 
