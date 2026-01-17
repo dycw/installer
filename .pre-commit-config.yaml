@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/dycw/actions
-    rev: 0.14.2
+    rev: 0.15.1
     hooks:
       - id: conformalize-repo
         args:
@@ -96,6 +96,6 @@ repos:
         args:
           - --upgrade
           - --resolution
-          - lowest-direct
+          - highest
           - --prerelease
           - disallow
