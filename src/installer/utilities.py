@@ -65,7 +65,7 @@ def ensure_shell_rc(text: str, /, *, etc: str | None = None) -> None:
                 path = Path.home() / f".{SHELL}rc"
             case "fish":
                 path = Path.home() / ".config/fish/config.fish"
-            case "posix":
+            case "posix" | "sh":
                 msg = f"Invalid shell: {SHELL=}"
                 raise TypeError(msg)
             case never:
@@ -80,7 +80,7 @@ def ensure_shell_rc(text: str, /, *, etc: str | None = None) -> None:
                 """)
                 path = Path(f"/etc/profile.d/{etc}.sh")
                 ensure_line(full, path)
-            case "fish" | "posix":
+            case "fish" | "posix" | "sh":
                 msg = f"Invalid shell: {SHELL!r}"
                 raise TypeError(msg)
             case never:
