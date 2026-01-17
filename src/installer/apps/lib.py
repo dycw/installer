@@ -326,7 +326,7 @@ def setup_direnv(
                 line = f'eval "$(direnv hook {SHELL})"'
             case "fish":
                 line = "direnv hook fish | source"
-            case "posix":
+            case "posix" | "sh":
                 msg = f"Unsupported shell: {SHELL=}"
                 raise TypeError(msg)
             case never:
@@ -487,7 +487,7 @@ def setup_fzf(
                 line = "source <(fzf --zsh)"
             case "fish":
                 line = "fzf --fish | source"
-            case "posix":
+            case "posix" | "sh":
                 msg = f"Unsupported shell: {SHELL=}"
                 raise TypeError(msg)
             case never:
@@ -702,7 +702,7 @@ def setup_starship(
                 line = f'eval "$(starship init {SHELL})"'
             case "fish":
                 line = "starship init fish | source"
-            case "posix":
+            case "posix" | "sh":
                 msg = f"Unsupported shell: {SHELL=}"
                 raise TypeError(msg)
             case never:
@@ -1076,7 +1076,7 @@ def setup_zoxide(
                 line = f'eval "$(fzf --{SHELL})"'
             case "fish":
                 line = "zoxide init fish | source"
-            case "posix":
+            case "posix" | "sh":
                 msg = f"Unsupported shell: {SHELL=}"
                 raise TypeError(msg)
             case never:
