@@ -308,7 +308,7 @@ wheels = [
 
 [[package]]
 name = "dycw-installer"
-version = "0.4.2"
+version = "0.4.3"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
@@ -349,8 +349,8 @@ requires-dist = [
     { name = "click", marker = "extra == 'cli'", specifier = "==8.3.1" },
     { name = "coloredlogs", specifier = ">=15.0.1,<16" },
     { name = "coloredlogs", marker = "extra == 'cli'", specifier = "==15.0.1" },
-    { name = "dycw-utilities", specifier = ">=0.183.4,<1" },
-    { name = "dycw-utilities", marker = "extra == 'cli'", specifier = "==0.183.4" },
+    { name = "dycw-utilities", specifier = ">=0.184.4,<1" },
+    { name = "dycw-utilities", marker = "extra == 'cli'", specifier = "==0.184.4" },
     { name = "inflect", specifier = ">=7.5.0,<8" },
     { name = "inflect", marker = "extra == 'cli'", specifier = "==7.5.0" },
     { name = "pygithub", specifier = ">=2.8.1,<3" },
@@ -368,7 +368,7 @@ provides-extras = ["cli"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "dycw-utilities", extras = ["test"], specifier = ">=0.183.4,<1" },
+    { name = "dycw-utilities", extras = ["test"], specifier = ">=0.184.4,<1" },
     { name = "orjson", specifier = ">=3.11.5,<4" },
     { name = "pyright", specifier = ">=1.1.408,<2" },
     { name = "rich", specifier = ">=14.2.0,<15" },
@@ -388,7 +388,7 @@ wheels = [
 
 [[package]]
 name = "dycw-utilities"
-version = "0.183.4"
+version = "0.184.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "atomicwrites" },
@@ -397,7 +397,7 @@ dependencies = [
     { name = "whenever" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/69/a2/10ae93f47062195d3e6433eebeb10cd7e8c64f33f3214518c1248520ddca/dycw_utilities-0.183.4-py3-none-any.whl", hash = "sha256:a0f2ab9c8f78b8536c00abeebe32447e3280fb6731b49a99eace713aa23b3e52", size = 214142, upload-time = "2026-01-17T14:17:38.823Z" },
+    { url = "https://files.pythonhosted.org/packages/d8/1d/4d59d5560ae81b0ffb38bed99a5ad24a2c61a776b04e4e3c687876be0ca7/dycw_utilities-0.184.4-py3-none-any.whl", hash = "sha256:8842c00ac281e9a53045b2633e9be30ab712ecb5bd410e9bcbbac504793b9be8", size = 215589, upload-time = "2026-01-19T01:50:21.085Z" },
 ]
 
 [package.optional-dependencies]
