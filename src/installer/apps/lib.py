@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, assert_never
 
 import utilities.subprocess
 from typed_settings import Secret
+from utilities.core import repr_str
 from utilities.subprocess import (
     APT_UPDATE,
     BASH_LS,
@@ -18,7 +19,6 @@ from utilities.subprocess import (
     yield_ssh_temp_dir,
 )
 from utilities.tabulate import func_param_desc
-from utilities.text import repr_str
 
 from installer import __version__
 from installer.apps.constants import SHELL, SYSTEM_NAME

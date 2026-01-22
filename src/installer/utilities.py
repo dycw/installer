@@ -5,9 +5,13 @@ from typing import TYPE_CHECKING, assert_never
 
 import utilities.subprocess
 from typed_settings import Secret
-from utilities.atomicwrites import writer
-from utilities.re import extract_groups
-from utilities.text import strip_and_dedent
+from utilities.core import (
+    ReadTextError,
+    extract_groups,
+    normalize_multi_line_str,
+    read_text,
+    write_text,
+)
 
 from installer.apps.constants import SHELL
 from installer.logging import LOGGER
@@ -41,16 +45,14 @@ def convert_token(x: str | None, /) -> Secret[str] | None:
 
 
 def ensure_line(text: str, path: PathLike, /) -> None:
-    path = Path(path)
     try:
-        contents = path.read_text()
-    except FileNotFoundError:
-        with writer(path) as temp:
-            _ = temp.write_text(text)
+        contents = read_text(path)
+    except ReadTextError:
+        write_text(path, text)
         LOGGER.info("Wrote %r to %r", text, str(path))
         return
     if text not in contents:
-        with path.open(mode="a") as fh:
+        with Path(path).open(mode="a") as fh:
             _ = fh.write(f"\n\n{text}")
         LOGGER.info("Appended %r to %r", text, str(path))
 
@@ -74,7 +76,7 @@ def ensure_shell_rc(text: str, /, *, etc: str | None = None) -> None:
     else:
         match SHELL:
             case "bash" | "zsh":
-                full = strip_and_dedent(f"""
+                full = normalize_multi_line_str(f"""
                     #!/usr/bin/env sh
                     {text}
                 """)

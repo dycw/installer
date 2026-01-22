@@ -7,13 +7,16 @@ from typing import TYPE_CHECKING, Any
 from github import Github
 from github.Auth import Token
 from requests import get
-from utilities.bz2 import yield_bz2_contents
-from utilities.gzip import yield_gzip_contents
+from utilities.core import (
+    OneNonUniqueError,
+    TemporaryDirectory,
+    one,
+    yield_bz2,
+    yield_gzip,
+    yield_lzma,
+)
 from utilities.inflect import counted_noun
-from utilities.iterables import OneNonUniqueError, one
-from utilities.lzma import yield_lzma_contents
 from utilities.tabulate import func_param_desc
-from utilities.tempfile import TemporaryDirectory
 
 from installer import __version__
 from installer.apps.constants import (
@@ -200,7 +203,7 @@ def yield_bz2_asset(
             timeout=timeout,
             chunk_size=chunk_size,
         ) as temp1,
-        yield_bz2_contents(temp1) as temp2,
+        yield_bz2(temp1) as temp2,
     ):
         yield temp2
 
@@ -255,7 +258,7 @@ def yield_gzip_asset(
             timeout=timeout,
             chunk_size=chunk_size,
         ) as temp1,
-        yield_gzip_contents(temp1) as temp2,
+        yield_gzip(temp1) as temp2,
     ):
         yield temp2
 
@@ -310,7 +313,7 @@ def yield_lzma_asset(
             timeout=timeout,
             chunk_size=chunk_size,
         ) as temp1,
-        yield_lzma_contents(temp1) as temp2,
+        yield_lzma(temp1) as temp2,
     ):
         yield temp2
 

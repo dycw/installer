@@ -3,9 +3,9 @@ from __future__ import annotations
 from re import escape, search
 from typing import TYPE_CHECKING
 
+from utilities.core import normalize_multi_line_str
 from utilities.pytest import run_test_frac, throttle_test
 from utilities.subprocess import run
-from utilities.text import strip_and_dedent
 
 from installer.apps.lib import (
     setup_age,
@@ -53,7 +53,7 @@ class TestSetupAge:
 
         run(str(tmp_path / "age"), "--help", print=True)
         result1 = capsys.readouterr()
-        pattern1 = strip_and_dedent("""
+        pattern1 = normalize_multi_line_str("""
             Usage:
                 age [--encrypt] (-r RECIPIENT | -R PATH)... [--armor] [-o OUTPUT] [INPUT]
                 age [--encrypt] --passphrase [--armor] [-o OUTPUT] [INPUT]
@@ -63,7 +63,7 @@ class TestSetupAge:
 
         run(str(tmp_path / "age-inspect"), "--help", print=True)
         result2 = capsys.readouterr()
-        pattern2 = strip_and_dedent("""
+        pattern2 = normalize_multi_line_str("""
             Usage:
                 age-inspect [--json] [INPUT]
         """)
@@ -71,7 +71,7 @@ class TestSetupAge:
 
         run(str(tmp_path / "age-keygen"), "--help", print=True)
         result3 = capsys.readouterr()
-        pattern3 = strip_and_dedent("""
+        pattern3 = normalize_multi_line_str("""
             Usage:
                 age-keygen [-pq] [-o OUTPUT]
                 age-keygen -y [-o OUTPUT] [INPUT]
@@ -80,7 +80,7 @@ class TestSetupAge:
 
         run(str(tmp_path / "age-plugin-batchpass"), "--help", print=True)
         result4 = capsys.readouterr()
-        pattern4 = strip_and_dedent("""
+        pattern4 = normalize_multi_line_str("""
             age-plugin-batchpass is an age plugin that enables non-interactive
             passphrase-based encryption and decryption using environment variables.
         """)
@@ -96,7 +96,7 @@ class TestSetupBottom:
         setup_bottom(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "btm"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage: btm [OPTIONS]
         """)
         assert search(escape(pattern), result.out)
@@ -111,7 +111,7 @@ class TestSetupBat:
         setup_bat(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "bat"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage: bat [OPTIONS] [FILE]...
                    bat <COMMAND>
         """)
@@ -127,7 +127,7 @@ class TestSetupDelta:
         setup_delta(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "delta"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage: delta [OPTIONS] [MINUS_FILE] [PLUS_FILE]
         """)
         assert search(escape(pattern), result.out)
@@ -142,7 +142,7 @@ class TestSetupDirenv:
         setup_direnv(token=token, path_binaries=tmp_path, skip_shell_rc=True)
         run(str(tmp_path / "direnv"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage: direnv COMMAND [...ARGS]
         """)
         assert search(escape(pattern), result.out)
@@ -157,7 +157,7 @@ class TestSetupDust:
         setup_dust(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "dust"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage: dust [OPTIONS] [PATH]...
         """)
         assert search(escape(pattern), result.out)
@@ -172,7 +172,7 @@ class TestSetupEza:
         setup_eza(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "eza"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage:
               eza [options] [files...]
         """)
@@ -188,7 +188,7 @@ class TestSetupFd:
         setup_fd(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "fd"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage: fd [OPTIONS] [pattern] [path]...
         """)
         assert search(escape(pattern), result.out)
@@ -203,7 +203,7 @@ class TestSetupFzf:
         setup_fzf(token=token, path_binaries=tmp_path, skip_shell_rc=True)
         run(str(tmp_path / "fzf"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage: fzf [options]
         """)
         assert search(escape(pattern), result.out)
@@ -218,7 +218,7 @@ class TestSetupJq:
         setup_jq(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "jq"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage:\tjq [options] <jq filter> [file...]
             \tjq [options] --args <jq filter> [strings...]
             \tjq [options] --jsonargs <jq filter> [JSON_TEXTS...]
@@ -235,7 +235,7 @@ class TestSetupJust:
         setup_just(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "just"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage: just [OPTIONS] [ARGUMENTS]...
         """)
         assert search(escape(pattern), result.out)
@@ -250,7 +250,7 @@ class TestSetupNeovim:
         setup_neovim(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "nvim"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage:
               nvim [options] [file ...]
         """)
@@ -266,7 +266,7 @@ class TestSetupRestic:
         setup_restic(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "restic"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage:
               restic [command]
         """)
@@ -282,7 +282,7 @@ class TestSetupRipgrep:
         setup_ripgrep(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "rg"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             USAGE:
                 rg [OPTIONS] PATTERN [PATH ...]
                 rg [OPTIONS] -e PATTERN ... [PATH ...]
@@ -305,7 +305,7 @@ class TestSetupRuff:
         setup_ruff(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "ruff"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage: ruff [OPTIONS] <COMMAND>
         """)
         assert search(escape(pattern), result.out)
@@ -320,7 +320,7 @@ class TestSetupSd:
         setup_sd(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "sd"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage: sd [OPTIONS] <FIND> <REPLACE_WITH> [FILES]...
         """)
         assert search(escape(pattern), result.out)
@@ -335,7 +335,7 @@ class TestSetupShellcheck:
         setup_shellcheck(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "shellcheck"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage: shellcheck [OPTIONS...] FILES...
         """)
         assert search(escape(pattern), result.out)
@@ -350,7 +350,7 @@ class TestSetupShfmt:
         setup_shfmt(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "shfmt"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             usage: shfmt [flags] [path ...]
         """)
         assert search(escape(pattern), result.err)
@@ -365,7 +365,7 @@ class TestSetupSops:
         setup_sops(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "sops"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             NAME:
                sops - sops - encrypted file editor with AWS KMS, GCP KMS, Azure Key Vault, age, and GPG support
         """)
@@ -381,7 +381,7 @@ class TestSetupStarship:
         setup_starship(token=token, path_binaries=tmp_path, skip_shell_rc=True)
         run(str(tmp_path / "starship"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage: starship <COMMAND>
         """)
         assert search(escape(pattern), result.out)
@@ -396,7 +396,7 @@ class TestSetupTaplo:
         setup_taplo(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "taplo"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage: taplo [OPTIONS] <COMMAND>
         """)
         assert search(escape(pattern), result.out)
@@ -411,7 +411,7 @@ class TestSetupUv:
         setup_uv(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "uv"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage: uv [OPTIONS] <COMMAND>
         """)
         assert search(escape(pattern), result.out)
@@ -426,7 +426,7 @@ class TestSetupWatchexec:
         setup_watchexec(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "watchexec"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage: watchexec [OPTIONS] [COMMAND]...
         """)
         assert search(escape(pattern), result.out)
@@ -441,7 +441,7 @@ class TestSetupYq:
         setup_yq(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "yq"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage:
               yq [flags]
               yq [command]
@@ -458,7 +458,7 @@ class TestSetupZoxide:
         setup_zoxide(token=token, path_binaries=tmp_path, skip_shell_rc=True)
         run(str(tmp_path / "zoxide"), "--help", print=True)
         result = capsys.readouterr()
-        pattern = strip_and_dedent("""
+        pattern = normalize_multi_line_str("""
             Usage:
               zoxide <COMMAND>
         """)

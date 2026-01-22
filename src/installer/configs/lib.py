@@ -5,10 +5,9 @@ from shlex import join
 from typing import TYPE_CHECKING
 
 import utilities.subprocess
-from utilities.atomicwrites import writer
+from utilities.core import normalize_multi_line_str, normalize_str, write_text
 from utilities.subprocess import BASH_LS, maybe_sudo_cmd, mkdir_cmd, tee, tee_cmd
 from utilities.tabulate import func_param_desc
-from utilities.text import strip_and_dedent
 
 from installer import __version__
 from installer.configs.settings import ROOT_SETTINGS, SSHD_SETTINGS
@@ -43,12 +42,11 @@ def setup_authorized_keys(
             f"{logger=}",
         )
     )
-    text = "\n".join(keys) + "\n"
+    text = normalize_str("\n".join(keys))
     if ssh is None:
         home = Path(root, RELATIVE_HOME)
         dest = home / ".ssh/authorized_keys"
-        with writer(dest, overwrite=True) as temp:
-            _ = temp.write_text(text)
+        write_text(dest, text, overwrite=True)
     else:
         user, hostname = split_ssh(ssh)
         home = get_home(ssh=ssh, batch_mode=batch_mode, retry=retry, logger=logger)
@@ -89,9 +87,8 @@ def setup_ssh_config(
         config = home / ".ssh/config"
         config_d = home / ".ssh/config.d"
         config_d.mkdir(parents=True, exist_ok=True)
-        text = f"Include {config_d}/*.conf\n"
-        with writer(config, overwrite=True) as temp:
-            _ = temp.write_text(text)
+        text = f"Include {config_d}/*.conf"
+        write_text(config, text, overwrite=True)
     else:
         user, hostname = split_ssh(ssh)
         home = get_home(ssh=ssh, retry=retry, logger=logger)
@@ -155,7 +152,7 @@ def setup_sshd_config(
 
 def sshd_config(*, permit_root_login: bool = SSHD_SETTINGS.permit_root_login) -> str:
     yes_no = "yes" if permit_root_login else "no"
-    return strip_and_dedent(f"""
+    return normalize_multi_line_str(f"""
         PasswordAuthentication no
         PermitRootLogin {yes_no}
         PubkeyAcceptedAlgorithms ssh-ed25519
