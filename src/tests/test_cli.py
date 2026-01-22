@@ -62,7 +62,7 @@ class TestCLI:
         key = tmp_path / "key.txt"
         key.touch()
         runner = CliRunner()
-        result = runner.invoke(cli, ["cli", "git-clone", str(key), "owner", "repo"])
+        result = runner.invoke(cli, ["git-clone", str(key), "owner", "repo"])
         assert result.exit_code == 0, result.stderr
 
     def test_entrypoint(self) -> None:
