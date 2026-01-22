@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import utilities.subprocess
-from utilities.atomicwrites import writer
+from utilities.core import write_text
 from utilities.subprocess import cp
 from utilities.tabulate import func_param_desc
 
@@ -66,9 +66,8 @@ def _setup_deploy_key(
     path = Path(path)
     stem = path.stem
     path_config = _get_path_config(stem, root=root)
-    text = "\n".join(_yield_config_lines(stem, host=host, port=port)) + "\n"
-    with writer(path_config, overwrite=True) as temp:
-        _ = temp.write_text(text)
+    text = "\n".join(_yield_config_lines(stem, host=host, port=port))
+    write_text(path_config, text, overwrite=True)
     dest = _get_path_deploy_key(stem, root=root)
     cp(path, dest, perms="u=rw,g=,o=")
 

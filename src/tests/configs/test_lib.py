@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from utilities.text import normalize_multi_line_str
+from utilities.core import normalize_multi_line_str
 
 from installer.configs.lib import (
     setup_authorized_keys,
