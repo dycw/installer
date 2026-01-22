@@ -42,7 +42,7 @@ from installer.utilities import ensure_shell_rc, split_ssh
 
 if TYPE_CHECKING:
     from typed_settings import Secret
-    from utilities.permissions import PermissionsLike
+    from utilities.core import PermissionsLike
     from utilities.types import LoggerLike, PathLike, Retry
 
 
