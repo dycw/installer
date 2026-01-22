@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from utilities.text import strip_and_dedent
+from utilities.text import normalize_multi_line_str
 
 from installer.configs.lib import (
     setup_authorized_keys,
@@ -33,7 +33,7 @@ class TestSetupSSHDConfig:
 class TestSSHDConfig:
     def test_main(self) -> None:
         result = sshd_config()
-        expected = strip_and_dedent("""
+        expected = normalize_multi_line_str("""
             PasswordAuthentication no
             PermitRootLogin no
             PubkeyAcceptedAlgorithms ssh-ed25519
