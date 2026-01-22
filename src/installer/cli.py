@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from click import group
+from click import group, version_option
 from utilities.click import CONTEXT_SETTINGS
 
+from installer import __version__
 from installer.apps.cli import (
     age_sub_cmd,
     bat_sub_cmd,
@@ -42,6 +43,7 @@ from installer.configs.cli import (
 
 
 @group(**CONTEXT_SETTINGS)
+@version_option(version=__version__)
 def cli() -> None: ...
 
 

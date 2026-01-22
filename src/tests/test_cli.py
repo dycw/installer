@@ -51,6 +51,8 @@ class TestCLI:
             param(["setup-authorized-keys", "key1", "key2"]),
             param(["setup-ssh-config"]),
             param(["setup-sshd-config"]),
+            ##
+            param(["--version"]),
         ],
     )
     def test_commands(self, *, commands: list[str]) -> None:
