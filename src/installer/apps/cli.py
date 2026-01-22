@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from typed_settings import click_options
+from utilities.core import is_pytest
 from utilities.logging import basic_config
-from utilities.os import is_pytest
 
 from installer.apps.lib import (
     setup_age,
