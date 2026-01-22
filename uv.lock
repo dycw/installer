@@ -305,6 +305,7 @@ name = "dycw-installer"
 version = "0.4.4"
 source = { editable = "." }
 dependencies = [
+    { name = "attrs" },
     { name = "click" },
     { name = "coloredlogs" },
     { name = "dycw-utilities" },
@@ -313,11 +314,12 @@ dependencies = [
     { name = "rich" },
     { name = "shellingham" },
     { name = "tabulate" },
-    { name = "typed-settings", extra = ["attrs", "click"] },
+    { name = "typed-settings" },
 ]
 
 [package.optional-dependencies]
 cli = [
+    { name = "attrs" },
     { name = "click" },
     { name = "coloredlogs" },
     { name = "dycw-utilities" },
@@ -326,7 +328,7 @@ cli = [
     { name = "rich" },
     { name = "shellingham" },
     { name = "tabulate" },
-    { name = "typed-settings", extra = ["attrs", "click"] },
+    { name = "typed-settings" },
 ]
 
 [package.dev-dependencies]
@@ -339,33 +341,35 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "click", specifier = ">=8.3.1,<9" },
+    { name = "attrs", specifier = ">=25.4.0" },
+    { name = "attrs", marker = "extra == 'cli'", specifier = "==25.4.0" },
+    { name = "click", specifier = ">=8.3.1" },
     { name = "click", marker = "extra == 'cli'", specifier = "==8.3.1" },
-    { name = "coloredlogs", specifier = ">=15.0.1,<16" },
+    { name = "coloredlogs", specifier = ">=15.0.1" },
     { name = "coloredlogs", marker = "extra == 'cli'", specifier = "==15.0.1" },
-    { name = "dycw-utilities", specifier = ">=0.185.0,<1" },
+    { name = "dycw-utilities", specifier = ">=0.185.0" },
     { name = "dycw-utilities", marker = "extra == 'cli'", specifier = "==0.185.0" },
-    { name = "inflect", specifier = ">=7.5.0,<8" },
+    { name = "inflect", specifier = ">=7.5.0" },
     { name = "inflect", marker = "extra == 'cli'", specifier = "==7.5.0" },
-    { name = "pygithub", specifier = ">=2.8.1,<3" },
+    { name = "pygithub", specifier = ">=2.8.1" },
     { name = "pygithub", marker = "extra == 'cli'", specifier = "==2.8.1" },
-    { name = "rich", specifier = ">=14.2.0,<15" },
+    { name = "rich", specifier = ">=14.2.0" },
     { name = "rich", marker = "extra == 'cli'", specifier = "==14.2.0" },
-    { name = "shellingham", specifier = ">=1.5.4,<2" },
+    { name = "shellingham", specifier = ">=1.5.4" },
     { name = "shellingham", marker = "extra == 'cli'", specifier = "==1.5.4" },
-    { name = "tabulate", specifier = ">=0.9.0,<1" },
+    { name = "tabulate", specifier = ">=0.9.0" },
     { name = "tabulate", marker = "extra == 'cli'", specifier = "==0.9.0" },
-    { name = "typed-settings", extras = ["attrs", "click"], specifier = ">=25.3.0,<26" },
-    { name = "typed-settings", extras = ["attrs", "click"], marker = "extra == 'cli'", specifier = "==25.3.0" },
+    { name = "typed-settings", specifier = ">=25.3.0" },
+    { name = "typed-settings", marker = "extra == 'cli'", specifier = "==25.3.0" },
 ]
 provides-extras = ["cli"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "dycw-utilities", extras = ["test"], specifier = ">=0.185.0,<1" },
-    { name = "orjson", specifier = ">=3.11.5,<4" },
-    { name = "pyright", specifier = ">=1.1.408,<2" },
-    { name = "rich", specifier = ">=14.2.0,<15" },
+    { name = "dycw-utilities", extras = ["test"], specifier = ">=0.185.0" },
+    { name = "orjson", specifier = ">=3.11.5" },
+    { name = "pyright", specifier = ">=1.1.408" },
+    { name = "rich", specifier = ">=14.2.0" },
 ]
 
 [[package]]
@@ -1028,14 +1032,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/30/19/a8155d9f411ed7cb4a5f510a6c37ac09ea6065542c597c23d0a88ec2fbed/typed_settings-25.3.0.tar.gz", hash = "sha256:865eb52c3184f467705645a1e58db9d719e08b9d7957448a2ad8cbbc22ed21a6", size = 3492969, upload-time = "2025-11-29T22:10:25.768Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8b/9e/d01ef2bed8e995bbdeeb5307a571729a10545de4a6f8f06d9175fc7a1978/typed_settings-25.3.0-py3-none-any.whl", hash = "sha256:8fe578c84ae2e44f6e8bdde256d2449fbff45f47dca3c4092aeee03900efc12c", size = 63962, upload-time = "2025-11-29T22:10:23.77Z" },
-]
-
-[package.optional-dependencies]
-attrs = [
-    { name = "attrs" },
-]
-click = [
-    { name = "click" },
 ]
 
 [[package]]
