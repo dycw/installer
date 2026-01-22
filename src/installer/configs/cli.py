@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from click import argument
 from typed_settings import click_options
+from utilities.core import is_pytest
 from utilities.logging import basic_config
-from utilities.os import is_pytest
 
 from installer.configs.lib import (
     setup_authorized_keys,
