@@ -16,7 +16,6 @@ from utilities.subprocess import (
     maybe_sudo_cmd,
     run,
     symlink,
-    uv_tool_run_cmd,
     yield_ssh_temp_dir,
 )
 from utilities.tabulate import func_param_desc
@@ -39,7 +38,7 @@ from installer.apps.settings import (
 )
 from installer.logging import LOGGER
 from installer.settings import SSH_SETTINGS, SUDO_SETTINGS
-from installer.utilities import ensure_shell_rc, split_ssh
+from installer.utilities import ensure_shell_rc, split_ssh, ssh_install
 
 if TYPE_CHECKING:
     from typed_settings import Secret
@@ -183,14 +182,7 @@ def setup_age(
                     downloads.append(dest)
         LOGGER.info("Downloaded to %s", ", ".join(map(repr_str, downloads)))
     else:
-        user, hostname = split_ssh(ssh)
-        utilities.subprocess.ssh(
-            user,
-            hostname,
-            *uv_tool_run_cmd("cli", "age", from_="dycw-installer", latest=True),
-            retry=retry,
-            logger=logger,
-        )
+        ssh_install(ssh, "age", retry=retry, logger=logger)
 
 
 ##
@@ -562,6 +554,7 @@ def setup_jq(
 
 def setup_just(
     *,
+    ssh: str | None = SSH_SETTINGS.ssh,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
@@ -570,21 +563,26 @@ def setup_just(
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> None:
     """Setup 'just'."""
-    with yield_gzip_asset(
-        "casey",
-        "just",
-        token=token,
-        match_system=True,
-        match_machine=True,
-        timeout=timeout,
-        chunk_size=chunk_size,
-    ) as temp:
-        src = temp / "just"
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
+    if ssh is None:
+        with yield_gzip_asset(
+            "casey",
+            "just",
+            token=token,
+            match_system=True,
+            match_machine=True,
+            timeout=timeout,
+            chunk_size=chunk_size,
+        ) as temp:
+            src = temp / "just"
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+        LOGGER.info("Downloaded to %r", str(dest))
+    else:
+        ssh_install(ssh, "just", retry=retry, logger=logger)
 
 
 ##
@@ -931,14 +929,7 @@ def setup_sops(
         )
         LOGGER.info("Downloaded to %r", str(dest))
     else:
-        user, hostname = split_ssh(ssh)
-        utilities.subprocess.ssh(
-            user,
-            hostname,
-            *uv_tool_run_cmd("cli", "sops", from_="dycw-installer", latest=True),
-            retry=retry,
-            logger=logger,
-        )
+        ssh_install(ssh, "sops", retry=retry, logger=logger)
 
 
 ##
