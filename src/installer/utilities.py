@@ -12,6 +12,7 @@ from utilities.core import (
     read_text,
     write_text,
 )
+from utilities.subprocess import uv_tool_run_cmd
 
 from installer.apps.constants import SHELL
 from installer.logging import LOGGER
@@ -125,4 +126,32 @@ def split_ssh(text: str, /) -> tuple[str, str]:
     return user, hostname
 
 
-__all__ = ["convert_token", "ensure_line", "ensure_shell_rc", "get_home", "split_ssh"]
+##
+
+
+def ssh_install(
+    ssh: str,
+    command: str,
+    /,
+    *args: str,
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
+) -> None:
+    user, hostname = split_ssh(ssh)
+    utilities.subprocess.ssh(
+        user,
+        hostname,
+        *uv_tool_run_cmd("cli", command, *args, from_="dycw-installer", latest=True),
+        retry=retry,
+        logger=logger,
+    )
+
+
+__all__ = [
+    "convert_token",
+    "ensure_line",
+    "ensure_shell_rc",
+    "get_home",
+    "split_ssh",
+    "ssh_install",
+]

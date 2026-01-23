@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 def git_clone_sub_cmd(
     *, key: PathLike, owner: str, repo: str, clone: CloneSettings, root: RootSettings
 ) -> None:
+    """Clone a repo with a deploy key."""
     if is_pytest():
         return
     basic_config(obj=LOGGER)
