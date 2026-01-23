@@ -34,14 +34,6 @@ def setup_authorized_keys_sub_cmd(
 
 
 @click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-def setup_shell_config_sub_cmd(*, ssh: SSHSettings) -> None:
-    if is_pytest():
-        return
-    basic_config(obj=LOGGER)
-    setup_ssh_config(ssh=ssh.ssh, retry=ssh.retry, logger=ssh.logger)
-
-
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 def setup_ssh_config_sub_cmd(*, ssh: SSHSettings) -> None:
     if is_pytest():
         return

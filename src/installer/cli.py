@@ -37,7 +37,6 @@ from installer.apps.cli import (
 from installer.clone.cli import git_clone_sub_cmd
 from installer.configs.cli import (
     setup_authorized_keys_sub_cmd,
-    setup_shell_config_sub_cmd,
     setup_ssh_config_sub_cmd,
     setup_sshd_sub_cmd,
 )
@@ -104,9 +103,6 @@ _ = cli.command(
     help="Set up the SSH authorized keys",
     **CONTEXT_SETTINGS,
 )(setup_authorized_keys_sub_cmd)
-_ = cli.command(
-    name="setup-shell-config", help="Set up the shell config", **CONTEXT_SETTINGS
-)(setup_shell_config_sub_cmd)
 _ = cli.command(
     name="setup-ssh-config", help="Set up the SSH config", **CONTEXT_SETTINGS
 )(setup_ssh_config_sub_cmd)
