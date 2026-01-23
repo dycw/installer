@@ -899,6 +899,7 @@ def setup_shfmt(
 
 def setup_sops(
     *,
+    ssh: str | None = SSH_SETTINGS.ssh,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
@@ -907,25 +908,37 @@ def setup_sops(
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> None:
     """Setup 'sops'."""
-    dest = Path(path_binaries, "sops")
-    setup_asset(
-        "getsops",
-        "sops",
-        dest,
-        token=token,
-        match_system=True,
-        match_machine=True,
-        not_endswith=["json"],
-        timeout=timeout,
-        chunk_size=chunk_size,
-        sudo=sudo,
-        perms=perms,
-        owner=owner,
-        group=group,
-    )
-    LOGGER.info("Downloaded to %r", str(dest))
+    if ssh is None:
+        dest = Path(path_binaries, "sops")
+        setup_asset(
+            "getsops",
+            "sops",
+            dest,
+            token=token,
+            match_system=True,
+            match_machine=True,
+            not_endswith=["json"],
+            timeout=timeout,
+            chunk_size=chunk_size,
+            sudo=sudo,
+            perms=perms,
+            owner=owner,
+            group=group,
+        )
+        LOGGER.info("Downloaded to %r", str(dest))
+    else:
+        user, hostname = split_ssh(ssh)
+        utilities.subprocess.ssh(
+            user,
+            hostname,
+            *uv_tool_run_cmd("cli", "sops", from_="dycw-installer", latest=True),
+            retry=retry,
+            logger=logger,
+        )
 
 
 ##
