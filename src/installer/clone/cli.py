@@ -11,7 +11,6 @@ from utilities.logging import basic_config
 
 from installer.clone.lib import git_clone
 from installer.clone.settings import CloneSettings
-from installer.configs.settings import RootSettings
 from installer.logging import LOGGER
 from installer.settings import LOADER
 
@@ -23,9 +22,8 @@ if TYPE_CHECKING:
 @argument("owner", type=str)
 @argument("repo", type=str)
 @click_options(CloneSettings, [LOADER], show_envvars_in_help=True, argname="clone")
-@click_options(RootSettings, [LOADER], show_envvars_in_help=True, argname="root")
 def git_clone_sub_cmd(
-    *, key: PathLike, owner: str, repo: str, clone: CloneSettings, root: RootSettings
+    *, key: PathLike, owner: str, repo: str, clone: CloneSettings
 ) -> None:
     """Clone a repo with a deploy key."""
     if is_pytest():
@@ -35,7 +33,6 @@ def git_clone_sub_cmd(
         key,
         owner,
         repo,
-        root=root.root,
         host=clone.host,
         port=clone.port,
         dest=clone.dest,

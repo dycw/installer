@@ -33,12 +33,13 @@ from installer.apps.settings import (
     MATCH_SETTINGS,
     PATH_BINARIES_SETTINGS,
     PERMS_SETTINGS,
-    SHELL_RC_SETTINGS,
     TAG_SETTINGS,
 )
+from installer.configs.lib import setup_shell_config
+from installer.configs.settings import FILE_SYSTEM_ROOT, SHELL_CONFIG_SETTINGS
 from installer.logging import LOGGER
 from installer.settings import SSH_SETTINGS, SUDO_SETTINGS
-from installer.utilities import ensure_shell_rc, split_ssh, ssh_install
+from installer.utilities import split_ssh, ssh_install
 
 if TYPE_CHECKING:
     from typed_settings import Secret
@@ -298,6 +299,7 @@ def setup_delta(
 
 def setup_direnv(
     *,
+    ssh: str | None = SSH_SETTINGS.ssh,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
@@ -306,38 +308,37 @@ def setup_direnv(
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
-    skip_shell_rc: bool = SHELL_RC_SETTINGS.skip_shell_rc,
-    etc: bool = SHELL_RC_SETTINGS.etc,
+    etc: bool = SHELL_CONFIG_SETTINGS.etc,
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'direnv'."""
-    dest = Path(path_binaries, "direnv")
-    setup_asset(
-        "direnv",
-        "direnv",
-        dest,
-        token=token,
-        match_system=True,
-        match_machine=True,
-        timeout=timeout,
-        chunk_size=chunk_size,
-        sudo=sudo,
-        perms=perms,
-        owner=owner,
-        group=group,
-    )
-    LOGGER.info("Downloaded to %r", str(dest))
-    if not skip_shell_rc:
-        match SHELL:
-            case "bash" | "zsh":
-                line = f'eval "$(direnv hook {SHELL})"'
-            case "fish":
-                line = "direnv hook fish | source"
-            case "posix" | "sh":
-                msg = f"Unsupported shell: {SHELL=}"
-                raise TypeError(msg)
-            case never:
-                assert_never(never)
-        ensure_shell_rc(line, etc="direnv" if etc else None)
+    if ssh is None:
+        dest = Path(path_binaries, "direnv")
+        setup_asset(
+            "direnv",
+            "direnv",
+            dest,
+            token=token,
+            match_system=True,
+            match_machine=True,
+            timeout=timeout,
+            chunk_size=chunk_size,
+            sudo=sudo,
+            perms=perms,
+            owner=owner,
+            group=group,
+        )
+        LOGGER.info("Downloaded to %r", str(dest))
+        setup_shell_config(
+            f'eval "$(direnv hook {SHELL})"',
+            "direnv hook fish | source",
+            etc="direnv" if etc else None,
+            __root=__root,
+        )
+    else:
+        ssh_install(ssh, "direnv", sudo=sudo, etc=etc, retry=retry, logger=logger)
 
 
 ##
@@ -461,6 +462,7 @@ def setup_fd(
 
 def setup_fzf(
     *,
+    ssh: str | None = SSH_SETTINGS.ssh,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
@@ -469,36 +471,34 @@ def setup_fzf(
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
-    skip_shell_rc: bool = SHELL_RC_SETTINGS.skip_shell_rc,
-    etc: bool = SHELL_RC_SETTINGS.etc,
+    etc: bool = SHELL_CONFIG_SETTINGS.etc,
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'fzf'."""
-    with yield_gzip_asset(
-        "junegunn",
-        "fzf",
-        token=token,
-        match_system=True,
-        match_machine=True,
-        timeout=timeout,
-        chunk_size=chunk_size,
-    ) as src:
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
-    if not skip_shell_rc:
-        match SHELL:
-            case "bash":
-                line = 'eval "$(fzf --bash)"'
-            case "zsh":
-                line = "source <(fzf --zsh)"
-            case "fish":
-                line = "fzf --fish | source"
-            case "posix" | "sh":
-                msg = f"Unsupported shell: {SHELL=}"
-                raise TypeError(msg)
-            case never:
-                assert_never(never)
-        ensure_shell_rc(line, etc="fzf" if etc else None)
+    if ssh is None:
+        with yield_gzip_asset(
+            "junegunn",
+            "fzf",
+            token=token,
+            match_system=True,
+            match_machine=True,
+            timeout=timeout,
+            chunk_size=chunk_size,
+        ) as src:
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+        LOGGER.info("Downloaded to %r", str(dest))
+        setup_shell_config(
+            'eval "$(fzf --bash)"',
+            "fzf --fish | source",
+            etc="fzf" if etc else None,
+            zsh="source <(fzf --zsh)",
+            __root=__root,
+        )
+    else:
+        ssh_install(ssh, "fzf", sudo=sudo, etc=etc, retry=retry, logger=logger)
 
 
 ##
@@ -622,6 +622,7 @@ def setup_neovim(
 
 def setup_restic(
     *,
+    ssh: str | None = SSH_SETTINGS.ssh,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
@@ -630,20 +631,25 @@ def setup_restic(
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> None:
     """Setup 'restic'."""
-    with yield_bz2_asset(
-        "restic",
-        "restic",
-        token=token,
-        match_system=True,
-        match_machine=True,
-        timeout=timeout,
-        chunk_size=chunk_size,
-    ) as src:
-        dest = Path(path_binaries, "restic")
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
+    if ssh is None:
+        with yield_bz2_asset(
+            "restic",
+            "restic",
+            token=token,
+            match_system=True,
+            match_machine=True,
+            timeout=timeout,
+            chunk_size=chunk_size,
+        ) as src:
+            dest = Path(path_binaries, "restic")
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+        LOGGER.info("Downloaded to %r", str(dest))
+    else:
+        ssh_install(ssh, "restic", retry=retry, logger=logger)
 
 
 ##
@@ -682,6 +688,7 @@ def setup_ripgrep(
 
 def setup_starship(
     *,
+    ssh: str | None = SSH_SETTINGS.ssh,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
@@ -690,36 +697,35 @@ def setup_starship(
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
-    skip_shell_rc: bool = SHELL_RC_SETTINGS.skip_shell_rc,
-    etc: bool = SHELL_RC_SETTINGS.etc,
+    etc: bool = SHELL_CONFIG_SETTINGS.etc,
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'starship'."""
-    with yield_gzip_asset(
-        "starship",
-        "starship",
-        token=token,
-        match_system=True,
-        match_c_std_lib=True,
-        match_machine=True,
-        not_endswith=["sha256"],
-        timeout=timeout,
-        chunk_size=chunk_size,
-    ) as src:
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
-    if not skip_shell_rc:
-        match SHELL:
-            case "bash" | "zsh":
-                line = f'eval "$(starship init {SHELL})"'
-            case "fish":
-                line = "starship init fish | source"
-            case "posix" | "sh":
-                msg = f"Unsupported shell: {SHELL=}"
-                raise TypeError(msg)
-            case never:
-                assert_never(never)
-        ensure_shell_rc(line, etc="starship" if etc else None)
+    if ssh is None:
+        with yield_gzip_asset(
+            "starship",
+            "starship",
+            token=token,
+            match_system=True,
+            match_c_std_lib=True,
+            match_machine=True,
+            not_endswith=["sha256"],
+            timeout=timeout,
+            chunk_size=chunk_size,
+        ) as src:
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+        LOGGER.info("Downloaded to %r", str(dest))
+        setup_shell_config(
+            f'eval "$(starship init {SHELL})"',
+            "starship init fish | source",
+            etc="starship" if etc else None,
+            __root=__root,
+        )
+    else:
+        ssh_install(ssh, "starship", sudo=sudo, etc=etc, retry=retry, logger=logger)
 
 
 ##
@@ -1063,6 +1069,7 @@ def setup_yq(
 
 def setup_zoxide(
     *,
+    ssh: str | None = SSH_SETTINGS.ssh,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
@@ -1071,35 +1078,34 @@ def setup_zoxide(
     perms: PermissionsLike | None = PERMS_SETTINGS.perms,
     owner: str | int | None = PERMS_SETTINGS.owner,
     group: str | int | None = PERMS_SETTINGS.group,
-    skip_shell_rc: bool = SHELL_RC_SETTINGS.skip_shell_rc,
-    etc: bool = SHELL_RC_SETTINGS.etc,
+    etc: bool = SHELL_CONFIG_SETTINGS.etc,
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'zoxide'."""
-    with yield_gzip_asset(
-        "ajeetdsouza",
-        "zoxide",
-        token=token,
-        match_system=True,
-        match_machine=True,
-        timeout=timeout,
-        chunk_size=chunk_size,
-    ) as temp:
-        src = temp / "zoxide"
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
-    if not skip_shell_rc:
-        match SHELL:
-            case "bash" | "zsh":
-                line = f'eval "$(fzf --{SHELL})"'
-            case "fish":
-                line = "zoxide init fish | source"
-            case "posix" | "sh":
-                msg = f"Unsupported shell: {SHELL=}"
-                raise TypeError(msg)
-            case never:
-                assert_never(never)
-        ensure_shell_rc(line, etc="zoxide" if etc else None)
+    if ssh is None:
+        with yield_gzip_asset(
+            "ajeetdsouza",
+            "zoxide",
+            token=token,
+            match_system=True,
+            match_machine=True,
+            timeout=timeout,
+            chunk_size=chunk_size,
+        ) as temp:
+            src = temp / "zoxide"
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+        LOGGER.info("Downloaded to %r", str(dest))
+        setup_shell_config(
+            f'eval "$(fzf --{SHELL})"',
+            "zoxide init fish | source",
+            etc="zoxide" if etc else None,
+            __root=__root,
+        )
+    else:
+        ssh_install(ssh, "zoxide", sudo=sudo, etc=etc, retry=retry, logger=logger)
 
 
 __all__ = [

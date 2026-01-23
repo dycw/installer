@@ -139,7 +139,7 @@ class TestSetupDirenv:
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
-        setup_direnv(token=token, path_binaries=tmp_path, skip_shell_rc=True)
+        setup_direnv(token=token, path_binaries=tmp_path, __root=tmp_path)
         run(str(tmp_path / "direnv"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -200,7 +200,7 @@ class TestSetupFzf:
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
-        setup_fzf(token=token, path_binaries=tmp_path, skip_shell_rc=True)
+        setup_fzf(token=token, path_binaries=tmp_path, __root=tmp_path)
         run(str(tmp_path / "fzf"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -378,7 +378,7 @@ class TestSetupStarship:
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
-        setup_starship(token=token, path_binaries=tmp_path, skip_shell_rc=True)
+        setup_starship(token=token, path_binaries=tmp_path, __root=tmp_path)
         run(str(tmp_path / "starship"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -455,7 +455,7 @@ class TestSetupZoxide:
     def test_main(
         self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
-        setup_zoxide(token=token, path_binaries=tmp_path, skip_shell_rc=True)
+        setup_zoxide(token=token, path_binaries=tmp_path, __root=tmp_path)
         run(str(tmp_path / "zoxide"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""

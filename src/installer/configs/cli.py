@@ -28,7 +28,7 @@ def setup_authorized_keys_sub_cmd(
     setup_authorized_keys(
         list(keys),
         ssh=ssh.ssh,
-        root=root.root,
+        __root=root.root,
         batch_mode=batch.batch_mode,
         retry=ssh.retry,
         logger=ssh.logger,
@@ -37,11 +37,20 @@ def setup_authorized_keys_sub_cmd(
 
 @click_options(RootSettings, [LOADER], show_envvars_in_help=True, argname="root")
 @click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
+def setup_shell_config_sub_cmd(*, ssh: SSHSettings) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_ssh_config(ssh=ssh.ssh, __root=root.root, retry=ssh.retry, logger=ssh.logger)
+
+
+@click_options(RootSettings, [LOADER], show_envvars_in_help=True, argname="root")
+@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 def setup_ssh_config_sub_cmd(*, root: RootSettings, ssh: SSHSettings) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
-    setup_ssh_config(ssh=ssh.ssh, root=root.root, retry=ssh.retry, logger=ssh.logger)
+    setup_ssh_config(ssh=ssh.ssh, __root=root.root, retry=ssh.retry, logger=ssh.logger)
 
 
 @click_options(RootSettings, [LOADER], show_envvars_in_help=True, argname="root")
@@ -57,7 +66,7 @@ def setup_sshd_sub_cmd(
     setup_sshd_config(
         permit_root_login=sshd.permit_root_login,
         ssh=ssh.ssh,
-        root=root.root,
+        __root=root.root,
         sudo=sudo.sudo,
         retry=ssh.retry,
         logger=ssh.logger,

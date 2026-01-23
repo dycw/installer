@@ -6,13 +6,21 @@ from typed_settings import load_settings, option, settings
 
 from installer.settings import LOADER
 
+FILE_SYSTEM_ROOT = Path("/")
+
+
+##
+
 
 @settings
-class RootSettings:
-    root: Path = option(default=Path("/"), help="File system root")
+class ShellConfigSettings:
+    etc: bool = option(
+        default=False,
+        help="Set up in '/etc/profile.d/*.sh' instead of '~/.{bash,zsh}rc'",
+    )
 
 
-ROOT_SETTINGS = load_settings(RootSettings, [LOADER])
+SHELL_CONFIG_SETTINGS = load_settings(ShellConfigSettings, [LOADER])
 
 
 ##
@@ -26,4 +34,10 @@ class SSHDSettings:
 SSHD_SETTINGS = load_settings(SSHDSettings, [LOADER])
 
 
-__all__ = ["ROOT_SETTINGS", "SSHD_SETTINGS", "RootSettings", "SSHDSettings"]
+__all__ = [
+    "FILE_SYSTEM_ROOT",
+    "SHELL_CONFIG_SETTINGS",
+    "SSHD_SETTINGS",
+    "SSHDSettings",
+    "ShellConfigSettings",
+]

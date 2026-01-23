@@ -38,8 +38,8 @@ from installer.apps.settings import (
     DownloadSettings,
     PathBinariesSettings,
     PermsSettings,
-    ShellRcSettings,
 )
+from installer.configs.settings import ShellConfigSettings
 from installer.logging import LOGGER
 from installer.settings import LOADER, SSHSettings, SudoSettings
 
@@ -200,14 +200,16 @@ def delta_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(ShellRcSettings, [LOADER], show_envvars_in_help=True, argname="shell_rc")
+@click_options(
+    ShellConfigSettings, [LOADER], show_envvars_in_help=True, argname="shell_rc"
+)
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def direnv_sub_cmd(
     *,
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
-    shell_rc: ShellRcSettings,
+    shell_rc: ShellConfigSettings,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
@@ -222,7 +224,6 @@ def direnv_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
-        skip_shell_rc=shell_rc.skip_shell_rc,
         etc=shell_rc.etc,
     )
 
@@ -336,12 +337,14 @@ def fd_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(ShellRcSettings, [LOADER], show_envvars_in_help=True, argname="shell_rc")
+@click_options(
+    ShellConfigSettings, [LOADER], show_envvars_in_help=True, argname="shell_rc"
+)
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def fzf_sub_cmd(
     *,
     download: DownloadSettings,
-    shell_rc: ShellRcSettings,
+    shell_rc: ShellConfigSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
     sudo: SudoSettings,
@@ -358,7 +361,6 @@ def fzf_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
-        skip_shell_rc=shell_rc.skip_shell_rc,
         etc=shell_rc.etc,
     )
 
@@ -737,14 +739,16 @@ def sops_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(ShellRcSettings, [LOADER], show_envvars_in_help=True, argname="shell_rc")
+@click_options(
+    ShellConfigSettings, [LOADER], show_envvars_in_help=True, argname="shell_rc"
+)
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def starship_sub_cmd(
     *,
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
-    shell_rc: ShellRcSettings,
+    shell_rc: ShellConfigSettings,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
@@ -759,7 +763,6 @@ def starship_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
-        skip_shell_rc=shell_rc.skip_shell_rc,
         etc=shell_rc.etc,
     )
 
@@ -911,12 +914,14 @@ def yq_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(ShellRcSettings, [LOADER], show_envvars_in_help=True, argname="shell_rc")
+@click_options(
+    ShellConfigSettings, [LOADER], show_envvars_in_help=True, argname="shell_rc"
+)
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def zoxide_sub_cmd(
     *,
     download: DownloadSettings,
-    shell_rc: ShellRcSettings,
+    shell_rc: ShellConfigSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
     sudo: SudoSettings,
@@ -933,7 +938,6 @@ def zoxide_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
-        skip_shell_rc=shell_rc.skip_shell_rc,
         etc=shell_rc.etc,
     )
 
