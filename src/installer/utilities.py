@@ -131,7 +131,6 @@ def split_ssh(text: str, /) -> tuple[str, str]:
 
 def ssh_install(
     ssh: str,
-    command: str,
     /,
     *args: str,
     retry: Retry | None = SSH_SETTINGS.retry,
@@ -141,7 +140,7 @@ def ssh_install(
     utilities.subprocess.ssh(
         user,
         hostname,
-        *uv_tool_run_cmd("cli", command, *args, from_="dycw-installer", latest=True),
+        *uv_tool_run_cmd("cli", *args, from_="dycw-installer", latest=True),
         retry=retry,
         logger=logger,
     )
