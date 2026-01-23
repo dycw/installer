@@ -5,18 +5,13 @@ from typing import TYPE_CHECKING, assert_never
 
 import utilities.subprocess
 from typed_settings import Secret
-from utilities.core import (
-    ReadTextError,
-    extract_groups,
-    normalize_multi_line_str,
-    read_text,
-    write_text,
-)
+from utilities.constants import HOME
+from utilities.core import ReadTextError, extract_groups, read_text, write_text
 from utilities.subprocess import uv_tool_run_cmd
 
-from installer.apps.constants import SHELL
+from installer.configs.settings import SHELL_CONFIG_SETTINGS
 from installer.logging import LOGGER
-from installer.settings import BATCH_SETTINGS, SSH_SETTINGS
+from installer.settings import BATCH_SETTINGS, SSH_SETTINGS, SUDO_SETTINGS
 
 if TYPE_CHECKING:
     from utilities.types import LoggerLike, PathLike, Retry
@@ -45,7 +40,7 @@ def convert_token(x: str | None, /) -> Secret[str] | None:
 ##
 
 
-def ensure_line(text: str, path: PathLike, /) -> None:
+def ensure_line(path: PathLike, text: str, /) -> None:
     try:
         contents = read_text(path)
     except ReadTextError:
@@ -61,38 +56,6 @@ def ensure_line(text: str, path: PathLike, /) -> None:
 ##
 
 
-def ensure_shell_rc(text: str, /, *, etc: str | None = None) -> None:
-    if etc is None:
-        match SHELL:
-            case "bash" | "zsh":
-                path = Path.home() / f".{SHELL}rc"
-            case "fish":
-                path = Path.home() / ".config/fish/config.fish"
-            case "posix" | "sh":
-                msg = f"Invalid shell: {SHELL=}"
-                raise TypeError(msg)
-            case never:
-                assert_never(never)
-        ensure_line(text, path)
-    else:
-        match SHELL:
-            case "bash" | "zsh":
-                full = normalize_multi_line_str(f"""
-                    #!/usr/bin/env sh
-                    {text}
-                """)
-                path = Path(f"/etc/profile.d/{etc}.sh")
-                ensure_line(full, path)
-            case "fish" | "posix" | "sh":
-                msg = f"Invalid shell: {SHELL!r}"
-                raise TypeError(msg)
-            case never:
-                assert_never(never)
-
-
-##
-
-
 def get_home(
     *,
     ssh: str | None = SSH_SETTINGS.ssh,
@@ -101,7 +64,7 @@ def get_home(
     logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> Path:
     if ssh is None:
-        return Path.home()
+        return HOME
     user, hostname = split_ssh(ssh)
     result = utilities.subprocess.ssh(
         user,
@@ -131,26 +94,29 @@ def split_ssh(text: str, /) -> tuple[str, str]:
 
 def ssh_install(
     ssh: str,
+    cmd: str,
     /,
     *args: str,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    etc: bool = SHELL_CONFIG_SETTINGS.etc,
     retry: Retry | None = SSH_SETTINGS.retry,
     logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> None:
     user, hostname = split_ssh(ssh)
+    parts: list[str] = []
+    if sudo:
+        parts.append("--sudo")
+    if etc:
+        parts.append("--etc")
     utilities.subprocess.ssh(
         user,
         hostname,
-        *uv_tool_run_cmd("cli", *args, from_="dycw-installer", latest=True),
+        *uv_tool_run_cmd(
+            "cli", cmd, *parts, *args, from_="dycw-installer", latest=True
+        ),
         retry=retry,
         logger=logger,
     )
 
 
-__all__ = [
-    "convert_token",
-    "ensure_line",
-    "ensure_shell_rc",
-    "get_home",
-    "split_ssh",
-    "ssh_install",
-]
+__all__ = ["convert_token", "ensure_line", "get_home", "split_ssh", "ssh_install"]

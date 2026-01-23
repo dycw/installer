@@ -38,8 +38,8 @@ from installer.apps.settings import (
     DownloadSettings,
     PathBinariesSettings,
     PermsSettings,
-    ShellRcSettings,
 )
+from installer.configs.settings import ShellConfigSettings
 from installer.logging import LOGGER
 from installer.settings import LOADER, SSHSettings, SudoSettings
 
@@ -200,20 +200,25 @@ def delta_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(ShellRcSettings, [LOADER], show_envvars_in_help=True, argname="shell_rc")
+@click_options(
+    ShellConfigSettings, [LOADER], show_envvars_in_help=True, argname="shell_config"
+)
+@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def direnv_sub_cmd(
     *,
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
-    shell_rc: ShellRcSettings,
+    shell_config: ShellConfigSettings,
+    ssh: SSHSettings,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
     setup_direnv(
+        ssh=ssh.ssh,
         token=download.token,
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,
@@ -222,8 +227,9 @@ def direnv_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
-        skip_shell_rc=shell_rc.skip_shell_rc,
-        etc=shell_rc.etc,
+        etc=shell_config.etc,
+        retry=ssh.retry,
+        logger=ssh.logger,
     )
 
 
@@ -336,20 +342,25 @@ def fd_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(ShellRcSettings, [LOADER], show_envvars_in_help=True, argname="shell_rc")
+@click_options(
+    ShellConfigSettings, [LOADER], show_envvars_in_help=True, argname="shell_config"
+)
+@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def fzf_sub_cmd(
     *,
     download: DownloadSettings,
-    shell_rc: ShellRcSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
+    shell_config: ShellConfigSettings,
+    ssh: SSHSettings,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
     setup_fzf(
+        ssh=ssh.ssh,
         token=download.token,
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,
@@ -358,8 +369,9 @@ def fzf_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
-        skip_shell_rc=shell_rc.skip_shell_rc,
-        etc=shell_rc.etc,
+        etc=shell_config.etc,
+        retry=ssh.retry,
+        logger=ssh.logger,
     )
 
 
@@ -489,18 +501,21 @@ def neovim_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def restic_sub_cmd(
     *,
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
+    ssh: SSHSettings,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
     setup_restic(
+        ssh=ssh.ssh,
         token=download.token,
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,
@@ -509,6 +524,8 @@ def restic_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
+        retry=ssh.retry,
+        logger=ssh.logger,
     )
 
 
@@ -737,20 +754,25 @@ def sops_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(ShellRcSettings, [LOADER], show_envvars_in_help=True, argname="shell_rc")
+@click_options(
+    ShellConfigSettings, [LOADER], show_envvars_in_help=True, argname="shell_config"
+)
+@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def starship_sub_cmd(
     *,
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
-    shell_rc: ShellRcSettings,
+    shell_config: ShellConfigSettings,
+    ssh: SSHSettings,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
     setup_starship(
+        ssh=ssh.ssh,
         token=download.token,
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,
@@ -759,8 +781,9 @@ def starship_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
-        skip_shell_rc=shell_rc.skip_shell_rc,
-        etc=shell_rc.etc,
+        etc=shell_config.etc,
+        retry=ssh.retry,
+        logger=ssh.logger,
     )
 
 
@@ -911,20 +934,25 @@ def yq_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(ShellRcSettings, [LOADER], show_envvars_in_help=True, argname="shell_rc")
+@click_options(
+    ShellConfigSettings, [LOADER], show_envvars_in_help=True, argname="shell_config"
+)
+@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def zoxide_sub_cmd(
     *,
     download: DownloadSettings,
-    shell_rc: ShellRcSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
+    shell_config: ShellConfigSettings,
+    ssh: SSHSettings,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
     setup_zoxide(
+        ssh=ssh.ssh,
         token=download.token,
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,
@@ -933,8 +961,9 @@ def zoxide_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
-        skip_shell_rc=shell_rc.skip_shell_rc,
-        etc=shell_rc.etc,
+        etc=shell_config.etc,
+        retry=ssh.retry,
+        logger=ssh.logger,
     )
 
 

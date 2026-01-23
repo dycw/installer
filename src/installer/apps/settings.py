@@ -70,20 +70,6 @@ PERMS_SETTINGS = load_settings(PermsSettings, [LOADER])
 
 
 @settings
-class ShellRcSettings:
-    skip_shell_rc: bool = option(
-        default=False, help="Skip setting up the shell configs"
-    )
-    etc: bool = option(default=False, help="Set up shell configs in '/etc'")
-
-
-SHELL_RC_SETTINGS = load_settings(ShellRcSettings, [LOADER])
-
-
-##
-
-
-@settings
 class TagSettings:
     tag: str | None = secret(default=None, help="The GitHub release tag")
 
@@ -96,12 +82,10 @@ __all__ = [
     "MATCH_SETTINGS",
     "PATH_BINARIES_SETTINGS",
     "PERMS_SETTINGS",
-    "SHELL_RC_SETTINGS",
     "TAG_SETTINGS",
     "DownloadSettings",
     "MatchSettings",
     "PathBinariesSettings",
     "PermsSettings",
-    "ShellRcSettings",
     "TagSettings",
 ]
