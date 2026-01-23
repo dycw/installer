@@ -694,18 +694,21 @@ def shfmt_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
+@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def sops_sub_cmd(
     *,
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
+    ssh: SSHSettings,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
     setup_sops(
+        ssh=ssh.ssh,
         token=download.token,
         timeout=download.timeout,
         path_binaries=path_binaries.path_binaries,
@@ -714,6 +717,8 @@ def sops_sub_cmd(
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
+        retry=ssh.retry,
+        logger=ssh.logger,
     )
 
 
