@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from pathlib import Path
+from utilities.constants import HOME
 
-RELATIVE_HOME = Path.home().relative_to("/")
+RELATIVE_HOME = HOME.relative_to("/")
 
 
 __all__ = ["RELATIVE_HOME"]
