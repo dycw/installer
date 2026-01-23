@@ -934,10 +934,10 @@ def yq_sub_cmd(
     PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
 )
 @click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(
     ShellConfigSettings, [LOADER], show_envvars_in_help=True, argname="shell_config"
 )
+@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def zoxide_sub_cmd(
     *,
