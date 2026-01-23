@@ -47,44 +47,68 @@ from installer.configs.cli import (
 def cli() -> None: ...
 
 
-_ = cli.command(name="age", **CONTEXT_SETTINGS)(age_sub_cmd)
-_ = cli.command(name="bat", **CONTEXT_SETTINGS)(bat_sub_cmd)
-_ = cli.command(name="btm", **CONTEXT_SETTINGS)(bottom_sub_cmd)
-_ = cli.command(name="curl", **CONTEXT_SETTINGS)(curl_sub_cmd)
-_ = cli.command(name="delta", **CONTEXT_SETTINGS)(delta_sub_cmd)
-_ = cli.command(name="direnv", **CONTEXT_SETTINGS)(direnv_sub_cmd)
-_ = cli.command(name="dust", **CONTEXT_SETTINGS)(dust_sub_cmd)
-_ = cli.command(name="eza", **CONTEXT_SETTINGS)(eza_sub_cmd)
-_ = cli.command(name="fd", **CONTEXT_SETTINGS)(fd_sub_cmd)
-_ = cli.command(name="fzf", **CONTEXT_SETTINGS)(fzf_sub_cmd)
-_ = cli.command(name="jq", **CONTEXT_SETTINGS)(jq_sub_cmd)
-_ = cli.command(name="git", **CONTEXT_SETTINGS)(git_sub_cmd)
-_ = cli.command(name="just", **CONTEXT_SETTINGS)(just_sub_cmd)
-_ = cli.command(name="neovim", **CONTEXT_SETTINGS)(neovim_sub_cmd)
-_ = cli.command(name="restic", **CONTEXT_SETTINGS)(restic_sub_cmd)
-_ = cli.command(name="ripgrep", **CONTEXT_SETTINGS)(ripgrep_sub_cmd)
-_ = cli.command(name="ruff", **CONTEXT_SETTINGS)(ruff_sub_cmd)
-_ = cli.command(name="rsync", **CONTEXT_SETTINGS)(rsync_sub_cmd)
-_ = cli.command(name="sd", **CONTEXT_SETTINGS)(sd_sub_cmd)
-_ = cli.command(name="shellcheck", **CONTEXT_SETTINGS)(shellcheck_sub_cmd)
-_ = cli.command(name="shfmt", **CONTEXT_SETTINGS)(shfmt_sub_cmd)
-_ = cli.command(name="sops", **CONTEXT_SETTINGS)(sops_sub_cmd)
-_ = cli.command(name="starship", **CONTEXT_SETTINGS)(starship_sub_cmd)
-_ = cli.command(name="taplo", **CONTEXT_SETTINGS)(taplo_sub_cmd)
-_ = cli.command(name="uv", **CONTEXT_SETTINGS)(uv_sub_cmd)
-_ = cli.command(name="watchexec", **CONTEXT_SETTINGS)(watchexec_sub_cmd)
-_ = cli.command(name="yq", **CONTEXT_SETTINGS)(yq_sub_cmd)
-_ = cli.command(name="zoxide", **CONTEXT_SETTINGS)(zoxide_sub_cmd)
-
-
-_ = cli.command(name="git-clone", **CONTEXT_SETTINGS)(git_clone_sub_cmd)
-
-
-_ = cli.command(name="setup-authorized-keys", **CONTEXT_SETTINGS)(
-    setup_authorized_keys_sub_cmd
+_ = cli.command(name="age", help="Setup 'age'", **CONTEXT_SETTINGS)(age_sub_cmd)
+_ = cli.command(name="bat", help="Setup 'bat'", **CONTEXT_SETTINGS)(bat_sub_cmd)
+_ = cli.command(name="btm", help="Setup 'btm'", **CONTEXT_SETTINGS)(bottom_sub_cmd)
+_ = cli.command(name="curl", help="Setup 'curl'", **CONTEXT_SETTINGS)(curl_sub_cmd)
+_ = cli.command(name="delta", help="Setup 'delta'", **CONTEXT_SETTINGS)(delta_sub_cmd)
+_ = cli.command(name="direnv", help="Setup 'direnv'", **CONTEXT_SETTINGS)(
+    direnv_sub_cmd
 )
-_ = cli.command(name="setup-ssh-config", **CONTEXT_SETTINGS)(setup_ssh_config_sub_cmd)
-_ = cli.command(name="setup-sshd-config", **CONTEXT_SETTINGS)(setup_sshd_sub_cmd)
+_ = cli.command(name="dust", help="Setup 'dust'", **CONTEXT_SETTINGS)(dust_sub_cmd)
+_ = cli.command(name="eza", help="Setup 'eza'", **CONTEXT_SETTINGS)(eza_sub_cmd)
+_ = cli.command(name="fd", help="Setup 'fd'", **CONTEXT_SETTINGS)(fd_sub_cmd)
+_ = cli.command(name="fzf", help="Setup 'fzf'", **CONTEXT_SETTINGS)(fzf_sub_cmd)
+_ = cli.command(name="jq", help="Setup 'jq'", **CONTEXT_SETTINGS)(jq_sub_cmd)
+_ = cli.command(name="git", help="Setup 'git'", **CONTEXT_SETTINGS)(git_sub_cmd)
+_ = cli.command(name="just", help="Setup 'just'", **CONTEXT_SETTINGS)(just_sub_cmd)
+_ = cli.command(name="neovim", help="Setup 'neovim'", **CONTEXT_SETTINGS)(
+    neovim_sub_cmd
+)
+_ = cli.command(name="restic", help="Setup 'restic'", **CONTEXT_SETTINGS)(
+    restic_sub_cmd
+)
+_ = cli.command(name="ripgrep", help="Setup 'ripgrep'", **CONTEXT_SETTINGS)(
+    ripgrep_sub_cmd
+)
+_ = cli.command(name="ruff", help="Setup 'ruff'", **CONTEXT_SETTINGS)(ruff_sub_cmd)
+_ = cli.command(name="rsync", help="Setup 'rsync'", **CONTEXT_SETTINGS)(rsync_sub_cmd)
+_ = cli.command(name="sd", help="Setup 'sd'", **CONTEXT_SETTINGS)(sd_sub_cmd)
+_ = cli.command(name="shellcheck", help="Setup 'shellcheck'", **CONTEXT_SETTINGS)(
+    shellcheck_sub_cmd
+)
+_ = cli.command(name="shfmt", help="Setup 'shfmt'", **CONTEXT_SETTINGS)(shfmt_sub_cmd)
+_ = cli.command(name="sops", help="Setup 'sops'", **CONTEXT_SETTINGS)(sops_sub_cmd)
+_ = cli.command(name="starship", help="Setup 'starship'", **CONTEXT_SETTINGS)(
+    starship_sub_cmd
+)
+_ = cli.command(name="taplo", help="Setup 'taplo'", **CONTEXT_SETTINGS)(taplo_sub_cmd)
+_ = cli.command(name="uv", help="Setup 'uv'", **CONTEXT_SETTINGS)(uv_sub_cmd)
+_ = cli.command(name="watchexec", help="Setup 'watchexec'", **CONTEXT_SETTINGS)(
+    watchexec_sub_cmd
+)
+_ = cli.command(name="yq", help="Setup 'yq'", **CONTEXT_SETTINGS)(yq_sub_cmd)
+_ = cli.command(name="zoxide", help="Setup 'zoxide'", **CONTEXT_SETTINGS)(
+    zoxide_sub_cmd
+)
+
+
+_ = cli.command(
+    name="git-clone", help="Clone a repo with a deploy key.", **CONTEXT_SETTINGS
+)(git_clone_sub_cmd)
+
+
+_ = cli.command(
+    name="setup-authorized-keys",
+    help="Set up the SSH authorized keys",
+    **CONTEXT_SETTINGS,
+)(setup_authorized_keys_sub_cmd)
+_ = cli.command(
+    name="setup-ssh-config", help="Set up the SSH config", **CONTEXT_SETTINGS
+)(setup_ssh_config_sub_cmd)
+_ = cli.command(
+    name="setup-sshd-config", help="Set up the SSHD config", **CONTEXT_SETTINGS
+)(setup_sshd_sub_cmd)
 
 
 if __name__ == "__main__":

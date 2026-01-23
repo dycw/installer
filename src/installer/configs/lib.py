@@ -30,6 +30,7 @@ def setup_authorized_keys(
     retry: Retry | None = SSH_SETTINGS.retry,
     logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> None:
+    """Set up the SSH authorized keys."""
     LOGGER.info(
         func_param_desc(
             setup_authorized_keys,
@@ -72,6 +73,7 @@ def setup_ssh_config(
     retry: Retry | None = SSH_SETTINGS.retry,
     logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> None:
+    """Set up the SSH config."""
     LOGGER.info(
         func_param_desc(
             setup_ssh_config,
