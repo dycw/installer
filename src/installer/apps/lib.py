@@ -257,6 +257,7 @@ def setup_delta(
 
 def setup_direnv(
     *,
+    logger: LoggerLike | None = None,
     ssh: str | None = None,
     path_binaries: PathLike = PATH_BINARIES,
     token: SecretLike | None = GITHUB_TOKEN,
@@ -266,7 +267,6 @@ def setup_direnv(
     group: str | int | None = None,
     etc: bool = False,
     retry: Retry | None = None,
-    logger: LoggerLike | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'direnv'."""
@@ -428,6 +428,7 @@ def setup_dust(
 
 def setup_eza(
     *,
+    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -436,7 +437,7 @@ def setup_eza(
     group: str | int | None = None,
 ) -> None:
     """Setup 'eza'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    log_info(logger, "Setting up 'eza'...")
     match SYSTEM_NAME:
         case "Darwin":
             asset_owner = "cargo-bins"
@@ -471,6 +472,7 @@ def setup_eza(
 
 def setup_fd(
     *,
+    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -479,7 +481,7 @@ def setup_fd(
     group: str | int | None = None,
 ) -> None:
     """Setup 'fd'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    log_info(logger, "Setting up 'fd'...")
     with yield_gzip_asset(
         "sharkdp",
         "fd",
@@ -498,6 +500,7 @@ def setup_fd(
 
 def setup_fzf(
     *,
+    logger: LoggerLike | None = None,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -507,11 +510,10 @@ def setup_fzf(
     group: str | int | None = None,
     etc: bool = False,
     retry: Retry | None = None,
-    logger: LoggerLike | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'fzf'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    log_info(logger, "Setting up 'fzf'...")
     if ssh is None:
         with yield_gzip_asset(
             "junegunn", "fzf", token=token, match_system=True, match_machine=True
@@ -526,7 +528,18 @@ def setup_fzf(
             __root=__root,
         )
     else:
-        ssh_install(ssh, "fzf", sudo=sudo, etc=etc, retry=retry, logger=logger)
+        ssh_install(
+            ssh,
+            "fzf",
+            etc=etc,
+            group=group,
+            owner=owner,
+            perms=perms,
+            sudo=sudo,
+            token=token,
+            retry=retry,
+            logger=logger,
+        )
 
 
 ##
@@ -549,15 +562,16 @@ def setup_git(
 
 def setup_jq(
     *,
-    token: SecretLike | None = GITHUB_TOKEN,
+    logger: LoggerLike | None = None,
     path_binaries: PathLike = PATH_BINARIES,
+    token: SecretLike | None = GITHUB_TOKEN,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    """Setup 'shfmt'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    """Setup 'jq'."""
+    log_info(logger, "Setting up 'jq'...")
     dest = Path(path_binaries, "jq")
     setup_asset(
         "jqlang",
