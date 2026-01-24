@@ -106,10 +106,10 @@ def setup_ssh_config(
     log_info(logger, "Setting up SSH config...")
     config = Path(home, ".ssh/config")
     config_d = Path(home, ".ssh/config.d")
+    text = f"Include {config_d}/*.conf"
     if ssh is None:
-        config_d.mkdir(parents=True, exist_ok=True)
-        text = f"Include {config_d}/*.conf"
         write_text(config, text, overwrite=True)
+        config_d.mkdir(parents=True, exist_ok=True)
     else:
         user, hostname = split_ssh(ssh)
         cmds: list[list[str]] = [mkdir_cmd(config, parent=True), mkdir_cmd(config_d)]
@@ -121,7 +121,6 @@ def setup_ssh_config(
             retry=retry,
             logger=logger,
         )
-        text = f"Include {config_d}/*.conf\n"
         utilities.subprocess.ssh(
             user, hostname, *tee_cmd(config), input=text, retry=retry, logger=logger
         )
