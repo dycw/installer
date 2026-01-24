@@ -66,26 +66,13 @@ class PermsSettings:
 PERMS_SETTINGS = load_settings(PermsSettings, [LOADER])
 
 
-##
-
-
-@settings
-class TagSettings:
-    tag: str | None = secret(default=None, help="The GitHub release tag")
-
-
-TAG_SETTINGS = load_settings(TagSettings, [LOADER])
-
-
 __all__ = [
     "DOWNLOAD_SETTINGS",
     "MATCH_SETTINGS",
     "PATH_BINARIES_SETTINGS",
     "PERMS_SETTINGS",
-    "TAG_SETTINGS",
     "DownloadSettings",
     "MatchSettings",
     "PathBinariesSettings",
     "PermsSettings",
-    "TagSettings",
 ]

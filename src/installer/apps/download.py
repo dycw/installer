@@ -24,7 +24,7 @@ from installer.apps.constants import (
     MACHINE_TYPE_GROUP,
     SYSTEM_NAME_GROUP,
 )
-from installer.apps.settings import DOWNLOAD_SETTINGS, MATCH_SETTINGS, TAG_SETTINGS
+from installer.apps.settings import DOWNLOAD_SETTINGS, MATCH_SETTINGS
 from installer.logging import LOGGER
 
 if TYPE_CHECKING:
@@ -40,7 +40,7 @@ def yield_asset(
     repo: str,
     /,
     *,
-    tag: str | None = TAG_SETTINGS.tag,
+    tag: str | None = None,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
@@ -162,7 +162,7 @@ def yield_bz2_asset(
     repo: str,
     /,
     *,
-    tag: str | None = TAG_SETTINGS.tag,
+    tag: str | None = None,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
@@ -217,7 +217,7 @@ def yield_gzip_asset(
     repo: str,
     /,
     *,
-    tag: str | None = TAG_SETTINGS.tag,
+    tag: str | None = None,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
@@ -272,7 +272,7 @@ def yield_lzma_asset(
     repo: str,
     /,
     *,
-    tag: str | None = TAG_SETTINGS.tag,
+    tag: str | None = None,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,

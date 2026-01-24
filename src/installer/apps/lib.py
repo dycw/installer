@@ -43,7 +43,6 @@ from installer.apps.settings import (
     MATCH_SETTINGS,
     PATH_BINARIES_SETTINGS,
     PERMS_SETTINGS,
-    TAG_SETTINGS,
 )
 from installer.configs.lib import setup_shell_config
 from installer.configs.settings import FILE_SYSTEM_ROOT, SHELL_CONFIG_SETTINGS
@@ -91,7 +90,7 @@ def setup_asset(
     path: PathLike,
     /,
     *,
-    tag: str | None = TAG_SETTINGS.tag,
+    tag: str | None = None,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
     match_system: bool = MATCH_SETTINGS.match_system,
     match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
