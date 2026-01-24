@@ -40,7 +40,6 @@ from installer.apps.lib import (
     setup_zoxide,
 )
 from installer.click import logger_option, retry_option, ssh_option, sudo_option
-from installer.logging import LOGGER
 
 if TYPE_CHECKING:
     from utilities.types import LoggerLike, Retry
@@ -61,7 +60,7 @@ def apt_package_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_apt_package(package, logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
 
@@ -82,17 +81,19 @@ def age_sub_cmd(
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
-    ssh: SSHSettings,
+    ssh: str | None = None,
+    retry: Retry | None = None,
+    logger: LoggerLike | None = None,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_age(
-        ssh=ssh.ssh,
+        ssh=ssh,
         token=download.token,
         path_binaries=path_binaries.path_binaries,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -121,13 +122,13 @@ def bat_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_bat(
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -154,13 +155,13 @@ def bottom_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_bottom(
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -172,11 +173,17 @@ def bottom_sub_cmd(
 
 @click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
-def curl_sub_cmd(*, ssh: SSHSettings, sudo: SudoSettings) -> None:
+def curl_sub_cmd(
+    *,
+    ssh: str | None = None,
+    retry: Retry | None = None,
+    logger: LoggerLike | None = None,
+    sudo: SudoSettings,
+) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
-    setup_curl(ssh=ssh.ssh, sudo=sudo.sudo, retry=retry, logger=logger)
+    basic_config(obj=logger)
+    setup_curl(ssh=ssh, sudo=sudo, retry=retry, logger=logger)
 
 
 ##
@@ -199,13 +206,13 @@ def delta_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_delta(
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -233,19 +240,21 @@ def direnv_sub_cmd(
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
     shell_config: ShellConfigSettings,
-    ssh: SSHSettings,
+    ssh: str | None = None,
+    retry: Retry | None = None,
+    logger: LoggerLike | None = None,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_direnv(
-        ssh=ssh.ssh,
+        ssh=ssh,
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -261,11 +270,18 @@ def direnv_sub_cmd(
 @option("--user", type=str, default=None, help="User to add to the 'docker' group")
 @click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
-def docker_sub_cmd(*, user: str | None, ssh: SSHSettings, sudo: SudoSettings) -> None:
+def docker_sub_cmd(
+    *,
+    user: str | None,
+    ssh: str | None = None,
+    retry: Retry | None = None,
+    logger: LoggerLike | None = None,
+    sudo: SudoSettings,
+) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
-    setup_docker(ssh=ssh.ssh, user=user, sudo=sudo.sudo, retry=retry, logger=logger)
+    basic_config(obj=logger)
+    setup_docker(ssh=ssh, user=user, sudo=sudo, retry=retry, logger=logger)
 
 
 ##
@@ -288,13 +304,13 @@ def dust_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_dust(
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -321,13 +337,13 @@ def eza_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_eza(
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -354,13 +370,13 @@ def fd_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_fd(
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -388,19 +404,21 @@ def fzf_sub_cmd(
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
     shell_config: ShellConfigSettings,
-    ssh: SSHSettings,
+    ssh: str | None = None,
+    retry: Retry | None = None,
+    logger: LoggerLike | None = None,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_fzf(
-        ssh=ssh.ssh,
+        ssh=ssh,
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -430,13 +448,13 @@ def jq_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_jq(
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -448,11 +466,17 @@ def jq_sub_cmd(
 
 @click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
-def git_sub_cmd(*, ssh: SSHSettings, sudo: SudoSettings) -> None:
+def git_sub_cmd(
+    *,
+    ssh: str | None = None,
+    retry: Retry | None = None,
+    logger: LoggerLike | None = None,
+    sudo: SudoSettings,
+) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
-    setup_git(ssh=ssh.ssh, sudo=sudo.sudo, retry=retry, logger=logger)
+    basic_config(obj=logger)
+    setup_git(ssh=ssh, sudo=sudo, retry=retry, logger=logger)
 
 
 ##
@@ -472,19 +496,21 @@ def just_sub_cmd(
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
-    ssh: SSHSettings,
+    ssh: str | None = None,
+    retry: Retry | None = None,
+    logger: LoggerLike | None = None,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_just(
-        ssh=ssh.ssh,
+        ssh=ssh,
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -513,13 +539,13 @@ def neovim_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_neovim(
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -543,19 +569,21 @@ def restic_sub_cmd(
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
-    ssh: SSHSettings,
+    ssh: str | None = None,
+    retry: Retry | None = None,
+    logger: LoggerLike | None = None,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_restic(
-        ssh=ssh.ssh,
+        ssh=ssh,
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -584,13 +612,13 @@ def ripgrep_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_ripgrep(
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -617,13 +645,13 @@ def ruff_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_ruff(
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -635,11 +663,17 @@ def ruff_sub_cmd(
 
 @click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
-def rsync_sub_cmd(*, ssh: SSHSettings, sudo: SudoSettings) -> None:
+def rsync_sub_cmd(
+    *,
+    ssh: str | None = None,
+    retry: Retry | None = None,
+    logger: LoggerLike | None = None,
+    sudo: SudoSettings,
+) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
-    setup_rsync(ssh=ssh.ssh, sudo=sudo.sudo, retry=retry, logger=logger)
+    basic_config(obj=logger)
+    setup_rsync(ssh=ssh, sudo=sudo, retry=retry, logger=logger)
 
 
 ##
@@ -662,13 +696,13 @@ def sd_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_sd(
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -695,13 +729,13 @@ def shellcheck_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_shellcheck(
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -728,13 +762,13 @@ def shfmt_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_shfmt(
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -758,19 +792,21 @@ def sops_sub_cmd(
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
-    ssh: SSHSettings,
+    ssh: str | None = None,
+    retry: Retry | None = None,
+    logger: LoggerLike | None = None,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_sops(
-        ssh=ssh.ssh,
+        ssh=ssh,
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -800,19 +836,21 @@ def starship_sub_cmd(
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
     shell_config: ShellConfigSettings,
-    ssh: SSHSettings,
+    ssh: str | None = None,
+    retry: Retry | None = None,
+    logger: LoggerLike | None = None,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_starship(
-        ssh=ssh.ssh,
+        ssh=ssh,
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -842,13 +880,13 @@ def taplo_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_taplo(
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -872,19 +910,21 @@ def uv_sub_cmd(
     download: DownloadSettings,
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
-    ssh: SSHSettings,
+    ssh: str | None = None,
+    retry: Retry | None = None,
+    logger: LoggerLike | None = None,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_uv(
-        ssh=ssh.ssh,
+        ssh=ssh,
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -913,13 +953,13 @@ def watchexec_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_watchexec(
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -946,13 +986,13 @@ def yq_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_yq(
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,
@@ -980,19 +1020,21 @@ def zoxide_sub_cmd(
     path_binaries: PathBinariesSettings,
     perms: PermsSettings,
     shell_config: ShellConfigSettings,
-    ssh: SSHSettings,
+    ssh: str | None = None,
+    retry: Retry | None = None,
+    logger: LoggerLike | None = None,
     sudo: SudoSettings,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_zoxide(
-        ssh=ssh.ssh,
+        ssh=ssh,
         token=download.token,
         timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries.path_binaries,
         chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
+        sudo=sudo,
         perms=perms.perms,
         owner=perms.owner,
         group=perms.group,

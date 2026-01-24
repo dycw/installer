@@ -6,6 +6,8 @@ from typed_settings import load_settings, option, settings
 
 from installer.settings import LOADER
 
+GIT_CLONE_HOST = "github.com"
+
 
 @settings
 class CloneSettings:

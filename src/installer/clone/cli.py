@@ -11,7 +11,6 @@ from utilities.logging import basic_config
 
 from installer.clone.lib import git_clone
 from installer.clone.settings import CloneSettings
-from installer.logging import LOGGER
 from installer.settings import LOADER
 
 if TYPE_CHECKING:
@@ -25,10 +24,9 @@ if TYPE_CHECKING:
 def git_clone_sub_cmd(
     *, key: PathLike, owner: str, repo: str, clone: CloneSettings
 ) -> None:
-    """Clone a repo with a deploy key."""
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     git_clone(
         key,
         owner,

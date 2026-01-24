@@ -15,8 +15,6 @@ from utilities.core import (
 )
 from utilities.subprocess import uv_tool_run_cmd
 
-from installer.logging import LOGGER
-
 if TYPE_CHECKING:
     from utilities.types import LoggerLike, PathLike, Retry
 
@@ -44,7 +42,9 @@ def convert_token(x: str | None, /) -> Secret[str] | None:
 ##
 
 
-def ensure_line(path: PathLike, text: str, /, *, logger: LoggerLike = LOGGER) -> None:
+def ensure_line(
+    path: PathLike, text: str, /, *, logger: LoggerLike | None = None
+) -> None:
     try:
         contents = read_text(path)
     except ReadTextError:
@@ -65,7 +65,7 @@ def get_home(
     ssh: str | None = None,
     batch_mode: bool = False,
     retry: Retry | None = None,
-    logger: LoggerLike = LOGGER,
+    logger: LoggerLike | None = None,
 ) -> Path:
     if ssh is None:
         return HOME
@@ -104,7 +104,7 @@ def ssh_install(
     sudo: bool = False,
     etc: bool = False,
     retry: Retry | None = None,
-    logger: LoggerLike = LOGGER,
+    logger: LoggerLike | None = None,
 ) -> None:
     user, hostname = split_ssh(ssh)
     parts: list[str] = []

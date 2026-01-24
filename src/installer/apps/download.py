@@ -26,7 +26,6 @@ from installer.apps.constants import (
     MACHINE_TYPE_GROUP,
     SYSTEM_NAME_GROUP,
 )
-from installer.logging import LOGGER
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -42,7 +41,7 @@ def yield_asset(
     repo: str,
     /,
     *,
-    logger: LoggerLike = LOGGER,
+    logger: LoggerLike | None = None,
     tag: str | None = None,
     token: Secret[str] | None = GITHUB_TOKEN,
     match_system: bool = False,

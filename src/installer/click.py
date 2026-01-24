@@ -8,8 +8,4 @@ sudo_option = option("--sudo", is_flag=True, default=False, help="Run as 'sudo'"
 retry_option = option("--ssh", type=tuple[int, int], default=None, help="SSH retry")
 
 
-class BatchSettings:
-    batch_mode: bool = option(default=True, help="SSH batch mode")
-
-
 __all__ = ["logger_option", "retry_option", "ssh_option", "sudo_option"]

@@ -59,7 +59,7 @@ def setup_apt_package(
     package: str,
     /,
     *,
-    logger: LoggerLike = LOGGER,
+    logger: LoggerLike | None = None,
     ssh: str | None = None,
     sudo: bool = False,
     retry: Retry | None = None,
@@ -162,7 +162,7 @@ def setup_age(
     owner: str | int | None = None,
     group: str | int | None = None,
     retry: Retry | None = None,
-    logger: LoggerLike = LOGGER,
+    logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'age'."""
     if ssh is None:
@@ -254,7 +254,7 @@ def setup_curl(
     ssh: str | None = None,
     sudo: bool = False,
     retry: Retry | None = None,
-    logger: LoggerLike = LOGGER,
+    logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'curl'."""
     setup_apt_package("curl", ssh=ssh, sudo=sudo, retry=retry, logger=logger)
@@ -303,7 +303,7 @@ def setup_direnv(
     group: str | int | None = None,
     etc: bool = False,
     retry: Retry | None = None,
-    logger: LoggerLike = LOGGER,
+    logger: LoggerLike | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'direnv'."""
@@ -343,7 +343,7 @@ def setup_docker(
     sudo: bool = False,
     user: str | None = None,
     retry: Retry | None = None,
-    logger: LoggerLike = LOGGER,
+    logger: LoggerLike | None = None,
 ) -> None:
     if ssh is None:
         match SYSTEM_NAME:
@@ -543,7 +543,7 @@ def setup_fzf(
     group: str | int | None = None,
     etc: bool = False,
     retry: Retry | None = None,
-    logger: LoggerLike = LOGGER,
+    logger: LoggerLike | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'fzf'."""
@@ -579,7 +579,7 @@ def setup_git(
     ssh: str | None = None,
     sudo: bool = False,
     retry: Retry | None = None,
-    logger: LoggerLike = LOGGER,
+    logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'git'."""
     setup_apt_package("git", ssh=ssh, sudo=sudo, retry=retry, logger=logger)
@@ -630,7 +630,7 @@ def setup_just(
     owner: str | int | None = None,
     group: str | int | None = None,
     retry: Retry | None = None,
-    logger: LoggerLike = LOGGER,
+    logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'just'."""
     if ssh is None:
@@ -694,7 +694,7 @@ def setup_restic(
     owner: str | int | None = None,
     group: str | int | None = None,
     retry: Retry | None = None,
-    logger: LoggerLike = LOGGER,
+    logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'restic'."""
     if ssh is None:
@@ -757,7 +757,7 @@ def setup_starship(
     group: str | int | None = None,
     etc: bool = False,
     retry: Retry | None = None,
-    logger: LoggerLike = LOGGER,
+    logger: LoggerLike | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'starship'."""
@@ -821,7 +821,7 @@ def setup_rsync(
     ssh: str | None = None,
     sudo: bool = False,
     retry: Retry | None = None,
-    logger: LoggerLike = LOGGER,
+    logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'rsync'."""
     setup_apt_package("rsync", ssh=ssh, sudo=sudo, retry=retry, logger=logger)
@@ -959,7 +959,7 @@ def setup_sops(
     owner: str | int | None = None,
     group: str | int | None = None,
     retry: Retry | None = None,
-    logger: LoggerLike = LOGGER,
+    logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'sops'."""
     if ssh is None:
@@ -997,7 +997,7 @@ def setup_uv(
     owner: str | int | None = None,
     group: str | int | None = None,
     retry: Retry | None = None,
-    logger: LoggerLike = LOGGER,
+    logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'uv'."""
     if ssh is None:
@@ -1118,7 +1118,7 @@ def setup_zoxide(
     group: str | int | None = None,
     etc: bool = False,
     retry: Retry | None = None,
-    logger: LoggerLike = LOGGER,
+    logger: LoggerLike | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'zoxide'."""
