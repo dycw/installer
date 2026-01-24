@@ -8,7 +8,7 @@ from utilities.constants import PWD
 from utilities.core import log_info, write_text
 from utilities.subprocess import cp
 
-from installer.clone.settings import CLONE_SETTINGS, GIT_CLONE_HOST
+from installer.clone.settings import GIT_CLONE_HOST
 from installer.configs.lib import setup_ssh_config
 from installer.constants import FILE_SYSTEM_ROOT, RELATIVE_HOME
 
@@ -46,7 +46,7 @@ def _setup_deploy_key(
     path: PathLike,
     /,
     *,
-    host: str = CLONE_SETTINGS.host,
+    host: str = GIT_CLONE_HOST,
     port: int | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
@@ -68,7 +68,7 @@ def _yield_config_lines(
     stem: str,
     /,
     *,
-    host: str = CLONE_SETTINGS.host,
+    host: str = GIT_CLONE_HOST,
     port: int | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> Iterator[str]:
