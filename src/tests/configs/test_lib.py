@@ -17,17 +17,17 @@ if TYPE_CHECKING:
 
 class TestSetupAuthorizedKeys:
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_authorized_keys([], __root=tmp_path)
+        setup_authorized_keys([], home=tmp_path)
 
 
 class TestSetupSSHConfig:
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_ssh_config(__root=tmp_path)
+        setup_ssh_config(home=tmp_path)
 
 
 class TestSetupSSHDConfig:
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_sshd_config(__root=tmp_path)
+        setup_sshd_config(root=tmp_path)
 
 
 class TestSSHDConfig:
