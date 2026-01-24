@@ -44,6 +44,7 @@ from installer.apps.download import (
     yield_lzma_asset,
 )
 from installer.configs.lib import setup_shell_config
+from installer.constants import FILE_SYSTEM_ROOT
 from installer.utilities import split_ssh, ssh_install
 
 if TYPE_CHECKING:
@@ -121,6 +122,7 @@ def setup_asset(
 
 def setup_age(
     *,
+    logger: LoggerLike | None = None,
     ssh: str | None = None,
     token: Secret[str] | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -129,9 +131,9 @@ def setup_age(
     owner: str | int | None = None,
     group: str | int | None = None,
     retry: Retry | None = None,
-    logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'age'."""
+    log_info(logger, "Setting up 'age'...")
     if ssh is None:
         with yield_gzip_asset(
             "FiloSottile",

@@ -15,6 +15,8 @@ from utilities.core import (
 )
 from utilities.subprocess import uv_tool_run_cmd
 
+from installer.apps.constants import GITHUB_TOKEN
+
 if TYPE_CHECKING:
     from utilities.types import LoggerLike, PathLike, Retry
 
@@ -101,17 +103,18 @@ def ssh_install(
     cmd: str,
     /,
     *args: str,
-    sudo: bool = False,
     etc: bool = False,
+    token: SecretLike | None = GITHUB_TOKEN,
+    sudo: bool = False,
     retry: Retry | None = None,
     logger: LoggerLike | None = None,
 ) -> None:
     user, hostname = split_ssh(ssh)
     parts: list[str] = []
-    if sudo:
-        parts.append("--sudo")
     if etc:
         parts.append("--etc")
+    if sudo:
+        parts.append("--sudo")
     utilities.subprocess.ssh(
         user,
         hostname,
