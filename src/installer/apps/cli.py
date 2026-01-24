@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from click import command, option
+from click import argument, option
 from typed_settings import click_options
 from utilities.core import is_pytest
 from utilities.logging import basic_config
@@ -47,7 +47,7 @@ from installer.logging import LOGGER
 from installer.settings import LOADER, SSHSettings, SudoSettings
 
 
-@command("package", type=str)
+@argument("package", type=str)
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def apt_package_sub_cmd(*, package: str, ssh: SSHSettings, sudo: SudoSettings) -> None:
     if is_pytest():
