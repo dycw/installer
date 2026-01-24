@@ -6,12 +6,16 @@ from typing import TYPE_CHECKING, assert_never
 import utilities.subprocess
 from typed_settings import Secret
 from utilities.constants import HOME
-from utilities.core import ReadTextError, extract_groups, read_text, write_text
+from utilities.core import (
+    ReadTextError,
+    extract_groups,
+    log_info,
+    read_text,
+    write_text,
+)
 from utilities.subprocess import uv_tool_run_cmd
 
-from installer.configs.settings import SHELL_CONFIG_SETTINGS
 from installer.logging import LOGGER
-from installer.settings import BATCH_SETTINGS, SSH_SETTINGS, SUDO_SETTINGS
 
 if TYPE_CHECKING:
     from utilities.types import LoggerLike, PathLike, Retry
@@ -40,17 +44,17 @@ def convert_token(x: str | None, /) -> Secret[str] | None:
 ##
 
 
-def ensure_line(path: PathLike, text: str, /) -> None:
+def ensure_line(path: PathLike, text: str, /, *, logger: LoggerLike = LOGGER) -> None:
     try:
         contents = read_text(path)
     except ReadTextError:
         write_text(path, text)
-        LOGGER.info("Wrote %r to %r", text, str(path))
+        log_info(logger, "Wrote %r to %r", text, str(path))
         return
     if text not in contents:
         with Path(path).open(mode="a") as fh:
             _ = fh.write(f"\n\n{text}")
-        LOGGER.info("Appended %r to %r", text, str(path))
+        log_info(logger, "Appended %r to %r", text, str(path))
 
 
 ##
@@ -58,10 +62,10 @@ def ensure_line(path: PathLike, text: str, /) -> None:
 
 def get_home(
     *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    batch_mode: bool = BATCH_SETTINGS.batch_mode,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    ssh: str | None = None,
+    batch_mode: bool = False,
+    retry: Retry | None = None,
+    logger: LoggerLike = LOGGER,
 ) -> Path:
     if ssh is None:
         return HOME
@@ -97,10 +101,10 @@ def ssh_install(
     cmd: str,
     /,
     *args: str,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    etc: bool = SHELL_CONFIG_SETTINGS.etc,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    sudo: bool = False,
+    etc: bool = False,
+    retry: Retry | None = None,
+    logger: LoggerLike = LOGGER,
 ) -> None:
     user, hostname = split_ssh(ssh)
     parts: list[str] = []

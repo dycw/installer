@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from click import argument
+from click import argument, option
 from typed_settings import click_options
 from utilities.core import is_pytest
 from utilities.logging import basic_config
@@ -10,9 +10,7 @@ from installer.configs.lib import (
     setup_ssh_config,
     setup_sshd_config,
 )
-from installer.configs.settings import SSHDSettings
 from installer.logging import LOGGER
-from installer.settings import LOADER, BatchSettings, SSHSettings, SudoSettings
 
 
 @argument("keys", type=str, nargs=-1)
@@ -25,11 +23,7 @@ def setup_authorized_keys_sub_cmd(
         return
     basic_config(obj=LOGGER)
     setup_authorized_keys(
-        list(keys),
-        ssh=ssh.ssh,
-        batch_mode=batch.batch_mode,
-        retry=ssh.retry,
-        logger=ssh.logger,
+        list(keys), ssh=ssh.ssh, batch_mode=batch.batch_mode, retry=retry, logger=logger
     )
 
 
@@ -38,12 +32,13 @@ def setup_ssh_config_sub_cmd(*, ssh: SSHSettings) -> None:
     if is_pytest():
         return
     basic_config(obj=LOGGER)
-    setup_ssh_config(ssh=ssh.ssh, retry=ssh.retry, logger=ssh.logger)
+    setup_ssh_config(ssh=ssh.ssh, retry=retry, logger=logger)
 
 
 @click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SSHDSettings, [LOADER], show_envvars_in_help=True, argname="sshd")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@option("--permit-root-login", is_flag=True, default=False, help="Permit root login")
 def setup_sshd_sub_cmd(
     *, ssh: SSHSettings, sshd: SSHDSettings, sudo: SudoSettings
 ) -> None:
@@ -54,8 +49,8 @@ def setup_sshd_sub_cmd(
         permit_root_login=sshd.permit_root_login,
         ssh=ssh.ssh,
         sudo=sudo.sudo,
-        retry=ssh.retry,
-        logger=ssh.logger,
+        retry=retry,
+        logger=logger,
     )
 
 

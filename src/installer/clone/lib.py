@@ -13,7 +13,6 @@ from installer.clone.settings import CLONE_SETTINGS
 from installer.configs.lib import setup_ssh_config
 from installer.configs.settings import FILE_SYSTEM_ROOT
 from installer.constants import RELATIVE_HOME
-from installer.logging import LOGGER
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -33,7 +32,8 @@ def git_clone(
     branch: str | None = CLONE_SETTINGS.branch,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
-    LOGGER.info(
+    log_info(
+        logger,
         func_param_desc(
             git_clone,
             __version__,
@@ -44,7 +44,7 @@ def git_clone(
             f"{port=}",
             f"{dest=}",
             f"{branch=}",
-        )
+        ),
     )
     key = Path(key)
     setup_ssh_config()
