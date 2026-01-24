@@ -1,21 +1,31 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from shlex import join
 from typing import TYPE_CHECKING, assert_never
 
 import utilities.subprocess
 from typed_settings import Secret
-from utilities.core import repr_str
+from utilities.core import extract_group, normalize_multi_line_str, one, repr_str
+from utilities.logging import to_logger
+from utilities.shutil import WhichError, which
 from utilities.subprocess import (
     APT_UPDATE,
     BASH_LS,
+    apt_install,
     apt_install_cmd,
+    apt_remove,
+    apt_update,
+    chmod,
     cp,
+    curl,
     curl_cmd,
+    install,
     maybe_sudo_cmd,
     run,
     symlink,
+    tee,
     yield_ssh_temp_dir,
 )
 from utilities.tabulate import func_param_desc
@@ -57,31 +67,19 @@ def setup_apt_package(
     logger: LoggerLike | None = SSH_SETTINGS.logger,
 ) -> None:
     """Setup an 'apt' package."""
-    match ssh, SYSTEM_NAME:
-        case None, "Darwin":
-            msg = f"Unsupported system: {SYSTEM_NAME!r}"
-            raise ValueError(msg)
-        case None, "Linux":
-            run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
-            run(*maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo))
-            LOGGER.info("Installed %r", package)
-        case str(), _:
-            user, hostname = split_ssh(ssh)
-            cmds: list[list[str]] = [
-                maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
-                maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo),
-            ]
-            utilities.subprocess.ssh(
-                user,
-                hostname,
-                *BASH_LS,
-                input="\n".join(map(join, cmds)),
-                retry=retry,
-                logger=logger,
-            )
-            LOGGER.info("Installed %r on %r", package, hostname)
-        case never:
-            assert_never(never)
+    if ssh is None:
+        match SYSTEM_NAME:
+            case "Darwin":
+                msg = f"Unsupported system: {SYSTEM_NAME!r}"
+                raise ValueError(msg)
+            case "Linux":
+                run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
+                run(*maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo))
+                LOGGER.info("Installed %r", package)
+            case never:
+                assert_never(never)
+    else:
+        ssh_install(ssh, "apt-package", package, retry=retry, logger=logger)
 
 
 ##
@@ -339,6 +337,91 @@ def setup_direnv(
         )
     else:
         ssh_install(ssh, "direnv", sudo=sudo, etc=etc, retry=retry, logger=logger)
+
+
+##
+
+
+def setup_docker(
+    *,
+    ssh: str | None = SSH_SETTINGS.ssh,
+    sudo: bool = SUDO_SETTINGS.sudo,
+    user: str | None = None,
+    retry: Retry | None = SSH_SETTINGS.retry,
+    logger: LoggerLike | None = SSH_SETTINGS.logger,
+) -> None:
+    if ssh is None:
+        match SYSTEM_NAME:
+            case "Darwin":
+                msg = f"Unsupported system: {SYSTEM_NAME!r}"
+                raise ValueError(msg)
+            case "Linux":
+                if logger is not None:
+                    to_logger(logger).info("Installing 'docker'...")
+                try:
+                    _ = which("docker")
+                except WhichError:
+                    apt_remove(
+                        "docker.io",
+                        "docker-doc",
+                        "docker-compose",
+                        "podman-docker",
+                        "containerd",
+                        "runc",
+                        sudo=sudo,
+                    )
+                    apt_update(sudo=sudo)
+                    apt_install("ca-certificates", "curl", sudo=sudo)
+                    docker_asc = Path("/etc/apt/keyrings/docker.asc")
+                    install(
+                        docker_asc.parent,
+                        directory=True,
+                        mode="u=rwx,g=rx,o=rx",
+                        sudo=sudo,
+                    )
+                    curl(
+                        "https://download.docker.com/linux/debian/gpg",
+                        output=docker_asc,
+                        sudo=sudo,
+                    )
+                    chmod(docker_asc, "u=rw,g=r,o=r", sudo=sudo)
+                    release = Path("/etc/os-release").read_text()
+                    pattern = re.compile(r"^VERSION_CODENAME=(\w+)$")
+                    line = one(
+                        line for line in release.splitlines() if pattern.search(line)
+                    )
+                    codename = extract_group(pattern, line)
+                    tee(
+                        "/etc/apt/sources.list.d/docker.sources",
+                        normalize_multi_line_str(f"""
+                            Types: deb
+                            URIs: https://download.docker.com/linux/debian
+                            Suites: {codename}
+                            Components: stable
+                            Signed-By: /etc/apt/keyrings/docker.asc
+                        """),
+                        sudo=sudo,
+                    )
+                    apt_install(
+                        "docker-ce",
+                        "docker-ce-cli",
+                        "containerd.io",
+                        "docker-buildx-plugin",
+                        "docker-compose-plugin",
+                        update=True,
+                        sudo=sudo,
+                    )
+                if user is not None:
+                    run(*maybe_sudo_cmd("usermod", "-aG", "docker", user, sudo=sudo))
+                if logger is not None:
+                    to_logger(logger).info("Installing 'docker'...")
+            case never:
+                assert_never(never)
+    else:
+        args: list[str] = []
+        if user is not None:
+            args.extend(["--user", user])
+        ssh_install(ssh, "docker", *args, retry=retry, logger=logger)
 
 
 ##
@@ -1117,6 +1200,7 @@ __all__ = [
     "setup_curl",
     "setup_delta",
     "setup_direnv",
+    "setup_docker",
     "setup_dust",
     "setup_eza",
     "setup_fd",

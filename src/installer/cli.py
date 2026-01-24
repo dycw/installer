@@ -6,11 +6,13 @@ from utilities.click import CONTEXT_SETTINGS
 from installer import __version__
 from installer.apps.cli import (
     age_sub_cmd,
+    apt_package_sub_cmd,
     bat_sub_cmd,
     bottom_sub_cmd,
     curl_sub_cmd,
     delta_sub_cmd,
     direnv_sub_cmd,
+    docker_sub_cmd,
     dust_sub_cmd,
     eza_sub_cmd,
     fd_sub_cmd,
@@ -47,6 +49,9 @@ from installer.configs.cli import (
 def cli() -> None: ...
 
 
+_ = cli.command(name="apt-package", help="Setup an 'apt' package", **CONTEXT_SETTINGS)(
+    apt_package_sub_cmd
+)
 _ = cli.command(name="age", help="Setup 'age'", **CONTEXT_SETTINGS)(age_sub_cmd)
 _ = cli.command(name="bat", help="Setup 'bat'", **CONTEXT_SETTINGS)(bat_sub_cmd)
 _ = cli.command(name="btm", help="Setup 'btm'", **CONTEXT_SETTINGS)(bottom_sub_cmd)
@@ -54,6 +59,9 @@ _ = cli.command(name="curl", help="Setup 'curl'", **CONTEXT_SETTINGS)(curl_sub_c
 _ = cli.command(name="delta", help="Setup 'delta'", **CONTEXT_SETTINGS)(delta_sub_cmd)
 _ = cli.command(name="direnv", help="Setup 'direnv'", **CONTEXT_SETTINGS)(
     direnv_sub_cmd
+)
+_ = cli.command(name="docker", help="Setup 'docker'", **CONTEXT_SETTINGS)(
+    docker_sub_cmd
 )
 _ = cli.command(name="dust", help="Setup 'dust'", **CONTEXT_SETTINGS)(dust_sub_cmd)
 _ = cli.command(name="eza", help="Setup 'eza'", **CONTEXT_SETTINGS)(eza_sub_cmd)

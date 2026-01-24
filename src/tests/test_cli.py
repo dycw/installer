@@ -18,12 +18,14 @@ class TestCLI:
         "commands",
         [
             ##
+            param(["apt-package", "git"]),
             param(["age"]),
             param(["bat"]),
             param(["btm"]),
             param(["curl"]),
             param(["delta"]),
             param(["direnv"]),
+            param(["docker"]),
             param(["dust"]),
             param(["eza"]),
             param(["fd"]),

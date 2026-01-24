@@ -1,16 +1,19 @@
 from __future__ import annotations
 
+from click import command, option
 from typed_settings import click_options
 from utilities.core import is_pytest
 from utilities.logging import basic_config
 
 from installer.apps.lib import (
     setup_age,
+    setup_apt_package,
     setup_bat,
     setup_bottom,
     setup_curl,
     setup_delta,
     setup_direnv,
+    setup_docker,
     setup_dust,
     setup_eza,
     setup_fd,
@@ -42,6 +45,20 @@ from installer.apps.settings import (
 from installer.configs.settings import ShellConfigSettings
 from installer.logging import LOGGER
 from installer.settings import LOADER, SSHSettings, SudoSettings
+
+
+@command("package", type=str)
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+def apt_package_sub_cmd(*, package: str, ssh: SSHSettings, sudo: SudoSettings) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_apt_package(
+        package, ssh=ssh.ssh, sudo=sudo.sudo, retry=ssh.retry, logger=ssh.logger
+    )
+
+
+##
 
 
 @click_options(
@@ -230,6 +247,21 @@ def direnv_sub_cmd(
         etc=shell_config.etc,
         retry=ssh.retry,
         logger=ssh.logger,
+    )
+
+
+##
+
+
+@option("--user", type=str, default=None, help="User to add to the 'docker' group")
+@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
+@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+def docker_sub_cmd(*, user: str | None, ssh: SSHSettings, sudo: SudoSettings) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=LOGGER)
+    setup_docker(
+        ssh=ssh.ssh, user=user, sudo=sudo.sudo, retry=ssh.retry, logger=ssh.logger
     )
 
 
@@ -969,6 +1001,7 @@ def zoxide_sub_cmd(
 
 __all__ = [
     "age_sub_cmd",
+    "apt_package_sub_cmd",
     "bat_sub_cmd",
     "bottom_sub_cmd",
     "curl_sub_cmd",
