@@ -10,8 +10,7 @@ from utilities.subprocess import cp
 
 from installer.clone.settings import CLONE_SETTINGS, GIT_CLONE_HOST
 from installer.configs.lib import setup_ssh_config
-from installer.configs.settings import FILE_SYSTEM_ROOT
-from installer.constants import RELATIVE_HOME
+from installer.constants import FILE_SYSTEM_ROOT, RELATIVE_HOME
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
