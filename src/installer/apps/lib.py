@@ -35,9 +35,7 @@ from utilities.subprocess import (
     tee,
     yield_ssh_temp_dir,
 )
-from utilities.tabulate import func_param_desc
 
-from installer import __version__
 from installer.apps.constants import GITHUB_TOKEN, PATH_BINARIES, SHELL, SYSTEM_NAME
 from installer.apps.download import (
     yield_asset,
@@ -46,7 +44,6 @@ from installer.apps.download import (
     yield_lzma_asset,
 )
 from installer.configs.lib import setup_shell_config
-from installer.configs.settings import FILE_SYSTEM_ROOT
 from installer.utilities import split_ssh, ssh_install
 
 if TYPE_CHECKING:
@@ -65,18 +62,7 @@ def setup_apt_package(
     retry: Retry | None = None,
 ) -> None:
     """Setup an 'apt' package."""
-    log_info(
-        logger,
-        "%s",
-        func_param_desc(
-            setup_apt_package,
-            __version__,
-            f"{logger=}",
-            f"{ssh=}",
-            f"{sudo=}",
-            f"{retry=}",
-        ),
-    )
+    log_info(logger, "Setting up 'apt' package...")
     if ssh is None:
         match SYSTEM_NAME:
             case "Darwin":
@@ -89,7 +75,7 @@ def setup_apt_package(
             case never:
                 assert_never(never)
     else:
-        ssh_install(ssh, "apt-package", package, retry=retry, logger=logger)
+        ssh_install(ssh, "apt-package", package, sudo=sudo, retry=retry, logger=logger)
 
 
 ##
@@ -101,6 +87,7 @@ def setup_asset(
     path: PathLike,
     /,
     *,
+    logger: LoggerLike | None = None,
     tag: str | None = None,
     token: Secret[str] | None = GITHUB_TOKEN,
     match_system: bool = False,
@@ -114,27 +101,7 @@ def setup_asset(
     group: str | int | None = None,
 ) -> None:
     """Setup a GitHub asset."""
-    log_info(
-        logger,
-        func_param_desc(
-            setup_asset,
-            __version__,
-            f"{asset_owner=}",
-            f"{asset_repo=}",
-            f"{path=}",
-            f"{tag=}",
-            f"{token=}",
-            f"{match_system=}",
-            f"{match_c_std_lib=}",
-            f"{match_machine=}",
-            f"{not_matches=}",
-            f"{not_endswith=}",
-            f"{sudo=}",
-            f"{perms=}",
-            f"{owner=}",
-            f"{group=}",
-        ),
-    )
+    log_info(logger, "Setting up GitHub asset...")
     with yield_asset(
         asset_owner,
         asset_repo,
@@ -143,10 +110,10 @@ def setup_asset(
         match_system=match_system,
         match_c_std_lib=match_c_std_lib,
         match_machine=match_machine,
+        not_matches=not_matches,
         not_endswith=not_endswith,
     ) as src:
         cp(src, path, sudo=sudo, perms=perms, owner=owner, group=group)
-        log_info(logger, "Downloaded to %r", str(path))
 
 
 ##
@@ -173,7 +140,6 @@ def setup_age(
             match_system=True,
             match_machine=True,
             not_endswith=["proof"],
-            chunk_size=chunk_size,
         ) as temp:
             downloads: list[Path] = []
             for src in temp.iterdir():
@@ -206,7 +172,6 @@ def setup_bat(
         match_system=True,
         match_c_std_lib=True,
         match_machine=True,
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "bat"
         dest = Path(path_binaries, src.name)
@@ -235,7 +200,6 @@ def setup_bottom(
         match_c_std_lib=True,
         match_machine=True,
         not_matches=[r"\d+\.tar\.gz$"],
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "btm"
         dest = Path(path_binaries, src.name)
@@ -277,7 +241,6 @@ def setup_delta(
         match_system=True,
         match_c_std_lib=True,
         match_machine=True,
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "delta"
         dest = Path(path_binaries, src.name)
@@ -312,7 +275,6 @@ def setup_direnv(
             token=token,
             match_system=True,
             match_machine=True,
-            chunk_size=chunk_size,
             sudo=sudo,
             perms=perms,
             owner=owner,
@@ -441,7 +403,6 @@ def setup_dust(
         match_system=True,
         match_c_std_lib=True,
         match_machine=match_machine,
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "dust"
         dest = Path(path_binaries, src.name)
@@ -486,7 +447,6 @@ def setup_eza(
         match_c_std_lib=match_c_std_lib,
         match_machine=True,
         not_endswith=not_endswith,
-        chunk_size=chunk_size,
     ) as src:
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
@@ -513,7 +473,6 @@ def setup_fd(
         match_system=True,
         match_c_std_lib=True,
         match_machine=True,
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "fd"
         dest = Path(path_binaries, src.name)
@@ -541,12 +500,7 @@ def setup_fzf(
     """Setup 'fzf'."""
     if ssh is None:
         with yield_gzip_asset(
-            "junegunn",
-            "fzf",
-            token=token,
-            match_system=True,
-            match_machine=True,
-            chunk_size=chunk_size,
+            "junegunn", "fzf", token=token, match_system=True, match_machine=True
         ) as src:
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
@@ -598,7 +552,6 @@ def setup_jq(
         match_system=True,
         match_machine=True,
         not_endswith=["linux64"],
-        chunk_size=chunk_size,
         sudo=sudo,
         perms=perms,
         owner=owner,
@@ -625,12 +578,7 @@ def setup_just(
     """Setup 'just'."""
     if ssh is None:
         with yield_gzip_asset(
-            "casey",
-            "just",
-            token=token,
-            match_system=True,
-            match_machine=True,
-            chunk_size=chunk_size,
+            "casey", "just", token=token, match_system=True, match_machine=True
         ) as temp:
             src = temp / "just"
             dest = Path(path_binaries, src.name)
@@ -660,7 +608,6 @@ def setup_neovim(
         match_system=True,
         match_machine=True,
         not_endswith=["appimage", "zsync"],
-        chunk_size=chunk_size,
     ) as temp:
         dest_dir = Path(path_binaries, "nvim-dir")
         cp(temp, dest_dir, sudo=sudo, perms=perms, owner=owner, group=group)
@@ -687,12 +634,7 @@ def setup_restic(
     """Setup 'restic'."""
     if ssh is None:
         with yield_bz2_asset(
-            "restic",
-            "restic",
-            token=token,
-            match_system=True,
-            match_machine=True,
-            chunk_size=chunk_size,
+            "restic", "restic", token=token, match_system=True, match_machine=True
         ) as src:
             dest = Path(path_binaries, "restic")
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
@@ -721,7 +663,6 @@ def setup_ripgrep(
         match_system=True,
         match_machine=True,
         not_endswith=["sha256"],
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "rg"
         dest = Path(path_binaries, src.name)
@@ -756,7 +697,6 @@ def setup_starship(
             match_c_std_lib=True,
             match_machine=True,
             not_endswith=["sha256"],
-            chunk_size=chunk_size,
         ) as src:
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
@@ -785,12 +725,7 @@ def setup_taplo(
 ) -> None:
     """Setup 'taplo'."""
     with yield_gzip_asset(
-        "tamasfe",
-        "taplo",
-        token=token,
-        match_system=True,
-        match_machine=True,
-        chunk_size=chunk_size,
+        "tamasfe", "taplo", token=token, match_system=True, match_machine=True
     ) as src:
         dest = Path(path_binaries, "taplo")
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
@@ -832,7 +767,6 @@ def setup_ruff(
         match_c_std_lib=True,
         match_machine=True,
         not_endswith=["sha256"],
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "ruff"
         dest = Path(path_binaries, src.name)
@@ -860,7 +794,6 @@ def setup_sd(
         match_system=True,
         match_c_std_lib=True,
         match_machine=True,
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "sd"
         dest = Path(path_binaries, src.name)
@@ -888,7 +821,6 @@ def setup_shellcheck(
         match_system=True,
         match_machine=True,
         not_endswith=["tar.xz"],
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "shellcheck"
         dest = Path(path_binaries, src.name)
@@ -917,7 +849,6 @@ def setup_shfmt(
         token=token,
         match_system=True,
         match_machine=True,
-        chunk_size=chunk_size,
         sudo=sudo,
         perms=perms,
         owner=owner,
@@ -952,7 +883,6 @@ def setup_sops(
             match_system=True,
             match_machine=True,
             not_endswith=["json"],
-            chunk_size=chunk_size,
             sudo=sudo,
             perms=perms,
             owner=owner,
@@ -988,7 +918,6 @@ def setup_uv(
             match_c_std_lib=True,
             match_machine=True,
             not_endswith=["sha256"],
-            chunk_size=chunk_size,
         ) as temp:
             src = temp / "uv"
             dest = Path(path_binaries, src.name)
@@ -1041,7 +970,6 @@ def setup_watchexec(
         match_c_std_lib=True,
         match_machine=True,
         not_endswith=["b3", "deb", "rpm", "sha256", "sha512"],
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "watchexec"
         dest = Path(path_binaries, src.name)
@@ -1071,7 +999,6 @@ def setup_yq(
         match_system=True,
         match_machine=True,
         not_endswith=["tar.gz"],
-        chunk_size=chunk_size,
         sudo=sudo,
         perms=perms,
         owner=owner,
@@ -1100,12 +1027,7 @@ def setup_zoxide(
     """Setup 'zoxide'."""
     if ssh is None:
         with yield_gzip_asset(
-            "ajeetdsouza",
-            "zoxide",
-            token=token,
-            match_system=True,
-            match_machine=True,
-            chunk_size=chunk_size,
+            "ajeetdsouza", "zoxide", token=token, match_system=True, match_machine=True
         ) as temp:
             src = temp / "zoxide"
             dest = Path(path_binaries, src.name)
