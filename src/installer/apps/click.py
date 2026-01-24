@@ -5,7 +5,7 @@ from pathlib import Path
 import click
 from click import option
 
-from installer.apps.constants import GITHUB_TOKEN, PATH_BINARIES
+from installer.apps.constants import GITHUB_TOKEN, PATH_BINARIES, PERMISSIONS
 
 group_option = option(
     "--group", type=click.Path(path_type=Path), default=None, help="Binary group"
@@ -19,7 +19,9 @@ path_binaries_option = option(
     default=PATH_BINARIES,
     help="Path to the binaries",
 )
-perms_option = option("--perms", type=str, default=None, help="Binary permissions")
+perms_option = option(
+    "--perms", type=str, default=PERMISSIONS, help="Binary permissions"
+)
 token_option = option("--token", type=str, default=GITHUB_TOKEN, help="GitHub token")
 
 

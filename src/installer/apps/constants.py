@@ -7,7 +7,7 @@ from re import IGNORECASE, search
 from typing import TYPE_CHECKING
 
 from pydantic import SecretStr
-from utilities.core import OneEmptyError, Permissions, get_env, has_env, one
+from utilities.core import OneEmptyError, get_env, has_env, one
 from utilities.shellingham import get_shell
 from utilities.subprocess import run
 from utilities.typing import get_args
@@ -22,7 +22,7 @@ TIMEOUT = 60
 CHUNK_SIZE = 8196
 GITHUB_TOKEN = SecretStr(get_env("GITHUB_TOKEN")) if has_env("GITHUB_TOKEN") else None
 PATH_BINARIES = Path("/usr/local/bin/")
-PERMISSIONS = Permissions.from_text("u=rwx,g=rx,o=rx")
+PERMISSIONS = "u=rwx,g=rx,o=rx"
 SHELL = get_shell()
 
 

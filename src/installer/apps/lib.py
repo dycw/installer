@@ -34,7 +34,13 @@ from utilities.subprocess import (
     yield_ssh_temp_dir,
 )
 
-from installer.apps.constants import GITHUB_TOKEN, PATH_BINARIES, SHELL, SYSTEM_NAME
+from installer.apps.constants import (
+    GITHUB_TOKEN,
+    PATH_BINARIES,
+    PERMISSIONS,
+    SHELL,
+    SYSTEM_NAME,
+)
 from installer.apps.download import (
     yield_asset,
     yield_bz2_asset,
@@ -95,7 +101,7 @@ def setup_asset(
     not_matches: MaybeSequenceStr | None = None,
     not_endswith: MaybeSequenceStr | None = None,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
@@ -125,7 +131,7 @@ def setup_age(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
     retry: Retry | None = None,
@@ -170,7 +176,7 @@ def setup_bat(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
@@ -198,7 +204,7 @@ def setup_bottom(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
@@ -242,7 +248,7 @@ def setup_delta(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
@@ -271,7 +277,7 @@ def setup_direnv(
     path_binaries: PathLike = PATH_BINARIES,
     token: SecretLike | None = GITHUB_TOKEN,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
@@ -406,7 +412,7 @@ def setup_dust(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
@@ -441,7 +447,7 @@ def setup_eza(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
@@ -485,7 +491,7 @@ def setup_fd(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
@@ -514,7 +520,7 @@ def setup_fzf(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
@@ -575,7 +581,7 @@ def setup_jq(
     path_binaries: PathLike = PATH_BINARIES,
     token: SecretLike | None = GITHUB_TOKEN,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
@@ -607,7 +613,7 @@ def setup_just(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
     retry: Retry | None = None,
@@ -645,7 +651,7 @@ def setup_neovim(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
@@ -675,7 +681,7 @@ def setup_restic(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
     retry: Retry | None = None,
@@ -711,7 +717,7 @@ def setup_ripgrep(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
@@ -754,7 +760,7 @@ def setup_ruff(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
@@ -783,7 +789,7 @@ def setup_sd(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
@@ -811,7 +817,7 @@ def setup_shellcheck(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
@@ -839,7 +845,7 @@ def setup_shfmt(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
@@ -870,7 +876,7 @@ def setup_sops(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
     retry: Retry | None = None,
@@ -917,7 +923,7 @@ def setup_starship(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
     custom_shell_config: bool = False,
@@ -972,7 +978,7 @@ def setup_taplo(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
@@ -995,7 +1001,7 @@ def setup_uv(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
     retry: Retry | None = None,
@@ -1049,7 +1055,7 @@ def setup_watchexec(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
@@ -1078,7 +1084,7 @@ def setup_yq(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
@@ -1110,7 +1116,7 @@ def setup_zoxide(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
