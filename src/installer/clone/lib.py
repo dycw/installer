@@ -8,7 +8,7 @@ from utilities.constants import PWD
 from utilities.core import log_info, write_text
 from utilities.subprocess import cp
 
-from installer.clone.settings import GIT_CLONE_HOST
+from installer.clone.constants import GIT_CLONE_HOST
 from installer.configs.lib import setup_ssh_config
 from installer.constants import FILE_SYSTEM_ROOT, RELATIVE_HOME
 

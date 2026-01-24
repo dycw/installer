@@ -9,8 +9,8 @@ from utilities.core import is_pytest
 from utilities.logging import basic_config
 
 from installer.click import logger_option, retry_option, ssh_option
+from installer.clone.constants import GIT_CLONE_HOST
 from installer.clone.lib import git_clone
-from installer.clone.settings import GIT_CLONE_HOST
 
 if TYPE_CHECKING:
     from utilities.types import LoggerLike, PathLike, Retry
