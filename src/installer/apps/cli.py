@@ -46,6 +46,7 @@ from installer.apps.lib import (
     setup_zoxide,
 )
 from installer.click import logger_option, retry_option, ssh_option, sudo_option
+from installer.configs.click import etc_option
 
 if TYPE_CHECKING:
     from utilities.pydantic import SecretLike
@@ -233,33 +234,34 @@ def delta_sub_cmd(
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(
-    ShellConfigSettings, [LOADER], show_envvars_in_help=True, argname="shell_config"
-)
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@ssh_option
+@path_binaries_option
+@token_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
+@etc_option
+@retry_option
 def direnv_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    shell_config: ShellConfigSettings,
-    ssh: str | None = None,
-    retry: Retry | None = None,
-    logger: LoggerLike | None = None,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    ssh: str | None,
+    path_binaries: PathLike,
+    token: SecretLike | None,
+    sudo: bool,
+    perms: PermissionsLike | None,
+    owner: str | int | None,
+    group: str | int | None,
+    etc: bool,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=logger)
     setup_direnv(
+        logger=logger,
         ssh=ssh,
         path_binaries=path_binaries,
         token=token,
@@ -269,56 +271,58 @@ def direnv_sub_cmd(
         group=group,
         etc=etc,
         retry=retry,
-        logger=logger,
     )
 
 
 ##
 
 
+@logger_option
+@ssh_option
+@sudo_option
 @option("--user", type=str, default=None, help="User to add to the 'docker' group")
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@retry_option
 def docker_sub_cmd(
     *,
-    user: str | None,
-    ssh: str | None = None,
-    retry: Retry | None = None,
     logger: LoggerLike | None = None,
-    sudo: SudoSettings,
+    ssh: str | None = None,
+    sudo: bool = False,
+    user: str | None = None,
+    retry: Retry | None = None,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=logger)
-    setup_docker(ssh=ssh, user=user, sudo=sudo, retry=retry, logger=logger)
+    setup_docker(logger=logger, ssh=ssh, sudo=sudo, user=user, retry=retry)
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def dust_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike | None,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=logger)
     setup_dust(
+        logger=logger,
         token=token,
-        timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries,
-        chunk_size=download.chunk_size,
         sudo=sudo,
         perms=perms,
         owner=owner,
