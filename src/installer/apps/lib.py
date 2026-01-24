@@ -6,6 +6,7 @@ from shlex import join
 from typing import TYPE_CHECKING, assert_never
 
 import utilities.subprocess
+from utilities.constants import HOME
 from utilities.core import (
     WhichError,
     extract_group,
@@ -48,7 +49,6 @@ from installer.apps.download import (
     yield_lzma_asset,
 )
 from installer.configs.lib import setup_shell_config
-from installer.constants import FILE_SYSTEM_ROOT
 from installer.utilities import split_ssh, ssh_install
 
 if TYPE_CHECKING:
@@ -281,8 +281,8 @@ def setup_direnv(
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
+    home: PathLike = HOME,
     retry: Retry | None = None,
-    __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'direnv'."""
     log_info(logger, "Setting up 'direnv'...")
@@ -304,7 +304,7 @@ def setup_direnv(
             f'eval "$(direnv hook {SHELL})"',
             "direnv hook fish | source",
             etc="direnv" if etc else None,
-            home=__root,
+            home=home,
         )
     else:
         ssh_install(
@@ -524,8 +524,8 @@ def setup_fzf(
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
+    home: PathLike = HOME,
     retry: Retry | None = None,
-    __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'fzf'."""
     log_info(logger, "Setting up 'fzf'...")
@@ -540,7 +540,7 @@ def setup_fzf(
             "fzf --fish | source",
             etc="fzf" if etc else None,
             zsh="source <(fzf --zsh)",
-            home=__root,
+            home=home,
         )
     else:
         ssh_install(
@@ -928,8 +928,8 @@ def setup_starship(
     group: str | int | None = None,
     custom_shell_config: bool = False,
     etc: bool = False,
+    home: PathLike = HOME,
     retry: Retry | None = None,
-    __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'starship'."""
     log_info(logger, "Setting up 'starship'...")
@@ -950,7 +950,7 @@ def setup_starship(
                 f'eval "$(starship init {SHELL})"',
                 "starship init fish | source",
                 etc="starship" if etc else None,
-                home=__root,
+                home=home,
             )
     else:
         ssh_install(
@@ -1120,8 +1120,8 @@ def setup_zoxide(
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
+    home: PathLike = HOME,
     retry: Retry | None = None,
-    __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'zoxide'."""
     log_info(logger, "Setting up 'zoxide'...")
@@ -1136,7 +1136,7 @@ def setup_zoxide(
             f'eval "$(fzf --{SHELL})"',
             "zoxide init fish | source",
             etc="zoxide" if etc else None,
-            home=__root,
+            home=home,
         )
     else:
         ssh_install(

@@ -128,7 +128,7 @@ class TestSetupDirenv:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
-        setup_direnv(path_binaries=tmp_path, __root=tmp_path)
+        setup_direnv(path_binaries=tmp_path, home=tmp_path)
         run(str(tmp_path / "direnv"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -181,7 +181,7 @@ class TestSetupFzf:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
-        setup_fzf(path_binaries=tmp_path, __root=tmp_path)
+        setup_fzf(path_binaries=tmp_path, home=tmp_path)
         run(str(tmp_path / "fzf"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -337,7 +337,7 @@ class TestSetupStarship:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
-        setup_starship(path_binaries=tmp_path, __root=tmp_path)
+        setup_starship(path_binaries=tmp_path, home=tmp_path)
         run(str(tmp_path / "starship"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -404,7 +404,7 @@ class TestSetupZoxide:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
-        setup_zoxide(path_binaries=tmp_path, __root=tmp_path)
+        setup_zoxide(path_binaries=tmp_path, home=tmp_path)
         run(str(tmp_path / "zoxide"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
