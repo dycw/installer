@@ -3,10 +3,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from click import argument, option
-from typed_settings import click_options
-from utilities.core import is_pytest
+from utilities.core import PermissionsLike, is_pytest
 from utilities.logging import basic_config
 
+from installer.apps.click import (
+    group_option,
+    owner_option,
+    path_binaries_option,
+    perms_option,
+    token_option,
+)
 from installer.apps.lib import (
     setup_age,
     setup_apt_package,
@@ -42,7 +48,8 @@ from installer.apps.lib import (
 from installer.click import logger_option, retry_option, ssh_option, sudo_option
 
 if TYPE_CHECKING:
-    from utilities.types import LoggerLike, Retry
+    from utilities.pydantic import SecretLike
+    from utilities.types import LoggerLike, PathLike, Retry
 
 
 @argument("package", type=str)
@@ -67,29 +74,32 @@ def apt_package_sub_cmd(
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@ssh_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
+@retry_option
 def age_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    ssh: str | None = None,
-    retry: Retry | None = None,
-    logger: LoggerLike | None = None,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    ssh: str | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike | None,
+    owner: str | int | None,
+    group: str | int | None,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=logger)
     setup_age(
+        logger=logger,
         ssh=ssh,
         token=token,
         path_binaries=path_binaries,
@@ -98,36 +108,36 @@ def age_sub_cmd(
         owner=owner,
         group=group,
         retry=retry,
-        logger=logger,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def bat_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike | None,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=logger)
     setup_bat(
+        logger=logger,
         token=token,
-        timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries,
-        chunk_size=download.chunk_size,
         sudo=sudo,
         perms=perms,
         owner=owner,
@@ -138,29 +148,30 @@ def bat_sub_cmd(
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def bottom_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike | None,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=logger)
     setup_bottom(
+        logger=logger,
         token=token,
-        timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries,
-        chunk_size=download.chunk_size,
         sudo=sudo,
         perms=perms,
         owner=owner,
@@ -171,47 +182,47 @@ def bottom_sub_cmd(
 ##
 
 
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@ssh_option
+@sudo_option
+@retry_option
 def curl_sub_cmd(
-    *,
-    ssh: str | None = None,
-    retry: Retry | None = None,
-    logger: LoggerLike | None = None,
-    sudo: SudoSettings,
+    *, logger: LoggerLike | None, ssh: str | None, sudo: bool, retry: Retry | None
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=logger)
-    setup_curl(ssh=ssh, sudo=sudo, retry=retry, logger=logger)
+    setup_curl(logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
+@retry_option
 def delta_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike | None,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=logger)
     setup_delta(
+        logger=logger,
         token=token,
-        timeout=DOWNLOAD_TIMEOUT,
         path_binaries=path_binaries,
-        chunk_size=download.chunk_size,
         sudo=sudo,
         perms=perms,
         owner=owner,

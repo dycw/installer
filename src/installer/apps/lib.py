@@ -148,7 +148,17 @@ def setup_age(
                     cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
                     downloads.append(dest)
     else:
-        ssh_install(ssh, "age", retry=retry, logger=logger)
+        ssh_install(
+            ssh,
+            "age",
+            owner=owner,
+            path_binaries=path_binaries,
+            perms=perms,
+            sudo=sudo,
+            token=token,
+            retry=retry,
+            logger=logger,
+        )
 
 
 ##
