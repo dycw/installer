@@ -17,7 +17,7 @@ from utilities.core import (
 from utilities.pydantic import extract_secret
 from utilities.subprocess import uv_tool_run_cmd
 
-from installer.apps.constants import GITHUB_TOKEN, PATH_BINARIES
+from installer.apps.constants import GITHUB_TOKEN, PATH_BINARIES, PERMISSIONS
 
 if TYPE_CHECKING:
     from utilities.pydantic import SecretLike
@@ -88,7 +88,7 @@ def ssh_install(
     group: str | int | None = None,
     owner: str | int | None = None,
     path_binaries: PathLike = PATH_BINARIES,
-    perms: PermissionsLike | None = None,
+    perms: PermissionsLike = PERMISSIONS,
     sudo: bool = False,
     token: SecretLike | None = GITHUB_TOKEN,
     user: str | None = None,
@@ -105,9 +105,12 @@ def ssh_install(
         parts.extend(["--group", str(group)])
     if owner is not None:
         parts.extend(["--owner", str(owner)])
-    parts.extend(["--path-binaries", str(path_binaries)])
-    if perms is not None:
-        parts.extend(["--perms", str(Permissions.new(perms))])
+    parts.extend([
+        "--path-binaries",
+        str(path_binaries),
+        "--perms",
+        str(Permissions.new(perms)),
+    ])
     if sudo:
         parts.append("--sudo")
     if token is not None:
