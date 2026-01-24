@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 import utilities.subprocess
 from utilities.constants import HOME
 from utilities.core import (
+    Permissions,
+    PermissionsLike,
     ReadTextError,
     extract_groups,
     log_info,
@@ -82,9 +84,13 @@ def ssh_install(
     /,
     *args: str,
     etc: bool = False,
+    group: str | int | None = None,
+    owner: str | int | None = None,
     path_binaries: PathLike = PATH_BINARIES,
+    perms: PermissionsLike | None = None,
     sudo: bool = False,
     token: SecretLike | None = GITHUB_TOKEN,
+    user: str | None = None,
     retry: Retry | None = None,
     logger: LoggerLike | None = None,
 ) -> None:
@@ -92,11 +98,19 @@ def ssh_install(
     parts: list[str] = []
     if etc:
         parts.append("--etc")
+    if group is not None:
+        parts.extend(["--group", str(group)])
+    if owner is not None:
+        parts.extend(["--owner", str(owner)])
     parts.extend(["--path-binaries", str(path_binaries)])
+    if perms is not None:
+        parts.extend(["--perms", str(Permissions.new(perms))])
     if sudo:
         parts.append("--sudo")
     if token is not None:
         parts.extend(["--token", extract_secret(token)])
+    if user is not None:
+        parts.extend(["--user", user])
     utilities.subprocess.ssh(
         user,
         hostname,

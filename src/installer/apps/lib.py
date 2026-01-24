@@ -148,7 +148,6 @@ def setup_age(
                     dest = Path(path_binaries, src.name)
                     cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
                     downloads.append(dest)
-        log_info(logger, "Downloaded to %s", ", ".join(map(repr_str, downloads)))
     else:
         ssh_install(ssh, "age", retry=retry, logger=logger)
 
@@ -297,7 +296,10 @@ def setup_direnv(
             ssh,
             "direnv",
             etc=etc,
+            group=group,
+            owner=owner,
             path_binaries=path_binaries,
+            perms=perms,
             sudo=sudo,
             token=token,
             retry=retry,
@@ -310,20 +312,19 @@ def setup_direnv(
 
 def setup_docker(
     *,
+    logger: LoggerLike | None = None,
     ssh: str | None = None,
     sudo: bool = False,
     user: str | None = None,
     retry: Retry | None = None,
-    logger: LoggerLike | None = None,
 ) -> None:
+    log_info(logger, "Setting up 'docker'....")
     if ssh is None:
         match SYSTEM_NAME:
             case "Darwin":
                 msg = f"Unsupported system: {SYSTEM_NAME!r}"
                 raise ValueError(msg)
             case "Linux":
-                if logger is not None:
-                    to_logger(logger).info("Installing 'docker'...")
                 try:
                     _ = which("docker")
                 except WhichError:
@@ -384,10 +385,7 @@ def setup_docker(
             case never:
                 assert_never(never)
     else:
-        args: list[str] = []
-        if user is not None:
-            args.extend(["--user", user])
-        ssh_install(ssh, "docker", *args, retry=retry, logger=logger)
+        ssh_install(ssh, "docker", user=user, retry=retry, logger=logger)
 
 
 ##
@@ -395,6 +393,7 @@ def setup_docker(
 
 def setup_dust(
     *,
+    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -403,6 +402,7 @@ def setup_dust(
     group: str | int | None = None,
 ) -> None:
     """Setup 'dust'."""
+    log_info(logger, "Setting up 'dust'....")
     match SYSTEM_NAME:
         case "Darwin":
             match_machine = False
@@ -421,7 +421,6 @@ def setup_dust(
         src = temp / "dust"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    log_info(logger, "Downloaded to %r", str(dest))
 
 
 ##
@@ -437,6 +436,7 @@ def setup_eza(
     group: str | int | None = None,
 ) -> None:
     """Setup 'eza'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     match SYSTEM_NAME:
         case "Darwin":
             asset_owner = "cargo-bins"
@@ -464,7 +464,6 @@ def setup_eza(
     ) as src:
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    log_info(logger, "Downloaded to %r", str(dest))
 
 
 ##
@@ -480,6 +479,7 @@ def setup_fd(
     group: str | int | None = None,
 ) -> None:
     """Setup 'fd'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     with yield_gzip_asset(
         "sharkdp",
         "fd",
@@ -491,7 +491,6 @@ def setup_fd(
         src = temp / "fd"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    log_info(logger, "Downloaded to %r", str(dest))
 
 
 ##
@@ -512,13 +511,13 @@ def setup_fzf(
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'fzf'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     if ssh is None:
         with yield_gzip_asset(
             "junegunn", "fzf", token=token, match_system=True, match_machine=True
         ) as src:
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        log_info(logger, "Downloaded to %r", str(dest))
         setup_shell_config(
             'eval "$(fzf --bash)"',
             "fzf --fish | source",
@@ -558,6 +557,7 @@ def setup_jq(
     group: str | int | None = None,
 ) -> None:
     """Setup 'shfmt'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     dest = Path(path_binaries, "jq")
     setup_asset(
         "jqlang",
@@ -572,7 +572,6 @@ def setup_jq(
         owner=owner,
         group=group,
     )
-    log_info(logger, "Downloaded to %r", str(dest))
 
 
 ##
@@ -591,6 +590,7 @@ def setup_just(
     logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'just'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     if ssh is None:
         with yield_gzip_asset(
             "casey", "just", token=token, match_system=True, match_machine=True
@@ -598,7 +598,6 @@ def setup_just(
             src = temp / "just"
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        log_info(logger, "Downloaded to %r", str(dest))
     else:
         ssh_install(ssh, "just", retry=retry, logger=logger)
 
@@ -616,6 +615,7 @@ def setup_neovim(
     group: str | int | None = None,
 ) -> None:
     """Setup 'neovim'."""
+    log_info(logger, "Downloaded to %r", str(dest_bin))
     with yield_gzip_asset(
         "neovim",
         "neovim",
@@ -628,7 +628,6 @@ def setup_neovim(
         cp(temp, dest_dir, sudo=sudo, perms=perms, owner=owner, group=group)
         dest_bin = Path(path_binaries, "nvim")
         symlink(dest_dir / "bin/nvim", dest_bin, sudo=sudo)
-    log_info(logger, "Downloaded to %r", str(dest_bin))
 
 
 ##
@@ -647,13 +646,13 @@ def setup_restic(
     logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'restic'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     if ssh is None:
         with yield_bz2_asset(
             "restic", "restic", token=token, match_system=True, match_machine=True
         ) as src:
             dest = Path(path_binaries, "restic")
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        log_info(logger, "Downloaded to %r", str(dest))
     else:
         ssh_install(ssh, "restic", retry=retry, logger=logger)
 
@@ -671,6 +670,7 @@ def setup_ripgrep(
     group: str | int | None = None,
 ) -> None:
     """Setup 'ripgrep'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     with yield_gzip_asset(
         "burntsushi",
         "ripgrep",
@@ -682,7 +682,6 @@ def setup_ripgrep(
         src = temp / "rg"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    log_info(logger, "Downloaded to %r", str(dest))
 
 
 ##
@@ -703,6 +702,7 @@ def setup_starship(
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'starship'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     if ssh is None:
         with yield_gzip_asset(
             "starship",
@@ -715,7 +715,6 @@ def setup_starship(
         ) as src:
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        log_info(logger, "Downloaded to %r", str(dest))
         setup_shell_config(
             f'eval "$(starship init {SHELL})"',
             "starship init fish | source",
@@ -739,12 +738,12 @@ def setup_taplo(
     group: str | int | None = None,
 ) -> None:
     """Setup 'taplo'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     with yield_gzip_asset(
         "tamasfe", "taplo", token=token, match_system=True, match_machine=True
     ) as src:
         dest = Path(path_binaries, "taplo")
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    log_info(logger, "Downloaded to %r", str(dest))
 
 
 ##
@@ -775,6 +774,7 @@ def setup_ruff(
     group: str | int | None = None,
 ) -> None:
     """Setup 'ruff'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     with yield_gzip_asset(
         "astral-sh",
         "ruff",
@@ -787,7 +787,6 @@ def setup_ruff(
         src = temp / "ruff"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    log_info(logger, "Downloaded to %r", str(dest))
 
 
 ##
@@ -803,6 +802,7 @@ def setup_sd(
     group: str | int | None = None,
 ) -> None:
     """Setup 'sd'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     with yield_gzip_asset(
         "chmln",
         "sd",
@@ -814,7 +814,6 @@ def setup_sd(
         src = temp / "sd"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    log_info(logger, "Downloaded to %r", str(dest))
 
 
 ##
@@ -830,6 +829,7 @@ def setup_shellcheck(
     group: str | int | None = None,
 ) -> None:
     """Setup 'shellcheck'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     with yield_gzip_asset(
         "koalaman",
         "shellcheck",
@@ -841,7 +841,6 @@ def setup_shellcheck(
         src = temp / "shellcheck"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    log_info(logger, "Downloaded to %r", str(dest))
 
 
 ##
@@ -857,6 +856,7 @@ def setup_shfmt(
     group: str | int | None = None,
 ) -> None:
     """Setup 'shfmt'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     dest = Path(path_binaries, "shfmt")
     setup_asset(
         "mvdan",
@@ -870,7 +870,6 @@ def setup_shfmt(
         owner=owner,
         group=group,
     )
-    log_info(logger, "Downloaded to %r", str(dest))
 
 
 ##
@@ -889,6 +888,7 @@ def setup_sops(
     logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'sops'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     if ssh is None:
         dest = Path(path_binaries, "sops")
         setup_asset(
@@ -904,7 +904,6 @@ def setup_sops(
             owner=owner,
             group=group,
         )
-        log_info(logger, "Downloaded to %r", str(dest))
     else:
         ssh_install(ssh, "sops", retry=retry, logger=logger)
 
@@ -925,6 +924,7 @@ def setup_uv(
     logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'uv'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     if ssh is None:
         with yield_gzip_asset(
             "astral-sh",
@@ -938,7 +938,6 @@ def setup_uv(
             src = temp / "uv"
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        log_info(logger, "Downloaded to %r", str(dest))
     else:
         user, hostname = split_ssh(ssh)
         with yield_ssh_temp_dir(user, hostname, retry=retry, logger=logger) as temp:
@@ -962,7 +961,6 @@ def setup_uv(
                 retry=retry,
                 logger=logger,
             )
-        log_info(logger, "Downloaded to %r on '%s'", str(path_binaries), hostname)
 
 
 ##
@@ -978,6 +976,7 @@ def setup_watchexec(
     group: str | int | None = None,
 ) -> None:
     """Setup 'watchexec'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     with yield_lzma_asset(
         "watchexec",
         "watchexec",
@@ -990,7 +989,6 @@ def setup_watchexec(
         src = temp / "watchexec"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    log_info(logger, "Downloaded to %r", str(dest))
 
 
 ##
@@ -1006,6 +1004,7 @@ def setup_yq(
     group: str | int | None = None,
 ) -> None:
     """Setup 'yq'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     dest = Path(path_binaries, "yq")
     setup_asset(
         "mikefarah",
@@ -1020,7 +1019,6 @@ def setup_yq(
         owner=owner,
         group=group,
     )
-    log_info(logger, "Downloaded to %r", str(dest))
 
 
 ##
@@ -1041,6 +1039,7 @@ def setup_zoxide(
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'zoxide'."""
+    log_info(logger, "Downloaded to %r", str(dest))
     if ssh is None:
         with yield_gzip_asset(
             "ajeetdsouza", "zoxide", token=token, match_system=True, match_machine=True
@@ -1048,7 +1047,6 @@ def setup_zoxide(
             src = temp / "zoxide"
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        log_info(logger, "Downloaded to %r", str(dest))
         setup_shell_config(
             f'eval "$(fzf --{SHELL})"',
             "zoxide init fish | source",
