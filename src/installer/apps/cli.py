@@ -206,7 +206,6 @@ def curl_sub_cmd(
 @perms_option
 @owner_option
 @group_option
-@retry_option
 def delta_sub_cmd(
     *,
     logger: LoggerLike | None,

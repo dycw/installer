@@ -40,16 +40,13 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from pytest import CaptureFixture
-    from utilities.pydantic import SecretLike
 
 
 class TestSetupAge:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_age(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_age(path_binaries=tmp_path)
 
         run(str(tmp_path / "age"), "--help", print=True)
         result1 = capsys.readouterr()
@@ -90,10 +87,8 @@ class TestSetupAge:
 class TestSetupBottom:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_bottom(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_bottom(path_binaries=tmp_path)
         run(str(tmp_path / "btm"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -105,10 +100,8 @@ class TestSetupBottom:
 class TestSetupBat:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_bat(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_bat(path_binaries=tmp_path)
         run(str(tmp_path / "bat"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -121,10 +114,8 @@ class TestSetupBat:
 class TestSetupDelta:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_delta(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_delta(path_binaries=tmp_path)
         run(str(tmp_path / "delta"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -136,10 +127,8 @@ class TestSetupDelta:
 class TestSetupDirenv:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_direnv(token=token, path_binaries=tmp_path, __root=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_direnv(path_binaries=tmp_path, __root=tmp_path)
         run(str(tmp_path / "direnv"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -151,10 +140,8 @@ class TestSetupDirenv:
 class TestSetupDust:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_dust(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_dust(path_binaries=tmp_path)
         run(str(tmp_path / "dust"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -166,10 +153,8 @@ class TestSetupDust:
 class TestSetupEza:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=2 * THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_eza(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_eza(path_binaries=tmp_path)
         run(str(tmp_path / "eza"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -182,10 +167,8 @@ class TestSetupEza:
 class TestSetupFd:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_fd(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_fd(path_binaries=tmp_path)
         run(str(tmp_path / "fd"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -197,10 +180,8 @@ class TestSetupFd:
 class TestSetupFzf:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_fzf(token=token, path_binaries=tmp_path, __root=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_fzf(path_binaries=tmp_path, __root=tmp_path)
         run(str(tmp_path / "fzf"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -212,10 +193,8 @@ class TestSetupFzf:
 class TestSetupJq:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_jq(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_jq(path_binaries=tmp_path)
         run(str(tmp_path / "jq"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -229,10 +208,8 @@ class TestSetupJq:
 class TestSetupJust:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_just(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_just(path_binaries=tmp_path)
         run(str(tmp_path / "just"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -244,10 +221,8 @@ class TestSetupJust:
 class TestSetupNeovim:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_neovim(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_neovim(path_binaries=tmp_path)
         run(str(tmp_path / "nvim"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -260,10 +235,8 @@ class TestSetupNeovim:
 class TestSetupRestic:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_restic(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_restic(path_binaries=tmp_path)
         run(str(tmp_path / "restic"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -276,10 +249,8 @@ class TestSetupRestic:
 class TestSetupRipgrep:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_ripgrep(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_ripgrep(path_binaries=tmp_path)
         run(str(tmp_path / "rg"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -299,10 +270,8 @@ class TestSetupRipgrep:
 class TestSetupRuff:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_ruff(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_ruff(path_binaries=tmp_path)
         run(str(tmp_path / "ruff"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -314,10 +283,8 @@ class TestSetupRuff:
 class TestSetupSd:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_sd(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_sd(path_binaries=tmp_path)
         run(str(tmp_path / "sd"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -329,10 +296,8 @@ class TestSetupSd:
 class TestSetupShellcheck:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_shellcheck(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_shellcheck(path_binaries=tmp_path)
         run(str(tmp_path / "shellcheck"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -344,10 +309,8 @@ class TestSetupShellcheck:
 class TestSetupShfmt:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_shfmt(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_shfmt(path_binaries=tmp_path)
         run(str(tmp_path / "shfmt"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -359,10 +322,8 @@ class TestSetupShfmt:
 class TestSetupSops:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_sops(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_sops(path_binaries=tmp_path)
         run(str(tmp_path / "sops"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -375,10 +336,8 @@ class TestSetupSops:
 class TestSetupStarship:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_starship(token=token, path_binaries=tmp_path, __root=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_starship(path_binaries=tmp_path, __root=tmp_path)
         run(str(tmp_path / "starship"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -390,10 +349,8 @@ class TestSetupStarship:
 class TestSetupTaplo:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_taplo(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_taplo(path_binaries=tmp_path)
         run(str(tmp_path / "taplo"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -405,10 +362,8 @@ class TestSetupTaplo:
 class TestSetupUv:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_uv(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_uv(path_binaries=tmp_path)
         run(str(tmp_path / "uv"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -420,10 +375,8 @@ class TestSetupUv:
 class TestSetupWatchexec:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_watchexec(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_watchexec(path_binaries=tmp_path)
         run(str(tmp_path / "watchexec"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -435,10 +388,8 @@ class TestSetupWatchexec:
 class TestSetupYq:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_yq(token=token, path_binaries=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_yq(path_binaries=tmp_path)
         run(str(tmp_path / "yq"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
@@ -452,10 +403,8 @@ class TestSetupYq:
 class TestSetupZoxide:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(
-        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
-    ) -> None:
-        setup_zoxide(token=token, path_binaries=tmp_path, __root=tmp_path)
+    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+        setup_zoxide(path_binaries=tmp_path, __root=tmp_path)
         run(str(tmp_path / "zoxide"), "--help", print=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
