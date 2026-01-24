@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
 
-    from typed_settings import Secret
+    from utilities.pydantic import SecretLike
     from utilities.types import LoggerLike, MaybeSequenceStr
 
 
@@ -43,7 +43,7 @@ def yield_asset(
     *,
     logger: LoggerLike | None = None,
     tag: str | None = None,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     match_system: bool = False,
     match_c_std_lib: bool = False,
     match_machine: bool = False,
@@ -155,7 +155,7 @@ def yield_bz2_asset(
     *,
     logger: LoggerLike | None = None,
     tag: str | None = None,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     match_system: bool = False,
     match_c_std_lib: bool = False,
     match_machine: bool = False,
@@ -192,7 +192,7 @@ def yield_gzip_asset(
     *,
     logger: LoggerLike | None = None,
     tag: str | None = None,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     match_system: bool = False,
     match_c_std_lib: bool = False,
     match_machine: bool = False,
@@ -229,7 +229,7 @@ def yield_lzma_asset(
     *,
     logger: LoggerLike | None = None,
     tag: str | None = None,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     match_system: bool = False,
     match_c_std_lib: bool = False,
     match_machine: bool = False,

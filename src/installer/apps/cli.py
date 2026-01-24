@@ -91,12 +91,12 @@ def age_sub_cmd(
     basic_config(obj=logger)
     setup_age(
         ssh=ssh,
-        token=download.token,
-        path_binaries=path_binaries.path_binaries,
+        token=token,
+        path_binaries=path_binaries,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
         retry=retry,
         logger=logger,
     )
@@ -124,14 +124,14 @@ def bat_sub_cmd(
         return
     basic_config(obj=logger)
     setup_bat(
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
@@ -157,14 +157,14 @@ def bottom_sub_cmd(
         return
     basic_config(obj=logger)
     setup_bottom(
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
@@ -208,14 +208,14 @@ def delta_sub_cmd(
         return
     basic_config(obj=logger)
     setup_delta(
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
@@ -250,15 +250,13 @@ def direnv_sub_cmd(
     basic_config(obj=logger)
     setup_direnv(
         ssh=ssh,
-        token=download.token,
-        timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
+        path_binaries=path_binaries,
+        token=token,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
-        etc=shell_config.etc,
+        perms=perms,
+        owner=owner,
+        group=group,
+        etc=etc,
         retry=retry,
         logger=logger,
     )
@@ -306,14 +304,14 @@ def dust_sub_cmd(
         return
     basic_config(obj=logger)
     setup_dust(
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
@@ -339,14 +337,14 @@ def eza_sub_cmd(
         return
     basic_config(obj=logger)
     setup_eza(
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
@@ -372,14 +370,14 @@ def fd_sub_cmd(
         return
     basic_config(obj=logger)
     setup_fd(
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
@@ -414,15 +412,15 @@ def fzf_sub_cmd(
     basic_config(obj=logger)
     setup_fzf(
         ssh=ssh,
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
-        etc=shell_config.etc,
+        perms=perms,
+        owner=owner,
+        group=group,
+        etc=etc,
         retry=retry,
         logger=logger,
     )
@@ -450,14 +448,14 @@ def jq_sub_cmd(
         return
     basic_config(obj=logger)
     setup_jq(
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
@@ -506,14 +504,14 @@ def just_sub_cmd(
     basic_config(obj=logger)
     setup_just(
         ssh=ssh,
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
         retry=retry,
         logger=logger,
     )
@@ -541,14 +539,14 @@ def neovim_sub_cmd(
         return
     basic_config(obj=logger)
     setup_neovim(
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
@@ -579,14 +577,14 @@ def restic_sub_cmd(
     basic_config(obj=logger)
     setup_restic(
         ssh=ssh,
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
         retry=retry,
         logger=logger,
     )
@@ -614,14 +612,14 @@ def ripgrep_sub_cmd(
         return
     basic_config(obj=logger)
     setup_ripgrep(
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
@@ -647,14 +645,14 @@ def ruff_sub_cmd(
         return
     basic_config(obj=logger)
     setup_ruff(
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
@@ -698,14 +696,14 @@ def sd_sub_cmd(
         return
     basic_config(obj=logger)
     setup_sd(
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
@@ -731,14 +729,14 @@ def shellcheck_sub_cmd(
         return
     basic_config(obj=logger)
     setup_shellcheck(
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
@@ -764,14 +762,14 @@ def shfmt_sub_cmd(
         return
     basic_config(obj=logger)
     setup_shfmt(
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
@@ -802,14 +800,14 @@ def sops_sub_cmd(
     basic_config(obj=logger)
     setup_sops(
         ssh=ssh,
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
         retry=retry,
         logger=logger,
     )
@@ -846,15 +844,15 @@ def starship_sub_cmd(
     basic_config(obj=logger)
     setup_starship(
         ssh=ssh,
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
-        etc=shell_config.etc,
+        perms=perms,
+        owner=owner,
+        group=group,
+        etc=etc,
         retry=retry,
         logger=logger,
     )
@@ -882,14 +880,14 @@ def taplo_sub_cmd(
         return
     basic_config(obj=logger)
     setup_taplo(
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
@@ -920,14 +918,14 @@ def uv_sub_cmd(
     basic_config(obj=logger)
     setup_uv(
         ssh=ssh,
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
         retry=retry,
         logger=logger,
     )
@@ -955,14 +953,14 @@ def watchexec_sub_cmd(
         return
     basic_config(obj=logger)
     setup_watchexec(
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
@@ -988,14 +986,14 @@ def yq_sub_cmd(
         return
     basic_config(obj=logger)
     setup_yq(
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
@@ -1030,15 +1028,15 @@ def zoxide_sub_cmd(
     basic_config(obj=logger)
     setup_zoxide(
         ssh=ssh,
-        token=download.token,
+        token=token,
         timeout=DOWNLOAD_TIMEOUT,
-        path_binaries=path_binaries.path_binaries,
+        path_binaries=path_binaries,
         chunk_size=download.chunk_size,
         sudo=sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
-        etc=shell_config.etc,
+        perms=perms,
+        owner=owner,
+        group=group,
+        etc=etc,
         retry=retry,
         logger=logger,
     )

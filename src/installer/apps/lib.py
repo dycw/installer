@@ -6,7 +6,6 @@ from shlex import join
 from typing import TYPE_CHECKING, assert_never
 
 import utilities.subprocess
-from typed_settings import Secret
 from utilities.core import (
     WhichError,
     extract_group,
@@ -48,8 +47,8 @@ from installer.constants import FILE_SYSTEM_ROOT
 from installer.utilities import split_ssh, ssh_install
 
 if TYPE_CHECKING:
-    from typed_settings import Secret
     from utilities.core import PermissionsLike
+    from utilities.pydantic import SecretLike
     from utilities.types import LoggerLike, MaybeSequenceStr, PathLike, Retry
 
 
@@ -90,7 +89,7 @@ def setup_asset(
     *,
     logger: LoggerLike | None = None,
     tag: str | None = None,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     match_system: bool = False,
     match_c_std_lib: bool = False,
     match_machine: bool = False,
@@ -124,7 +123,7 @@ def setup_age(
     *,
     logger: LoggerLike | None = None,
     ssh: str | None = None,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -159,7 +158,8 @@ def setup_age(
 
 def setup_bat(
     *,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -167,6 +167,7 @@ def setup_bat(
     group: str | int | None = None,
 ) -> None:
     """Setup 'bat'."""
+    log_info(logger, "Setting up 'bat'...")
     with yield_gzip_asset(
         "sharkdp",
         "bat",
@@ -178,7 +179,6 @@ def setup_bat(
         src = temp / "bat"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    log_info(logger, "Downloaded to %r", str(dest))
 
 
 ##
@@ -186,7 +186,8 @@ def setup_bat(
 
 def setup_bottom(
     *,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -194,6 +195,7 @@ def setup_bottom(
     group: str | int | None = None,
 ) -> None:
     """Setup 'bottom'."""
+    log_info(logger, "Setting up 'bottom'...")
     with yield_gzip_asset(
         "ClementTsang",
         "bottom",
@@ -206,7 +208,6 @@ def setup_bottom(
         src = temp / "btm"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    log_info(logger, "Downloaded to %r", str(dest))
 
 
 ##
@@ -214,13 +215,14 @@ def setup_bottom(
 
 def setup_curl(
     *,
+    logger: LoggerLike | None = None,
     ssh: str | None = None,
     sudo: bool = False,
     retry: Retry | None = None,
-    logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'curl'."""
-    setup_apt_package("curl", ssh=ssh, sudo=sudo, retry=retry, logger=logger)
+    log_info(logger, "Setting up 'curl'...")
+    setup_apt_package("curl", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -228,7 +230,8 @@ def setup_curl(
 
 def setup_delta(
     *,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -236,6 +239,7 @@ def setup_delta(
     group: str | int | None = None,
 ) -> None:
     """Setup 'delta'."""
+    log_info(logger, "Setting up 'delta'...")
     with yield_gzip_asset(
         "dandavison",
         "delta",
@@ -247,7 +251,6 @@ def setup_delta(
         src = temp / "delta"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    log_info(logger, "Downloaded to %r", str(dest))
 
 
 ##
@@ -256,8 +259,8 @@ def setup_delta(
 def setup_direnv(
     *,
     ssh: str | None = None,
-    token: Secret[str] | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
+    token: SecretLike | None = GITHUB_TOKEN,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
     owner: str | int | None = None,
@@ -268,6 +271,7 @@ def setup_direnv(
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'direnv'."""
+    log_info(logger, "Setting up 'direnv'...")
     if ssh is None:
         dest = Path(path_binaries, "direnv")
         setup_asset(
@@ -282,7 +286,6 @@ def setup_direnv(
             owner=owner,
             group=group,
         )
-        log_info(logger, "Downloaded to %r", str(dest))
         setup_shell_config(
             f'eval "$(direnv hook {SHELL})"',
             "direnv hook fish | source",
@@ -290,7 +293,16 @@ def setup_direnv(
             __root=__root,
         )
     else:
-        ssh_install(ssh, "direnv", sudo=sudo, etc=etc, retry=retry, logger=logger)
+        ssh_install(
+            ssh,
+            "direnv",
+            etc=etc,
+            path_binaries=path_binaries,
+            sudo=sudo,
+            token=token,
+            retry=retry,
+            logger=logger,
+        )
 
 
 ##
@@ -383,7 +395,7 @@ def setup_docker(
 
 def setup_dust(
     *,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -417,7 +429,7 @@ def setup_dust(
 
 def setup_eza(
     *,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -460,7 +472,7 @@ def setup_eza(
 
 def setup_fd(
     *,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -488,7 +500,7 @@ def setup_fd(
 def setup_fzf(
     *,
     ssh: str | None = None,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -523,13 +535,14 @@ def setup_fzf(
 
 def setup_git(
     *,
+    logger: LoggerLike | None = None,
     ssh: str | None = None,
     sudo: bool = False,
     retry: Retry | None = None,
-    logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'git'."""
-    setup_apt_package("git", ssh=ssh, sudo=sudo, retry=retry, logger=logger)
+    log_info(logger, "Setting up 'git'...")
+    setup_apt_package("git", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -537,7 +550,7 @@ def setup_git(
 
 def setup_jq(
     *,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -568,7 +581,7 @@ def setup_jq(
 def setup_just(
     *,
     ssh: str | None = None,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -595,7 +608,7 @@ def setup_just(
 
 def setup_neovim(
     *,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -624,7 +637,7 @@ def setup_neovim(
 def setup_restic(
     *,
     ssh: str | None = None,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -650,7 +663,7 @@ def setup_restic(
 
 def setup_ripgrep(
     *,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -678,7 +691,7 @@ def setup_ripgrep(
 def setup_starship(
     *,
     ssh: str | None = None,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -718,7 +731,7 @@ def setup_starship(
 
 def setup_taplo(
     *,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -739,13 +752,14 @@ def setup_taplo(
 
 def setup_rsync(
     *,
+    logger: LoggerLike | None = None,
     ssh: str | None = None,
     sudo: bool = False,
     retry: Retry | None = None,
-    logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'rsync'."""
-    setup_apt_package("rsync", ssh=ssh, sudo=sudo, retry=retry, logger=logger)
+    log_info(logger, "Setting up 'rsync'...")
+    setup_apt_package("rsync", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -753,7 +767,7 @@ def setup_rsync(
 
 def setup_ruff(
     *,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -781,7 +795,7 @@ def setup_ruff(
 
 def setup_sd(
     *,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -808,7 +822,7 @@ def setup_sd(
 
 def setup_shellcheck(
     *,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -835,7 +849,7 @@ def setup_shellcheck(
 
 def setup_shfmt(
     *,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -865,7 +879,7 @@ def setup_shfmt(
 def setup_sops(
     *,
     ssh: str | None = None,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -901,7 +915,7 @@ def setup_sops(
 def setup_uv(
     *,
     ssh: str | None = None,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -956,7 +970,7 @@ def setup_uv(
 
 def setup_watchexec(
     *,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -984,7 +998,7 @@ def setup_watchexec(
 
 def setup_yq(
     *,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
@@ -1015,7 +1029,7 @@ def setup_yq(
 def setup_zoxide(
     *,
     ssh: str | None = None,
-    token: Secret[str] | None = GITHUB_TOKEN,
+    token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,

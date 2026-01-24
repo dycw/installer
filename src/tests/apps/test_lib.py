@@ -40,14 +40,13 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from pytest import CaptureFixture
-    from typed_settings import Secret
 
 
 class TestSetupAge:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_age(token=token, path_binaries=tmp_path)
 
@@ -91,7 +90,7 @@ class TestSetupBottom:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_bottom(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "btm"), "--help", print=True)
@@ -106,7 +105,7 @@ class TestSetupBat:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_bat(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "bat"), "--help", print=True)
@@ -122,7 +121,7 @@ class TestSetupDelta:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_delta(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "delta"), "--help", print=True)
@@ -137,7 +136,7 @@ class TestSetupDirenv:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_direnv(token=token, path_binaries=tmp_path, __root=tmp_path)
         run(str(tmp_path / "direnv"), "--help", print=True)
@@ -152,7 +151,7 @@ class TestSetupDust:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_dust(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "dust"), "--help", print=True)
@@ -167,7 +166,7 @@ class TestSetupEza:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=2 * THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_eza(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "eza"), "--help", print=True)
@@ -183,7 +182,7 @@ class TestSetupFd:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_fd(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "fd"), "--help", print=True)
@@ -198,7 +197,7 @@ class TestSetupFzf:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_fzf(token=token, path_binaries=tmp_path, __root=tmp_path)
         run(str(tmp_path / "fzf"), "--help", print=True)
@@ -213,7 +212,7 @@ class TestSetupJq:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_jq(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "jq"), "--help", print=True)
@@ -230,7 +229,7 @@ class TestSetupJust:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_just(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "just"), "--help", print=True)
@@ -245,7 +244,7 @@ class TestSetupNeovim:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_neovim(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "nvim"), "--help", print=True)
@@ -261,7 +260,7 @@ class TestSetupRestic:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_restic(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "restic"), "--help", print=True)
@@ -277,7 +276,7 @@ class TestSetupRipgrep:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_ripgrep(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "rg"), "--help", print=True)
@@ -300,7 +299,7 @@ class TestSetupRuff:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_ruff(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "ruff"), "--help", print=True)
@@ -315,7 +314,7 @@ class TestSetupSd:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_sd(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "sd"), "--help", print=True)
@@ -330,7 +329,7 @@ class TestSetupShellcheck:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_shellcheck(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "shellcheck"), "--help", print=True)
@@ -345,7 +344,7 @@ class TestSetupShfmt:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_shfmt(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "shfmt"), "--help", print=True)
@@ -360,7 +359,7 @@ class TestSetupSops:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_sops(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "sops"), "--help", print=True)
@@ -376,7 +375,7 @@ class TestSetupStarship:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_starship(token=token, path_binaries=tmp_path, __root=tmp_path)
         run(str(tmp_path / "starship"), "--help", print=True)
@@ -391,7 +390,7 @@ class TestSetupTaplo:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_taplo(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "taplo"), "--help", print=True)
@@ -406,7 +405,7 @@ class TestSetupUv:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_uv(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "uv"), "--help", print=True)
@@ -421,7 +420,7 @@ class TestSetupWatchexec:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_watchexec(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "watchexec"), "--help", print=True)
@@ -436,7 +435,7 @@ class TestSetupYq:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_yq(token=token, path_binaries=tmp_path)
         run(str(tmp_path / "yq"), "--help", print=True)
@@ -453,7 +452,7 @@ class TestSetupZoxide:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(
-        self, *, token: Secret[str] | None, tmp_path: Path, capsys: CaptureFixture
+        self, *, token: SecretLike | None, tmp_path: Path, capsys: CaptureFixture
     ) -> None:
         setup_zoxide(token=token, path_binaries=tmp_path, __root=tmp_path)
         run(str(tmp_path / "zoxide"), "--help", print=True)

@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, assert_never
+from typing import TYPE_CHECKING
 
 import utilities.subprocess
-from typed_settings import Secret
 from utilities.constants import HOME
 from utilities.core import (
     ReadTextError,
@@ -13,35 +12,14 @@ from utilities.core import (
     read_text,
     write_text,
 )
+from utilities.pydantic import extract_secret
 from utilities.subprocess import uv_tool_run_cmd
 
-from installer.apps.constants import GITHUB_TOKEN
+from installer.apps.constants import GITHUB_TOKEN, PATH_BINARIES
 
 if TYPE_CHECKING:
+    from utilities.pydantic import SecretLike
     from utilities.types import LoggerLike, PathLike, Retry
-
-
-def convert_token(x: str | None, /) -> Secret[str] | None:
-    match x:
-        case Secret():
-            match x.get_secret_value():
-                case None:
-                    return None
-                case str() as inner:
-                    y = inner.strip("\n")
-                    return None if y == "" else Secret(y)
-                case never:
-                    assert_never(never)
-        case str():
-            y = x.strip("\n")
-            return None if y == "" else Secret(y)
-        case None:
-            return None
-        case never:
-            assert_never(never)
-
-
-##
 
 
 def ensure_line(
@@ -104,8 +82,9 @@ def ssh_install(
     /,
     *args: str,
     etc: bool = False,
-    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
+    token: SecretLike | None = GITHUB_TOKEN,
     retry: Retry | None = None,
     logger: LoggerLike | None = None,
 ) -> None:
@@ -113,8 +92,11 @@ def ssh_install(
     parts: list[str] = []
     if etc:
         parts.append("--etc")
+    parts.extend(["--path-binaries", str(path_binaries)])
     if sudo:
         parts.append("--sudo")
+    if token is not None:
+        parts.extend(["--token", extract_secret(token)])
     utilities.subprocess.ssh(
         user,
         hostname,
@@ -126,4 +108,4 @@ def ssh_install(
     )
 
 
-__all__ = ["convert_token", "ensure_line", "get_home", "split_ssh", "ssh_install"]
+__all__ = ["ensure_line", "get_home", "split_ssh", "ssh_install"]
