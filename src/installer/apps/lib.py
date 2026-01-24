@@ -7,9 +7,15 @@ from typing import TYPE_CHECKING, assert_never
 
 import utilities.subprocess
 from typed_settings import Secret
-from utilities.core import extract_group, normalize_multi_line_str, one, repr_str
+from utilities.core import (
+    WhichError,
+    extract_group,
+    normalize_multi_line_str,
+    one,
+    repr_str,
+    which,
+)
 from utilities.logging import to_logger
-from utilities.shutil import WhichError, which
 from utilities.subprocess import (
     APT_UPDATE,
     BASH_LS,
@@ -40,7 +46,6 @@ from installer.apps.download import (
 )
 from installer.apps.settings import (
     DOWNLOAD_SETTINGS,
-    MATCH_SETTINGS,
     PATH_BINARIES_SETTINGS,
     PERMS_SETTINGS,
 )
@@ -53,7 +58,7 @@ from installer.utilities import split_ssh, ssh_install
 if TYPE_CHECKING:
     from typed_settings import Secret
     from utilities.core import PermissionsLike
-    from utilities.types import LoggerLike, PathLike, Retry
+    from utilities.types import LoggerLike, MaybeSequenceStr, PathLike, Retry
 
 
 def setup_apt_package(
@@ -92,11 +97,11 @@ def setup_asset(
     *,
     tag: str | None = None,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    match_system: bool = MATCH_SETTINGS.match_system,
-    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
-    match_machine: bool = MATCH_SETTINGS.match_machine,
-    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
-    not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
+    match_system: bool = False,
+    match_c_std_lib: bool = False,
+    match_machine: bool = False,
+    not_matches: MaybeSequenceStr | None = None,
+    not_endswith: MaybeSequenceStr | None = None,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
     sudo: bool = SUDO_SETTINGS.sudo,

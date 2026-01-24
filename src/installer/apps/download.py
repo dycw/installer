@@ -24,7 +24,7 @@ from installer.apps.constants import (
     MACHINE_TYPE_GROUP,
     SYSTEM_NAME_GROUP,
 )
-from installer.apps.settings import DOWNLOAD_SETTINGS, MATCH_SETTINGS
+from installer.apps.settings import DOWNLOAD_SETTINGS
 from installer.logging import LOGGER
 
 if TYPE_CHECKING:
@@ -32,6 +32,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from typed_settings import Secret
+    from utilities.types import MaybeSequenceStr
 
 
 @contextmanager
@@ -42,11 +43,11 @@ def yield_asset(
     *,
     tag: str | None = None,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    match_system: bool = MATCH_SETTINGS.match_system,
-    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
-    match_machine: bool = MATCH_SETTINGS.match_machine,
-    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
-    not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
+    match_system: bool = False,
+    match_c_std_lib: bool = False,
+    match_machine: bool = False,
+    not_matches: MaybeSequenceStr | None = None,
+    not_endswith: MaybeSequenceStr | None = None,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
 ) -> Iterator[Path]:
@@ -164,11 +165,11 @@ def yield_bz2_asset(
     *,
     tag: str | None = None,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    match_system: bool = MATCH_SETTINGS.match_system,
-    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
-    match_machine: bool = MATCH_SETTINGS.match_machine,
-    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
-    not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
+    match_system: bool = False,
+    match_c_std_lib: bool = False,
+    match_machine: bool = False,
+    not_matches: MaybeSequenceStr | None = None,
+    not_endswith: MaybeSequenceStr | None = None,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
 ) -> Iterator[Path]:
@@ -219,11 +220,11 @@ def yield_gzip_asset(
     *,
     tag: str | None = None,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    match_system: bool = MATCH_SETTINGS.match_system,
-    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
-    match_machine: bool = MATCH_SETTINGS.match_machine,
-    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
-    not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
+    match_system: bool = False,
+    match_c_std_lib: bool = False,
+    match_machine: bool = False,
+    not_matches: MaybeSequenceStr | None = None,
+    not_endswith: MaybeSequenceStr | None = None,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
 ) -> Iterator[Path]:
@@ -274,11 +275,11 @@ def yield_lzma_asset(
     *,
     tag: str | None = None,
     token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    match_system: bool = MATCH_SETTINGS.match_system,
-    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
-    match_machine: bool = MATCH_SETTINGS.match_machine,
-    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
-    not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
+    match_system: bool = False,
+    match_c_std_lib: bool = False,
+    match_machine: bool = False,
+    not_matches: MaybeSequenceStr | None = None,
+    not_endswith: MaybeSequenceStr | None = None,
     timeout: int = DOWNLOAD_SETTINGS.timeout,
     chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
 ) -> Iterator[Path]:
