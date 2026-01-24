@@ -6,10 +6,15 @@ from shlex import join
 from typing import TYPE_CHECKING, assert_never
 
 import utilities.subprocess
-from typed_settings import Secret
-from utilities.core import extract_group, normalize_multi_line_str, one, repr_str
+from utilities.core import (
+    WhichError,
+    extract_group,
+    log_info,
+    normalize_multi_line_str,
+    one,
+    which,
+)
 from utilities.logging import to_logger
-from utilities.shutil import WhichError, which
 from utilities.subprocess import (
     APT_UPDATE,
     BASH_LS,
@@ -28,45 +33,41 @@ from utilities.subprocess import (
     tee,
     yield_ssh_temp_dir,
 )
-from utilities.tabulate import func_param_desc
 
-from installer import __version__
-from installer.apps.constants import SHELL, SYSTEM_NAME
+from installer.apps.constants import (
+    GITHUB_TOKEN,
+    PATH_BINARIES,
+    PERMISSIONS,
+    SHELL,
+    SYSTEM_NAME,
+)
 from installer.apps.download import (
     yield_asset,
     yield_bz2_asset,
     yield_gzip_asset,
     yield_lzma_asset,
 )
-from installer.apps.settings import (
-    DOWNLOAD_SETTINGS,
-    MATCH_SETTINGS,
-    PATH_BINARIES_SETTINGS,
-    PERMS_SETTINGS,
-    TAG_SETTINGS,
-)
 from installer.configs.lib import setup_shell_config
-from installer.configs.settings import FILE_SYSTEM_ROOT, SHELL_CONFIG_SETTINGS
-from installer.logging import LOGGER
-from installer.settings import SSH_SETTINGS, SUDO_SETTINGS
+from installer.constants import FILE_SYSTEM_ROOT
 from installer.utilities import split_ssh, ssh_install
 
 if TYPE_CHECKING:
-    from typed_settings import Secret
     from utilities.core import PermissionsLike
-    from utilities.types import LoggerLike, PathLike, Retry
+    from utilities.pydantic import SecretLike
+    from utilities.types import LoggerLike, MaybeSequenceStr, PathLike, Retry
 
 
 def setup_apt_package(
     package: str,
     /,
     *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    sudo: bool = False,
+    retry: Retry | None = None,
 ) -> None:
     """Setup an 'apt' package."""
+    log_info(logger, "Setting up 'apt' package...")
     if ssh is None:
         match SYSTEM_NAME:
             case "Darwin":
@@ -75,11 +76,11 @@ def setup_apt_package(
             case "Linux":
                 run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
                 run(*maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo))
-                LOGGER.info("Installed %r", package)
+                log_info(logger, "Installed %r", package)
             case never:
                 assert_never(never)
     else:
-        ssh_install(ssh, "apt-package", package, retry=retry, logger=logger)
+        ssh_install(ssh, "apt-package", package, sudo=sudo, retry=retry, logger=logger)
 
 
 ##
@@ -91,43 +92,21 @@ def setup_asset(
     path: PathLike,
     /,
     *,
-    tag: str | None = TAG_SETTINGS.tag,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    match_system: bool = MATCH_SETTINGS.match_system,
-    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
-    match_machine: bool = MATCH_SETTINGS.match_machine,
-    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
-    not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
+    logger: LoggerLike | None = None,
+    tag: str | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    match_system: bool = False,
+    match_c_std_lib: bool = False,
+    match_machine: bool = False,
+    not_matches: MaybeSequenceStr | None = None,
+    not_endswith: MaybeSequenceStr | None = None,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
     """Setup a GitHub asset."""
-    LOGGER.info(
-        func_param_desc(
-            setup_asset,
-            __version__,
-            f"{asset_owner=}",
-            f"{asset_repo=}",
-            f"{path=}",
-            f"{tag=}",
-            f"{token=}",
-            f"{match_system=}",
-            f"{match_c_std_lib=}",
-            f"{match_machine=}",
-            f"{not_matches=}",
-            f"{not_endswith=}",
-            f"{timeout=}",
-            f"{chunk_size=}",
-            f"{sudo=}",
-            f"{perms=}",
-            f"{owner=}",
-            f"{group=}",
-        )
-    )
+    log_info(logger, "Setting up GitHub asset...")
     with yield_asset(
         asset_owner,
         asset_repo,
@@ -136,12 +115,10 @@ def setup_asset(
         match_system=match_system,
         match_c_std_lib=match_c_std_lib,
         match_machine=match_machine,
+        not_matches=not_matches,
         not_endswith=not_endswith,
-        timeout=timeout,
-        chunk_size=chunk_size,
     ) as src:
         cp(src, path, sudo=sudo, perms=perms, owner=owner, group=group)
-        LOGGER.info("Downloaded to %r", str(path))
 
 
 ##
@@ -149,19 +126,18 @@ def setup_asset(
 
 def setup_age(
     *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
+    retry: Retry | None = None,
 ) -> None:
     """Setup 'age'."""
+    log_info(logger, "Setting up 'age'...")
     if ssh is None:
         with yield_gzip_asset(
             "FiloSottile",
@@ -170,8 +146,6 @@ def setup_age(
             match_system=True,
             match_machine=True,
             not_endswith=["proof"],
-            timeout=timeout,
-            chunk_size=chunk_size,
         ) as temp:
             downloads: list[Path] = []
             for src in temp.iterdir():
@@ -179,9 +153,18 @@ def setup_age(
                     dest = Path(path_binaries, src.name)
                     cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
                     downloads.append(dest)
-        LOGGER.info("Downloaded to %s", ", ".join(map(repr_str, downloads)))
     else:
-        ssh_install(ssh, "age", retry=retry, logger=logger)
+        ssh_install(
+            ssh,
+            "age",
+            owner=owner,
+            path_binaries=path_binaries,
+            perms=perms,
+            sudo=sudo,
+            token=token,
+            retry=retry,
+            logger=logger,
+        )
 
 
 ##
@@ -189,16 +172,16 @@ def setup_age(
 
 def setup_bat(
     *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
     """Setup 'bat'."""
+    log_info(logger, "Setting up 'bat'...")
     with yield_gzip_asset(
         "sharkdp",
         "bat",
@@ -206,13 +189,10 @@ def setup_bat(
         match_system=True,
         match_c_std_lib=True,
         match_machine=True,
-        timeout=timeout,
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "bat"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -220,16 +200,16 @@ def setup_bat(
 
 def setup_bottom(
     *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
     """Setup 'bottom'."""
+    log_info(logger, "Setting up 'bottom'...")
     with yield_gzip_asset(
         "ClementTsang",
         "bottom",
@@ -238,13 +218,10 @@ def setup_bottom(
         match_c_std_lib=True,
         match_machine=True,
         not_matches=[r"\d+\.tar\.gz$"],
-        timeout=timeout,
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "btm"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -252,13 +229,14 @@ def setup_bottom(
 
 def setup_curl(
     *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    sudo: bool = False,
+    retry: Retry | None = None,
 ) -> None:
     """Setup 'curl'."""
-    setup_apt_package("curl", ssh=ssh, sudo=sudo, retry=retry, logger=logger)
+    log_info(logger, "Setting up 'curl'...")
+    setup_apt_package("curl", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -266,16 +244,16 @@ def setup_curl(
 
 def setup_delta(
     *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
     """Setup 'delta'."""
+    log_info(logger, "Setting up 'delta'...")
     with yield_gzip_asset(
         "dandavison",
         "delta",
@@ -283,13 +261,10 @@ def setup_delta(
         match_system=True,
         match_c_std_lib=True,
         match_machine=True,
-        timeout=timeout,
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "delta"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -297,21 +272,20 @@ def setup_delta(
 
 def setup_direnv(
     *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-    etc: bool = SHELL_CONFIG_SETTINGS.etc,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    path_binaries: PathLike = PATH_BINARIES,
+    token: SecretLike | None = GITHUB_TOKEN,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
+    etc: bool = False,
+    retry: Retry | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'direnv'."""
+    log_info(logger, "Setting up 'direnv'...")
     if ssh is None:
         dest = Path(path_binaries, "direnv")
         setup_asset(
@@ -321,14 +295,11 @@ def setup_direnv(
             token=token,
             match_system=True,
             match_machine=True,
-            timeout=timeout,
-            chunk_size=chunk_size,
             sudo=sudo,
             perms=perms,
             owner=owner,
             group=group,
         )
-        LOGGER.info("Downloaded to %r", str(dest))
         setup_shell_config(
             f'eval "$(direnv hook {SHELL})"',
             "direnv hook fish | source",
@@ -336,7 +307,19 @@ def setup_direnv(
             __root=__root,
         )
     else:
-        ssh_install(ssh, "direnv", sudo=sudo, etc=etc, retry=retry, logger=logger)
+        ssh_install(
+            ssh,
+            "direnv",
+            etc=etc,
+            group=group,
+            owner=owner,
+            path_binaries=path_binaries,
+            perms=perms,
+            sudo=sudo,
+            token=token,
+            retry=retry,
+            logger=logger,
+        )
 
 
 ##
@@ -344,20 +327,19 @@ def setup_direnv(
 
 def setup_docker(
     *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    sudo: bool = SUDO_SETTINGS.sudo,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    sudo: bool = False,
     user: str | None = None,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    retry: Retry | None = None,
 ) -> None:
+    log_info(logger, "Setting up 'docker'....")
     if ssh is None:
         match SYSTEM_NAME:
             case "Darwin":
                 msg = f"Unsupported system: {SYSTEM_NAME!r}"
                 raise ValueError(msg)
             case "Linux":
-                if logger is not None:
-                    to_logger(logger).info("Installing 'docker'...")
                 try:
                     _ = which("docker")
                 except WhichError:
@@ -418,10 +400,7 @@ def setup_docker(
             case never:
                 assert_never(never)
     else:
-        args: list[str] = []
-        if user is not None:
-            args.extend(["--user", user])
-        ssh_install(ssh, "docker", *args, retry=retry, logger=logger)
+        ssh_install(ssh, "docker", user=user, retry=retry, logger=logger)
 
 
 ##
@@ -429,16 +408,16 @@ def setup_docker(
 
 def setup_dust(
     *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
     """Setup 'dust'."""
+    log_info(logger, "Setting up 'dust'....")
     match SYSTEM_NAME:
         case "Darwin":
             match_machine = False
@@ -453,13 +432,10 @@ def setup_dust(
         match_system=True,
         match_c_std_lib=True,
         match_machine=match_machine,
-        timeout=timeout,
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "dust"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -467,16 +443,16 @@ def setup_dust(
 
 def setup_eza(
     *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
     """Setup 'eza'."""
+    log_info(logger, "Setting up 'eza'...")
     match SYSTEM_NAME:
         case "Darwin":
             asset_owner = "cargo-bins"
@@ -501,12 +477,9 @@ def setup_eza(
         match_c_std_lib=match_c_std_lib,
         match_machine=True,
         not_endswith=not_endswith,
-        timeout=timeout,
-        chunk_size=chunk_size,
     ) as src:
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -514,16 +487,16 @@ def setup_eza(
 
 def setup_fd(
     *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
     """Setup 'fd'."""
+    log_info(logger, "Setting up 'fd'...")
     with yield_gzip_asset(
         "sharkdp",
         "fd",
@@ -531,13 +504,10 @@ def setup_fd(
         match_system=True,
         match_c_std_lib=True,
         match_machine=True,
-        timeout=timeout,
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "fd"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -545,34 +515,26 @@ def setup_fd(
 
 def setup_fzf(
     *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-    etc: bool = SHELL_CONFIG_SETTINGS.etc,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
+    etc: bool = False,
+    retry: Retry | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'fzf'."""
+    log_info(logger, "Setting up 'fzf'...")
     if ssh is None:
         with yield_gzip_asset(
-            "junegunn",
-            "fzf",
-            token=token,
-            match_system=True,
-            match_machine=True,
-            timeout=timeout,
-            chunk_size=chunk_size,
+            "junegunn", "fzf", token=token, match_system=True, match_machine=True
         ) as src:
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        LOGGER.info("Downloaded to %r", str(dest))
         setup_shell_config(
             'eval "$(fzf --bash)"',
             "fzf --fish | source",
@@ -581,7 +543,18 @@ def setup_fzf(
             __root=__root,
         )
     else:
-        ssh_install(ssh, "fzf", sudo=sudo, etc=etc, retry=retry, logger=logger)
+        ssh_install(
+            ssh,
+            "fzf",
+            etc=etc,
+            group=group,
+            owner=owner,
+            perms=perms,
+            sudo=sudo,
+            token=token,
+            retry=retry,
+            logger=logger,
+        )
 
 
 ##
@@ -589,13 +562,14 @@ def setup_fzf(
 
 def setup_git(
     *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    sudo: bool = False,
+    retry: Retry | None = None,
 ) -> None:
     """Setup 'git'."""
-    setup_apt_package("git", ssh=ssh, sudo=sudo, retry=retry, logger=logger)
+    log_info(logger, "Setting up 'git'...")
+    setup_apt_package("git", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -603,16 +577,16 @@ def setup_git(
 
 def setup_jq(
     *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
+    logger: LoggerLike | None = None,
+    path_binaries: PathLike = PATH_BINARIES,
+    token: SecretLike | None = GITHUB_TOKEN,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
-    """Setup 'shfmt'."""
+    """Setup 'jq'."""
+    log_info(logger, "Setting up 'jq'...")
     dest = Path(path_binaries, "jq")
     setup_asset(
         "jqlang",
@@ -622,14 +596,11 @@ def setup_jq(
         match_system=True,
         match_machine=True,
         not_endswith=["linux64"],
-        timeout=timeout,
-        chunk_size=chunk_size,
         sudo=sudo,
         perms=perms,
         owner=owner,
         group=group,
     )
-    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -637,35 +608,38 @@ def setup_jq(
 
 def setup_just(
     *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
+    retry: Retry | None = None,
 ) -> None:
     """Setup 'just'."""
+    log_info(logger, "Setting up 'just'...")
     if ssh is None:
         with yield_gzip_asset(
-            "casey",
-            "just",
-            token=token,
-            match_system=True,
-            match_machine=True,
-            timeout=timeout,
-            chunk_size=chunk_size,
+            "casey", "just", token=token, match_system=True, match_machine=True
         ) as temp:
             src = temp / "just"
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        LOGGER.info("Downloaded to %r", str(dest))
     else:
-        ssh_install(ssh, "just", retry=retry, logger=logger)
+        ssh_install(
+            ssh,
+            "just",
+            group=group,
+            owner=owner,
+            path_binaries=path_binaries,
+            perms=perms,
+            sudo=sudo,
+            token=token,
+            retry=retry,
+            logger=logger,
+        )
 
 
 ##
@@ -673,16 +647,16 @@ def setup_just(
 
 def setup_neovim(
     *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
     """Setup 'neovim'."""
+    log_info(logger, "Setting up 'neovim'...")
     with yield_gzip_asset(
         "neovim",
         "neovim",
@@ -690,14 +664,11 @@ def setup_neovim(
         match_system=True,
         match_machine=True,
         not_endswith=["appimage", "zsync"],
-        timeout=timeout,
-        chunk_size=chunk_size,
     ) as temp:
         dest_dir = Path(path_binaries, "nvim-dir")
         cp(temp, dest_dir, sudo=sudo, perms=perms, owner=owner, group=group)
         dest_bin = Path(path_binaries, "nvim")
         symlink(dest_dir / "bin/nvim", dest_bin, sudo=sudo)
-    LOGGER.info("Downloaded to %r", str(dest_bin))
 
 
 ##
@@ -705,34 +676,36 @@ def setup_neovim(
 
 def setup_restic(
     *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
+    retry: Retry | None = None,
 ) -> None:
     """Setup 'restic'."""
+    log_info(logger, "Setting up 'restic'...")
     if ssh is None:
         with yield_bz2_asset(
-            "restic",
-            "restic",
-            token=token,
-            match_system=True,
-            match_machine=True,
-            timeout=timeout,
-            chunk_size=chunk_size,
+            "restic", "restic", token=token, match_system=True, match_machine=True
         ) as src:
             dest = Path(path_binaries, "restic")
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        LOGGER.info("Downloaded to %r", str(dest))
     else:
-        ssh_install(ssh, "restic", retry=retry, logger=logger)
+        ssh_install(
+            ssh,
+            "restic",
+            group=group,
+            owner=owner,
+            path_binaries=path_binaries,
+            sudo=sudo,
+            token=token,
+            retry=retry,
+            logger=logger,
+        )
 
 
 ##
@@ -740,16 +713,16 @@ def setup_restic(
 
 def setup_ripgrep(
     *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
     """Setup 'ripgrep'."""
+    log_info(logger, "Setting up 'ripgrep'...")
     with yield_gzip_asset(
         "burntsushi",
         "ripgrep",
@@ -757,87 +730,10 @@ def setup_ripgrep(
         match_system=True,
         match_machine=True,
         not_endswith=["sha256"],
-        timeout=timeout,
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "rg"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
-
-
-##
-
-
-def setup_starship(
-    *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-    etc: bool = SHELL_CONFIG_SETTINGS.etc,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
-    __root: PathLike = FILE_SYSTEM_ROOT,
-) -> None:
-    """Setup 'starship'."""
-    if ssh is None:
-        with yield_gzip_asset(
-            "starship",
-            "starship",
-            token=token,
-            match_system=True,
-            match_c_std_lib=True,
-            match_machine=True,
-            not_endswith=["sha256"],
-            timeout=timeout,
-            chunk_size=chunk_size,
-        ) as src:
-            dest = Path(path_binaries, src.name)
-            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        LOGGER.info("Downloaded to %r", str(dest))
-        setup_shell_config(
-            f'eval "$(starship init {SHELL})"',
-            "starship init fish | source",
-            etc="starship" if etc else None,
-            __root=__root,
-        )
-    else:
-        ssh_install(ssh, "starship", sudo=sudo, etc=etc, retry=retry, logger=logger)
-
-
-##
-
-
-def setup_taplo(
-    *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-) -> None:
-    """Setup 'taplo'."""
-    with yield_gzip_asset(
-        "tamasfe",
-        "taplo",
-        token=token,
-        match_system=True,
-        match_machine=True,
-        timeout=timeout,
-        chunk_size=chunk_size,
-    ) as src:
-        dest = Path(path_binaries, "taplo")
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -845,13 +741,14 @@ def setup_taplo(
 
 def setup_rsync(
     *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    sudo: bool = False,
+    retry: Retry | None = None,
 ) -> None:
     """Setup 'rsync'."""
-    setup_apt_package("rsync", ssh=ssh, sudo=sudo, retry=retry, logger=logger)
+    log_info(logger, "Setting up 'rsync'...")
+    setup_apt_package("rsync", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -859,16 +756,16 @@ def setup_rsync(
 
 def setup_ruff(
     *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
     """Setup 'ruff'."""
+    log_info(logger, "Setting up 'ruff'...")
     with yield_gzip_asset(
         "astral-sh",
         "ruff",
@@ -877,13 +774,10 @@ def setup_ruff(
         match_c_std_lib=True,
         match_machine=True,
         not_endswith=["sha256"],
-        timeout=timeout,
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "ruff"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -891,16 +785,16 @@ def setup_ruff(
 
 def setup_sd(
     *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
     """Setup 'sd'."""
+    log_info(logger, "Setting up 'sd'...")
     with yield_gzip_asset(
         "chmln",
         "sd",
@@ -908,13 +802,10 @@ def setup_sd(
         match_system=True,
         match_c_std_lib=True,
         match_machine=True,
-        timeout=timeout,
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "sd"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -922,16 +813,16 @@ def setup_sd(
 
 def setup_shellcheck(
     *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
     """Setup 'shellcheck'."""
+    log_info(logger, "Setting up 'shellcheck'...")
     with yield_gzip_asset(
         "koalaman",
         "shellcheck",
@@ -939,13 +830,10 @@ def setup_shellcheck(
         match_system=True,
         match_machine=True,
         not_endswith=["tar.xz"],
-        timeout=timeout,
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "shellcheck"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -953,16 +841,16 @@ def setup_shellcheck(
 
 def setup_shfmt(
     *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
     """Setup 'shfmt'."""
+    log_info(logger, "Setting up 'shfmt'...")
     dest = Path(path_binaries, "shfmt")
     setup_asset(
         "mvdan",
@@ -971,14 +859,11 @@ def setup_shfmt(
         token=token,
         match_system=True,
         match_machine=True,
-        timeout=timeout,
-        chunk_size=chunk_size,
         sudo=sudo,
         perms=perms,
         owner=owner,
         group=group,
     )
-    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -986,19 +871,18 @@ def setup_shfmt(
 
 def setup_sops(
     *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
+    retry: Retry | None = None,
 ) -> None:
     """Setup 'sops'."""
+    log_info(logger, "Setting up 'sops'...")
     if ssh is None:
         dest = Path(path_binaries, "sops")
         setup_asset(
@@ -1009,16 +893,102 @@ def setup_sops(
             match_system=True,
             match_machine=True,
             not_endswith=["json"],
-            timeout=timeout,
-            chunk_size=chunk_size,
             sudo=sudo,
             perms=perms,
             owner=owner,
             group=group,
         )
-        LOGGER.info("Downloaded to %r", str(dest))
     else:
-        ssh_install(ssh, "sops", retry=retry, logger=logger)
+        ssh_install(
+            ssh,
+            "sops",
+            group=group,
+            owner=owner,
+            path_binaries=path_binaries,
+            perms=perms,
+            sudo=sudo,
+            token=token,
+            retry=retry,
+            logger=logger,
+        )
+
+
+##
+
+
+def setup_starship(
+    *,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
+    custom_shell_config: bool = False,
+    etc: bool = False,
+    retry: Retry | None = None,
+    __root: PathLike = FILE_SYSTEM_ROOT,
+) -> None:
+    """Setup 'starship'."""
+    log_info(logger, "Setting up 'starship'...")
+    if ssh is None:
+        with yield_gzip_asset(
+            "starship",
+            "starship",
+            token=token,
+            match_system=True,
+            match_c_std_lib=True,
+            match_machine=True,
+            not_endswith=["sha256"],
+        ) as src:
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+        if not custom_shell_config:
+            setup_shell_config(
+                f'eval "$(starship init {SHELL})"',
+                "starship init fish | source",
+                etc="starship" if etc else None,
+                __root=__root,
+            )
+    else:
+        ssh_install(
+            ssh,
+            "starship",
+            custom_shell_config=custom_shell_config,
+            etc=etc,
+            group=group,
+            owner=owner,
+            path_binaries=path_binaries,
+            perms=perms,
+            sudo=sudo,
+            token=token,
+            retry=retry,
+            logger=logger,
+        )
+
+
+##
+
+
+def setup_taplo(
+    *,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
+) -> None:
+    """Setup 'taplo'."""
+    log_info(logger, "Setting up 'taplo'...")
+    with yield_gzip_asset(
+        "tamasfe", "taplo", token=token, match_system=True, match_machine=True
+    ) as src:
+        dest = Path(path_binaries, "taplo")
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
 
 ##
@@ -1026,19 +996,18 @@ def setup_sops(
 
 def setup_uv(
     *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
+    retry: Retry | None = None,
 ) -> None:
     """Setup 'uv'."""
+    log_info(logger, "Setting up 'uv'...")
     if ssh is None:
         with yield_gzip_asset(
             "astral-sh",
@@ -1048,13 +1017,10 @@ def setup_uv(
             match_c_std_lib=True,
             match_machine=True,
             not_endswith=["sha256"],
-            timeout=timeout,
-            chunk_size=chunk_size,
         ) as temp:
             src = temp / "uv"
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        LOGGER.info("Downloaded to %r", str(dest))
     else:
         user, hostname = split_ssh(ssh)
         with yield_ssh_temp_dir(user, hostname, retry=retry, logger=logger) as temp:
@@ -1078,7 +1044,6 @@ def setup_uv(
                 retry=retry,
                 logger=logger,
             )
-        LOGGER.info("Downloaded to %r on '%s'", str(path_binaries), hostname)
 
 
 ##
@@ -1086,16 +1051,16 @@ def setup_uv(
 
 def setup_watchexec(
     *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
     """Setup 'watchexec'."""
+    log_info(logger, "Setting up 'watchexec'...")
     with yield_lzma_asset(
         "watchexec",
         "watchexec",
@@ -1104,13 +1069,10 @@ def setup_watchexec(
         match_c_std_lib=True,
         match_machine=True,
         not_endswith=["b3", "deb", "rpm", "sha256", "sha512"],
-        timeout=timeout,
-        chunk_size=chunk_size,
     ) as temp:
         src = temp / "watchexec"
         dest = Path(path_binaries, src.name)
         cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -1118,16 +1080,16 @@ def setup_watchexec(
 
 def setup_yq(
     *,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
     """Setup 'yq'."""
+    log_info(logger, "Setting up 'yq'...")
     dest = Path(path_binaries, "yq")
     setup_asset(
         "mikefarah",
@@ -1137,14 +1099,11 @@ def setup_yq(
         match_system=True,
         match_machine=True,
         not_endswith=["tar.gz"],
-        timeout=timeout,
-        chunk_size=chunk_size,
         sudo=sudo,
         perms=perms,
         owner=owner,
         group=group,
     )
-    LOGGER.info("Downloaded to %r", str(dest))
 
 
 ##
@@ -1152,35 +1111,27 @@ def setup_yq(
 
 def setup_zoxide(
     *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    path_binaries: PathLike = PATH_BINARIES_SETTINGS.path_binaries,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    perms: PermissionsLike | None = PERMS_SETTINGS.perms,
-    owner: str | int | None = PERMS_SETTINGS.owner,
-    group: str | int | None = PERMS_SETTINGS.group,
-    etc: bool = SHELL_CONFIG_SETTINGS.etc,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike = PERMISSIONS,
+    owner: str | int | None = None,
+    group: str | int | None = None,
+    etc: bool = False,
+    retry: Retry | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'zoxide'."""
+    log_info(logger, "Setting up 'zoxide'...")
     if ssh is None:
         with yield_gzip_asset(
-            "ajeetdsouza",
-            "zoxide",
-            token=token,
-            match_system=True,
-            match_machine=True,
-            timeout=timeout,
-            chunk_size=chunk_size,
+            "ajeetdsouza", "zoxide", token=token, match_system=True, match_machine=True
         ) as temp:
             src = temp / "zoxide"
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        LOGGER.info("Downloaded to %r", str(dest))
         setup_shell_config(
             f'eval "$(fzf --{SHELL})"',
             "zoxide init fish | source",
@@ -1188,7 +1139,19 @@ def setup_zoxide(
             __root=__root,
         )
     else:
-        ssh_install(ssh, "zoxide", sudo=sudo, etc=etc, retry=retry, logger=logger)
+        ssh_install(
+            ssh,
+            "zoxide",
+            etc=etc,
+            group=group,
+            owner=owner,
+            path_binaries=path_binaries,
+            perms=perms,
+            sudo=sudo,
+            token=token,
+            retry=retry,
+            logger=logger,
+        )
 
 
 __all__ = [

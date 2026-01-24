@@ -5,17 +5,18 @@ from shlex import join
 from typing import TYPE_CHECKING, assert_never
 
 import utilities.subprocess
-from utilities.core import normalize_multi_line_str, normalize_str, repr_str, write_text
+from utilities.core import (
+    log_info,
+    normalize_multi_line_str,
+    normalize_str,
+    repr_str,
+    write_text,
+)
 from utilities.shellingham import SHELL
 from utilities.subprocess import BASH_LS, maybe_sudo_cmd, mkdir_cmd, tee, tee_cmd
-from utilities.tabulate import func_param_desc
 from xdg_base_dirs import xdg_config_home
 
-from installer import __version__
-from installer.configs.settings import FILE_SYSTEM_ROOT, SSHD_SETTINGS
-from installer.constants import RELATIVE_HOME
-from installer.logging import LOGGER
-from installer.settings import BATCH_SETTINGS, SSH_SETTINGS, SUDO_SETTINGS
+from installer.constants import FILE_SYSTEM_ROOT, RELATIVE_HOME
 from installer.utilities import ensure_line, get_home, split_ssh
 
 if TYPE_CHECKING:
@@ -26,24 +27,14 @@ def setup_authorized_keys(
     keys: list[str],
     /,
     *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    batch_mode: bool = BATCH_SETTINGS.batch_mode,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    batch_mode: bool = False,
+    retry: Retry | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Set up the SSH authorized keys."""
-    LOGGER.info(
-        func_param_desc(
-            setup_authorized_keys,
-            __version__,
-            f"{keys=}",
-            f"{ssh=}",
-            f"{batch_mode=}",
-            f"{retry=}",
-            f"{logger=}",
-        )
-    )
+    log_info(logger, "Setting up authorized keys...")
     text = normalize_str("\n".join(keys))
     if ssh is None:
         home = Path(__root, RELATIVE_HOME)
@@ -72,10 +63,12 @@ def setup_shell_config(
     fish: str,
     /,
     *,
+    logger: LoggerLike | None = None,
     etc: str | None = None,
     zsh: str | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
+    log_info(logger, "Setting up shell config...")
     match etc, SHELL, zsh:
         case None, "bash" | "posix" | "sh", _:
             home = Path(__root, RELATIVE_HOME)
@@ -106,17 +99,13 @@ def setup_shell_config(
 
 def setup_ssh_config(
     *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    retry: Retry | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Set up the SSH config."""
-    LOGGER.info(
-        func_param_desc(
-            setup_ssh_config, __version__, f"{ssh=}", f"{retry=}", f"{logger=}"
-        )
-    )
+    log_info(logger, "Setting up SSH config...")
     if ssh is None:
         home = Path(__root, RELATIVE_HOME)
         config = home / ".ssh/config"
@@ -149,24 +138,14 @@ def setup_ssh_config(
 
 def setup_sshd_config(
     *,
-    permit_root_login: bool = SSHD_SETTINGS.permit_root_login,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    logger: LoggerLike | None = None,
+    permit_root_login: bool = False,
+    ssh: str | None = None,
+    sudo: bool = False,
+    retry: Retry | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
-    LOGGER.info(
-        func_param_desc(
-            setup_sshd_config,
-            __version__,
-            f"{permit_root_login=}",
-            f"{ssh=}",
-            f"{retry=}",
-            f"{logger=}",
-            f"{sudo=}",
-        )
-    )
+    log_info(logger, "Setting up SSHD config...")
     text = sshd_config(permit_root_login=permit_root_login)
     if ssh is None:
         path = Path(__root, "etc/ssh/sshd_config.d/default.conf")
@@ -184,7 +163,7 @@ def setup_sshd_config(
         )
 
 
-def sshd_config(*, permit_root_login: bool = SSHD_SETTINGS.permit_root_login) -> str:
+def sshd_config(*, permit_root_login: bool = False) -> str:
     yes_no = "yes" if permit_root_login else "no"
     return normalize_multi_line_str(f"""
         PasswordAuthentication no

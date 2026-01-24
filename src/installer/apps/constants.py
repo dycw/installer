@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from collections.abc import Set as AbstractSet
+from pathlib import Path
 from platform import machine, system
 from re import IGNORECASE, search
 from typing import TYPE_CHECKING
 
-from utilities.core import OneEmptyError, one
+from pydantic import SecretStr
+from utilities.core import OneEmptyError, get_env, has_env, one
 from utilities.shellingham import get_shell
 from utilities.subprocess import run
 from utilities.typing import get_args
@@ -16,6 +18,11 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
 
+TIMEOUT = 60
+CHUNK_SIZE = 8196
+GITHUB_TOKEN = SecretStr(get_env("GITHUB_TOKEN")) if has_env("GITHUB_TOKEN") else None
+PATH_BINARIES = Path("/usr/local/bin/")
+PERMISSIONS = "u=rwx,g=rx,o=rx"
 SHELL = get_shell()
 
 
@@ -95,9 +102,14 @@ MACHINE_TYPE_GROUP = _get_machine_type_group()
 
 
 __all__ = [
+    "CHUNK_SIZE",
     "C_STD_LIB_GROUP",
+    "GITHUB_TOKEN",
     "MACHINE_TYPE_GROUP",
+    "PATH_BINARIES",
+    "PERMISSIONS",
     "SHELL",
     "SYSTEM_NAME",
     "SYSTEM_NAME_GROUP",
+    "TIMEOUT",
 ]

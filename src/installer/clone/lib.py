@@ -4,21 +4,18 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import utilities.subprocess
-from utilities.core import write_text
+from utilities.constants import PWD
+from utilities.core import log_info, write_text
 from utilities.subprocess import cp
-from utilities.tabulate import func_param_desc
 
-from installer import __version__
-from installer.clone.settings import CLONE_SETTINGS
+from installer.clone.constants import GIT_CLONE_HOST
 from installer.configs.lib import setup_ssh_config
-from installer.configs.settings import FILE_SYSTEM_ROOT
-from installer.constants import RELATIVE_HOME
-from installer.logging import LOGGER
+from installer.constants import FILE_SYSTEM_ROOT, RELATIVE_HOME
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from utilities.types import PathLike
+    from utilities.types import LoggerLike, PathLike, Retry
 
 
 def git_clone(
@@ -27,27 +24,18 @@ def git_clone(
     repo: str,
     /,
     *,
-    host: str = CLONE_SETTINGS.host,
-    port: int | None = CLONE_SETTINGS.port,
-    dest: PathLike = CLONE_SETTINGS.dest,
-    branch: str | None = CLONE_SETTINGS.branch,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    retry: Retry | None = None,
+    host: str = GIT_CLONE_HOST,
+    port: int | None = None,
+    dest: PathLike = PWD,
+    branch: str | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
-    LOGGER.info(
-        func_param_desc(
-            git_clone,
-            __version__,
-            f"{key=}",
-            f"{owner=}",
-            f"{repo=}",
-            f"{host=}",
-            f"{port=}",
-            f"{dest=}",
-            f"{branch=}",
-        )
-    )
+    log_info(logger, "Cloning repository...")
     key = Path(key)
-    setup_ssh_config()
+    setup_ssh_config(logger=logger, ssh=ssh, retry=retry, __root=__root)
     _setup_deploy_key(key, host=host, port=port, __root=__root)
     utilities.subprocess.git_clone(
         f"git@{key.stem}:{owner}/{repo}", dest, branch=branch
@@ -58,8 +46,8 @@ def _setup_deploy_key(
     path: PathLike,
     /,
     *,
-    host: str = CLONE_SETTINGS.host,
-    port: int | None = CLONE_SETTINGS.port,
+    host: str = GIT_CLONE_HOST,
+    port: int | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     path = Path(path)
@@ -80,8 +68,8 @@ def _yield_config_lines(
     stem: str,
     /,
     *,
-    host: str = CLONE_SETTINGS.host,
-    port: int | None = CLONE_SETTINGS.port,
+    host: str = GIT_CLONE_HOST,
+    port: int | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> Iterator[str]:
     path_key = _get_path_deploy_key(stem, __root=__root)

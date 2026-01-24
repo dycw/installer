@@ -1,10 +1,18 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from click import argument, option
-from typed_settings import click_options
-from utilities.core import is_pytest
+from utilities.core import PermissionsLike, is_pytest
 from utilities.logging import basic_config
 
+from installer.apps.click import (
+    group_option,
+    owner_option,
+    path_binaries_option,
+    perms_option,
+    token_option,
+)
 from installer.apps.lib import (
     setup_age,
     setup_apt_package,
@@ -37,966 +45,1024 @@ from installer.apps.lib import (
     setup_yq,
     setup_zoxide,
 )
-from installer.apps.settings import (
-    DownloadSettings,
-    PathBinariesSettings,
-    PermsSettings,
-)
-from installer.configs.settings import ShellConfigSettings
-from installer.logging import LOGGER
-from installer.settings import LOADER, SSHSettings, SudoSettings
+from installer.click import logger_option, retry_option, ssh_option, sudo_option
+from installer.configs.click import etc_option
+
+if TYPE_CHECKING:
+    from utilities.pydantic import SecretLike
+    from utilities.types import LoggerLike, PathLike, Retry
 
 
 @argument("package", type=str)
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
-def apt_package_sub_cmd(*, package: str, ssh: SSHSettings, sudo: SudoSettings) -> None:
+@logger_option
+@ssh_option
+@sudo_option
+@retry_option
+def apt_package_sub_cmd(
+    *,
+    package: str,
+    logger: LoggerLike | None,
+    ssh: str | None,
+    sudo: bool,
+    retry: Retry | None,
+) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
-    setup_apt_package(
-        package, ssh=ssh.ssh, sudo=sudo.sudo, retry=ssh.retry, logger=ssh.logger
-    )
+    basic_config(obj=logger)
+    setup_apt_package(package, logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@ssh_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
+@retry_option
 def age_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    ssh: SSHSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    ssh: str | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_age(
-        ssh=ssh.ssh,
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
-        retry=ssh.retry,
-        logger=ssh.logger,
+        logger=logger,
+        ssh=ssh,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def bat_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_bat(
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def bottom_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_bottom(
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
 ##
 
 
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
-def curl_sub_cmd(*, ssh: SSHSettings, sudo: SudoSettings) -> None:
+@logger_option
+@ssh_option
+@sudo_option
+@retry_option
+def curl_sub_cmd(
+    *, logger: LoggerLike | None, ssh: str | None, sudo: bool, retry: Retry | None
+) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
-    setup_curl(ssh=ssh.ssh, sudo=sudo.sudo, retry=ssh.retry, logger=ssh.logger)
+    basic_config(obj=logger)
+    setup_curl(logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def delta_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_delta(
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(
-    ShellConfigSettings, [LOADER], show_envvars_in_help=True, argname="shell_config"
-)
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@ssh_option
+@path_binaries_option
+@token_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
+@etc_option
+@retry_option
 def direnv_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    shell_config: ShellConfigSettings,
-    ssh: SSHSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    ssh: str | None,
+    path_binaries: PathLike,
+    token: SecretLike | None,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
+    etc: bool,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_direnv(
-        ssh=ssh.ssh,
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
-        etc=shell_config.etc,
-        retry=ssh.retry,
-        logger=ssh.logger,
+        logger=logger,
+        ssh=ssh,
+        path_binaries=path_binaries,
+        token=token,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        etc=etc,
+        retry=retry,
     )
 
 
 ##
 
 
+@logger_option
+@ssh_option
+@sudo_option
 @option("--user", type=str, default=None, help="User to add to the 'docker' group")
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
-def docker_sub_cmd(*, user: str | None, ssh: SSHSettings, sudo: SudoSettings) -> None:
+@retry_option
+def docker_sub_cmd(
+    *,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    sudo: bool = False,
+    user: str | None = None,
+    retry: Retry | None = None,
+) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
-    setup_docker(
-        ssh=ssh.ssh, user=user, sudo=sudo.sudo, retry=ssh.retry, logger=ssh.logger
-    )
+    basic_config(obj=logger)
+    setup_docker(logger=logger, ssh=ssh, sudo=sudo, user=user, retry=retry)
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def dust_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_dust(
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def eza_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_eza(
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def fd_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_fd(
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(
-    ShellConfigSettings, [LOADER], show_envvars_in_help=True, argname="shell_config"
-)
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@ssh_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
+@etc_option
+@retry_option
 def fzf_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    shell_config: ShellConfigSettings,
-    ssh: SSHSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    ssh: str | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
+    etc: bool,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_fzf(
-        ssh=ssh.ssh,
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
-        etc=shell_config.etc,
-        retry=ssh.retry,
-        logger=ssh.logger,
+        logger=logger,
+        ssh=ssh,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        etc=etc,
+        retry=retry,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@ssh_option
+@sudo_option
+@retry_option
+def git_sub_cmd(
+    *, logger: LoggerLike | None, ssh: str | None, sudo: bool, retry: Retry | None
+) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=logger)
+    setup_git(logger=logger, ssh=ssh, sudo=sudo, retry=retry)
+
+
+##
+
+
+@logger_option
+@path_binaries_option
+@token_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def jq_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    path_binaries: PathLike,
+    token: SecretLike | None,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_jq(
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        logger=logger,
+        path_binaries=path_binaries,
+        token=token,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
 ##
 
 
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
-def git_sub_cmd(*, ssh: SSHSettings, sudo: SudoSettings) -> None:
-    if is_pytest():
-        return
-    basic_config(obj=LOGGER)
-    setup_git(ssh=ssh.ssh, sudo=sudo.sudo, retry=ssh.retry, logger=ssh.logger)
-
-
-##
-
-
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@ssh_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
+@retry_option
 def just_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    ssh: SSHSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    ssh: str | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_just(
-        ssh=ssh.ssh,
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
-        retry=ssh.retry,
-        logger=ssh.logger,
+        logger=logger,
+        ssh=ssh,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def neovim_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_neovim(
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@ssh_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
+@retry_option
 def restic_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    ssh: SSHSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    ssh: str | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_restic(
-        ssh=ssh.ssh,
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
-        retry=ssh.retry,
-        logger=ssh.logger,
+        logger=logger,
+        ssh=ssh,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def ripgrep_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_ripgrep(
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@ssh_option
+@sudo_option
+@retry_option
+def rsync_sub_cmd(
+    *, logger: LoggerLike | None, ssh: str | None, sudo: bool, retry: Retry | None
+) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=logger)
+    setup_rsync(logger=logger, ssh=ssh, sudo=sudo, retry=retry)
+
+
+##
+
+
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def ruff_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_ruff(
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
 ##
 
 
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
-def rsync_sub_cmd(*, ssh: SSHSettings, sudo: SudoSettings) -> None:
-    if is_pytest():
-        return
-    basic_config(obj=LOGGER)
-    setup_rsync(ssh=ssh.ssh, sudo=sudo.sudo, retry=ssh.retry, logger=ssh.logger)
-
-
-##
-
-
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def sd_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_sd(
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def shellcheck_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_shellcheck(
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def shfmt_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_shfmt(
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@ssh_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
+@retry_option
 def sops_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    ssh: SSHSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    ssh: str | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_sops(
-        ssh=ssh.ssh,
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
-        retry=ssh.retry,
-        logger=ssh.logger,
+        logger=logger,
+        ssh=ssh,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
+@logger_option
+@ssh_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
+@option(
+    "--custom-shell-config",
+    is_flag=True,
+    default=False,
+    help="Use a custom shell config, so skip the standard one",
 )
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(
-    ShellConfigSettings, [LOADER], show_envvars_in_help=True, argname="shell_config"
-)
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@etc_option
+@retry_option
 def starship_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    shell_config: ShellConfigSettings,
-    ssh: SSHSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    ssh: str | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
+    custom_shell_config: bool,
+    etc: bool,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_starship(
-        ssh=ssh.ssh,
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
-        etc=shell_config.etc,
-        retry=ssh.retry,
-        logger=ssh.logger,
+        logger=logger,
+        ssh=ssh,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        custom_shell_config=custom_shell_config,
+        etc=etc,
+        retry=retry,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def taplo_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_taplo(
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@ssh_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
+@retry_option
 def uv_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    ssh: SSHSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    ssh: str | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_uv(
-        ssh=ssh.ssh,
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
-        retry=ssh.retry,
-        logger=ssh.logger,
+        logger=logger,
+        ssh=ssh,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def watchexec_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_watchexec(
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
 def yq_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_yq(
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
     )
 
 
 ##
 
 
-@click_options(
-    DownloadSettings, [LOADER], show_envvars_in_help=True, argname="download"
-)
-@click_options(
-    PathBinariesSettings, [LOADER], show_envvars_in_help=True, argname="path_binaries"
-)
-@click_options(PermsSettings, [LOADER], show_envvars_in_help=True, argname="perms")
-@click_options(
-    ShellConfigSettings, [LOADER], show_envvars_in_help=True, argname="shell_config"
-)
-@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
-@click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
+@logger_option
+@ssh_option
+@token_option
+@path_binaries_option
+@sudo_option
+@perms_option
+@owner_option
+@group_option
+@etc_option
+@retry_option
 def zoxide_sub_cmd(
     *,
-    download: DownloadSettings,
-    path_binaries: PathBinariesSettings,
-    perms: PermsSettings,
-    shell_config: ShellConfigSettings,
-    ssh: SSHSettings,
-    sudo: SudoSettings,
+    logger: LoggerLike | None,
+    ssh: str | None,
+    token: SecretLike | None,
+    path_binaries: PathLike,
+    sudo: bool,
+    perms: PermissionsLike,
+    owner: str | int | None,
+    group: str | int | None,
+    etc: bool,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=LOGGER)
+    basic_config(obj=logger)
     setup_zoxide(
-        ssh=ssh.ssh,
-        token=download.token,
-        timeout=download.timeout,
-        path_binaries=path_binaries.path_binaries,
-        chunk_size=download.chunk_size,
-        sudo=sudo.sudo,
-        perms=perms.perms,
-        owner=perms.owner,
-        group=perms.group,
-        etc=shell_config.etc,
-        retry=ssh.retry,
-        logger=ssh.logger,
+        logger=logger,
+        ssh=ssh,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        etc=etc,
+        retry=retry,
     )
 
 

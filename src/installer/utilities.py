@@ -1,56 +1,42 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, assert_never
+from typing import TYPE_CHECKING
 
 import utilities.subprocess
-from typed_settings import Secret
 from utilities.constants import HOME
-from utilities.core import ReadTextError, extract_groups, read_text, write_text
+from utilities.core import (
+    Permissions,
+    PermissionsLike,
+    ReadTextError,
+    extract_groups,
+    log_info,
+    read_text,
+    write_text,
+)
+from utilities.pydantic import extract_secret
 from utilities.subprocess import uv_tool_run_cmd
 
-from installer.configs.settings import SHELL_CONFIG_SETTINGS
-from installer.logging import LOGGER
-from installer.settings import BATCH_SETTINGS, SSH_SETTINGS, SUDO_SETTINGS
+from installer.apps.constants import GITHUB_TOKEN, PATH_BINARIES, PERMISSIONS
 
 if TYPE_CHECKING:
+    from utilities.pydantic import SecretLike
     from utilities.types import LoggerLike, PathLike, Retry
 
 
-def convert_token(x: str | None, /) -> Secret[str] | None:
-    match x:
-        case Secret():
-            match x.get_secret_value():
-                case None:
-                    return None
-                case str() as inner:
-                    y = inner.strip("\n")
-                    return None if y == "" else Secret(y)
-                case never:
-                    assert_never(never)
-        case str():
-            y = x.strip("\n")
-            return None if y == "" else Secret(y)
-        case None:
-            return None
-        case never:
-            assert_never(never)
-
-
-##
-
-
-def ensure_line(path: PathLike, text: str, /) -> None:
+def ensure_line(
+    path: PathLike, text: str, /, *, logger: LoggerLike | None = None
+) -> None:
     try:
         contents = read_text(path)
     except ReadTextError:
         write_text(path, text)
-        LOGGER.info("Wrote %r to %r", text, str(path))
+        log_info(logger, "Wrote %r to %r", text, str(path))
         return
     if text not in contents:
         with Path(path).open(mode="a") as fh:
             _ = fh.write(f"\n\n{text}")
-        LOGGER.info("Appended %r to %r", text, str(path))
+        log_info(logger, "Appended %r to %r", text, str(path))
 
 
 ##
@@ -58,10 +44,10 @@ def ensure_line(path: PathLike, text: str, /) -> None:
 
 def get_home(
     *,
-    ssh: str | None = SSH_SETTINGS.ssh,
-    batch_mode: bool = BATCH_SETTINGS.batch_mode,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    ssh: str | None = None,
+    batch_mode: bool = False,
+    retry: Retry | None = None,
+    logger: LoggerLike | None = None,
 ) -> Path:
     if ssh is None:
         return HOME
@@ -97,17 +83,40 @@ def ssh_install(
     cmd: str,
     /,
     *args: str,
-    sudo: bool = SUDO_SETTINGS.sudo,
-    etc: bool = SHELL_CONFIG_SETTINGS.etc,
-    retry: Retry | None = SSH_SETTINGS.retry,
-    logger: LoggerLike | None = SSH_SETTINGS.logger,
+    custom_shell_config: bool = False,
+    etc: bool = False,
+    group: str | int | None = None,
+    owner: str | int | None = None,
+    path_binaries: PathLike = PATH_BINARIES,
+    perms: PermissionsLike = PERMISSIONS,
+    sudo: bool = False,
+    token: SecretLike | None = GITHUB_TOKEN,
+    user: str | None = None,
+    retry: Retry | None = None,
+    logger: LoggerLike | None = None,
 ) -> None:
     user, hostname = split_ssh(ssh)
     parts: list[str] = []
-    if sudo:
-        parts.append("--sudo")
+    if custom_shell_config:
+        parts.append("--custom-shell-config")
     if etc:
         parts.append("--etc")
+    if group is not None:
+        parts.extend(["--group", str(group)])
+    if owner is not None:
+        parts.extend(["--owner", str(owner)])
+    parts.extend([
+        "--path-binaries",
+        str(path_binaries),
+        "--perms",
+        str(Permissions.new(perms)),
+    ])
+    if sudo:
+        parts.append("--sudo")
+    if token is not None:
+        parts.extend(["--token", extract_secret(token)])
+    if user is not None:
+        parts.extend(["--user", user])
     utilities.subprocess.ssh(
         user,
         hostname,
@@ -119,4 +128,4 @@ def ssh_install(
     )
 
 
-__all__ = ["convert_token", "ensure_line", "get_home", "split_ssh", "ssh_install"]
+__all__ = ["ensure_line", "get_home", "split_ssh", "ssh_install"]

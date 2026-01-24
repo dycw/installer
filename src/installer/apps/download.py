@@ -10,28 +10,30 @@ from requests import get
 from utilities.core import (
     OneNonUniqueError,
     TemporaryDirectory,
+    log_info,
     one,
     yield_bz2,
     yield_gzip,
     yield_lzma,
 )
 from utilities.inflect import counted_noun
-from utilities.tabulate import func_param_desc
+from utilities.pydantic import extract_secret
 
-from installer import __version__
 from installer.apps.constants import (
     C_STD_LIB_GROUP,
+    CHUNK_SIZE,
+    GITHUB_TOKEN,
     MACHINE_TYPE_GROUP,
     SYSTEM_NAME_GROUP,
+    TIMEOUT,
 )
-from installer.apps.settings import DOWNLOAD_SETTINGS, MATCH_SETTINGS, TAG_SETTINGS
-from installer.logging import LOGGER
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
 
-    from typed_settings import Secret
+    from utilities.pydantic import SecretLike
+    from utilities.types import LoggerLike, MaybeSequenceStr
 
 
 @contextmanager
@@ -40,49 +42,35 @@ def yield_asset(
     repo: str,
     /,
     *,
-    tag: str | None = TAG_SETTINGS.tag,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    match_system: bool = MATCH_SETTINGS.match_system,
-    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
-    match_machine: bool = MATCH_SETTINGS.match_machine,
-    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
-    not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    logger: LoggerLike | None = None,
+    tag: str | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    match_system: bool = False,
+    match_c_std_lib: bool = False,
+    match_machine: bool = False,
+    not_matches: MaybeSequenceStr | None = None,
+    not_endswith: MaybeSequenceStr | None = None,
 ) -> Iterator[Path]:
     """Yield a GitHub asset."""
-    LOGGER.info(
-        func_param_desc(
-            yield_asset,
-            __version__,
-            f"{owner=}",
-            f"{repo=}",
-            f"{tag=}",
-            f"{token=}",
-            f"{match_system=}",
-            f"{match_c_std_lib=}",
-            f"{match_machine=}",
-            f"{not_matches=}",
-            f"{not_endswith=}",
-            f"{timeout=}",
-            f"{chunk_size=}",
-        )
-    )
-    gh = Github(auth=None if token is None else Token(token.get_secret_value()))
+    log_info(logger, "Yielding asset...")
+    gh = Github(auth=None if token is None else Token(extract_secret(token)))
     repository = gh.get_repo(f"{owner}/{repo}")
     if tag is None:
         release = repository.get_latest_release()
     else:
         release = next(r for r in repository.get_releases() if search(tag, r.tag_name))
     assets = list(release.get_assets())
-    LOGGER.info("Got %s: %s", counted_noun(assets, "asset"), [a.name for a in assets])
+    log_info(
+        logger, "Got %s: %s", counted_noun(assets, "asset"), [a.name for a in assets]
+    )
     if match_system:
         assets = [
             a
             for a in assets
             if any(search(c, a.name, flags=IGNORECASE) for c in SYSTEM_NAME_GROUP)
         ]
-        LOGGER.info(
+        log_info(
+            logger,
             "Post system name group %s, got %s: %s",
             SYSTEM_NAME_GROUP,
             counted_noun(assets, "asset"),
@@ -94,7 +82,8 @@ def yield_asset(
             for a in assets
             if any(search(c, a.name, flags=IGNORECASE) for c in C_STD_LIB_GROUP)
         ]
-        LOGGER.info(
+        log_info(
+            logger,
             "Post C standard library group %s, got %s: %s",
             C_STD_LIB_GROUP,
             counted_noun(assets, "asset"),
@@ -106,7 +95,8 @@ def yield_asset(
             for a in assets
             if any(search(m, a.name, flags=IGNORECASE) for m in MACHINE_TYPE_GROUP)
         ]
-        LOGGER.info(
+        log_info(
+            logger,
             "Post machine type group %s, got %s: %s",
             MACHINE_TYPE_GROUP,
             counted_noun(assets, "asset"),
@@ -116,7 +106,8 @@ def yield_asset(
         assets = [
             a for a in assets if all(search(p, a.name) is None for p in not_matches)
         ]
-        LOGGER.info(
+        log_info(
+            logger,
             "Post asset name patterns, got %s: %s",
             counted_noun(assets, "asset"),
             [a.name for a in assets],
@@ -125,7 +116,8 @@ def yield_asset(
         assets = [
             a for a in assets if all(not a.name.endswith(e) for e in not_endswith)
         ]
-        LOGGER.info(
+        log_info(
+            logger,
             "Post asset name endings, got %s: %s",
             counted_noun(assets, "asset"),
             [a.name for a in assets],
@@ -140,16 +132,16 @@ def yield_asset(
         ) from None
     headers: dict[str, Any] = {}
     if token is not None:
-        headers["Authorization"] = f"Bearer {token.get_secret_value()}"
+        headers["Authorization"] = f"Bearer {extract_secret(token)}"
     with TemporaryDirectory() as temp_dir:
         with get(
-            asset.browser_download_url, headers=headers, timeout=timeout, stream=True
+            asset.browser_download_url, headers=headers, timeout=TIMEOUT, stream=True
         ) as resp:
             resp.raise_for_status()
             dest = temp_dir / asset.name
             with dest.open(mode="wb") as fh:
-                fh.writelines(resp.iter_content(chunk_size=chunk_size))
-        LOGGER.info("Yielding %r...", str(dest))
+                fh.writelines(resp.iter_content(chunk_size=CHUNK_SIZE))
+        log_info(logger, "Yielding %r...", str(dest))
         yield dest
 
 
@@ -162,37 +154,21 @@ def yield_bz2_asset(
     repo: str,
     /,
     *,
-    tag: str | None = TAG_SETTINGS.tag,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    match_system: bool = MATCH_SETTINGS.match_system,
-    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
-    match_machine: bool = MATCH_SETTINGS.match_machine,
-    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
-    not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    logger: LoggerLike | None = None,
+    tag: str | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    match_system: bool = False,
+    match_c_std_lib: bool = False,
+    match_machine: bool = False,
+    not_matches: MaybeSequenceStr | None = None,
+    not_endswith: MaybeSequenceStr | None = None,
 ) -> Iterator[Path]:
-    LOGGER.info(
-        func_param_desc(
-            yield_bz2_asset,
-            __version__,
-            f"{owner=}",
-            f"{repo=}",
-            f"{tag=}",
-            f"{token=}",
-            f"{match_system=}",
-            f"{match_c_std_lib=}",
-            f"{match_machine=}",
-            f"{not_matches=}",
-            f"{not_endswith=}",
-            f"{timeout=}",
-            f"{chunk_size=}",
-        )
-    )
+    log_info(logger, "Yielding BZ2 asset...")
     with (
         yield_asset(
             owner,
             repo,
+            logger=logger,
             tag=tag,
             token=token,
             match_system=match_system,
@@ -200,8 +176,6 @@ def yield_bz2_asset(
             match_machine=match_machine,
             not_matches=not_matches,
             not_endswith=not_endswith,
-            timeout=timeout,
-            chunk_size=chunk_size,
         ) as temp1,
         yield_bz2(temp1) as temp2,
     ):
@@ -217,37 +191,21 @@ def yield_gzip_asset(
     repo: str,
     /,
     *,
-    tag: str | None = TAG_SETTINGS.tag,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    match_system: bool = MATCH_SETTINGS.match_system,
-    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
-    match_machine: bool = MATCH_SETTINGS.match_machine,
-    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
-    not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    logger: LoggerLike | None = None,
+    tag: str | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    match_system: bool = False,
+    match_c_std_lib: bool = False,
+    match_machine: bool = False,
+    not_matches: MaybeSequenceStr | None = None,
+    not_endswith: MaybeSequenceStr | None = None,
 ) -> Iterator[Path]:
-    LOGGER.info(
-        func_param_desc(
-            yield_gzip_asset,
-            __version__,
-            f"{owner=}",
-            f"{repo=}",
-            f"{tag=}",
-            f"{token=}",
-            f"{match_system=}",
-            f"{match_c_std_lib=}",
-            f"{match_machine=}",
-            f"{not_matches=}",
-            f"{not_endswith=}",
-            f"{timeout=}",
-            f"{chunk_size=}",
-        )
-    )
+    log_info(logger, "Yielding Gzip asset...")
     with (
         yield_asset(
             owner,
             repo,
+            logger=logger,
             tag=tag,
             token=token,
             match_system=match_system,
@@ -255,8 +213,6 @@ def yield_gzip_asset(
             match_machine=match_machine,
             not_matches=not_matches,
             not_endswith=not_endswith,
-            timeout=timeout,
-            chunk_size=chunk_size,
         ) as temp1,
         yield_gzip(temp1) as temp2,
     ):
@@ -272,37 +228,21 @@ def yield_lzma_asset(
     repo: str,
     /,
     *,
-    tag: str | None = TAG_SETTINGS.tag,
-    token: Secret[str] | None = DOWNLOAD_SETTINGS.token,
-    match_system: bool = MATCH_SETTINGS.match_system,
-    match_c_std_lib: bool = MATCH_SETTINGS.match_c_std_lib,
-    match_machine: bool = MATCH_SETTINGS.match_machine,
-    not_matches: list[str] | None = MATCH_SETTINGS.not_matches,
-    not_endswith: list[str] | None = MATCH_SETTINGS.not_endswith,
-    timeout: int = DOWNLOAD_SETTINGS.timeout,
-    chunk_size: int = DOWNLOAD_SETTINGS.chunk_size,
+    logger: LoggerLike | None = None,
+    tag: str | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    match_system: bool = False,
+    match_c_std_lib: bool = False,
+    match_machine: bool = False,
+    not_matches: MaybeSequenceStr | None = None,
+    not_endswith: MaybeSequenceStr | None = None,
 ) -> Iterator[Path]:
-    LOGGER.info(
-        func_param_desc(
-            yield_lzma_asset,
-            __version__,
-            f"{owner=}",
-            f"{repo=}",
-            f"{tag=}",
-            f"{token=}",
-            f"{match_system=}",
-            f"{match_c_std_lib=}",
-            f"{match_machine=}",
-            f"{not_matches=}",
-            f"{not_endswith=}",
-            f"{timeout=}",
-            f"{chunk_size=}",
-        )
-    )
+    log_info(logger, "Yielding LZMA asset...")
     with (
         yield_asset(
             owner,
             repo,
+            logger=logger,
             tag=tag,
             token=token,
             match_system=match_system,
@@ -310,8 +250,6 @@ def yield_lzma_asset(
             match_machine=match_machine,
             not_matches=not_matches,
             not_endswith=not_endswith,
-            timeout=timeout,
-            chunk_size=chunk_size,
         ) as temp1,
         yield_lzma(temp1) as temp2,
     ):
