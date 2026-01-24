@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
 
-DOWNLOAD_TIMEOUT = 60
+TIMEOUT = 60
 CHUNK_SIZE = 8196
 GITHUB_TOKEN = Secret(get_env("GITHUB_TOKEN")) if has_env("GITHUB_TOKEN") else None
 PATH_BINARIES = Path("/usr/local/bin/")
@@ -104,7 +104,6 @@ MACHINE_TYPE_GROUP = _get_machine_type_group()
 __all__ = [
     "CHUNK_SIZE",
     "C_STD_LIB_GROUP",
-    "DOWNLOAD_TIMEOUT",
     "GITHUB_TOKEN",
     "MACHINE_TYPE_GROUP",
     "PATH_BINARIES",
@@ -112,4 +111,5 @@ __all__ = [
     "SHELL",
     "SYSTEM_NAME",
     "SYSTEM_NAME_GROUP",
+    "TIMEOUT",
 ]
