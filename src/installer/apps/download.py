@@ -17,6 +17,7 @@ from utilities.core import (
     yield_lzma,
 )
 from utilities.inflect import counted_noun
+from utilities.pydantic import extract_secret
 
 from installer.apps.constants import (
     C_STD_LIB_GROUP,
@@ -52,7 +53,7 @@ def yield_asset(
 ) -> Iterator[Path]:
     """Yield a GitHub asset."""
     log_info(logger, "Yielding asset...")
-    gh = Github(auth=None if token is None else Token(token.get_secret_value()))
+    gh = Github(auth=None if token is None else Token(extract_secret(token)))
     repository = gh.get_repo(f"{owner}/{repo}")
     if tag is None:
         release = repository.get_latest_release()
@@ -131,7 +132,7 @@ def yield_asset(
         ) from None
     headers: dict[str, Any] = {}
     if token is not None:
-        headers["Authorization"] = f"Bearer {token.get_secret_value()}"
+        headers["Authorization"] = f"Bearer {extract_secret(token)}"
     with TemporaryDirectory() as temp_dir:
         with get(
             asset.browser_download_url, headers=headers, timeout=TIMEOUT, stream=True

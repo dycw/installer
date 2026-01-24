@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from pytest import CaptureFixture
+    from utilities.pydantic import SecretLike
 
 
 class TestSetupAge:
