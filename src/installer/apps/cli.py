@@ -48,6 +48,7 @@ from installer.settings import LOADER, SSHSettings, SudoSettings
 
 
 @argument("package", type=str)
+@click_options(SSHSettings, [LOADER], show_envvars_in_help=True, argname="ssh")
 @click_options(SudoSettings, [LOADER], show_envvars_in_help=True, argname="sudo")
 def apt_package_sub_cmd(*, package: str, ssh: SSHSettings, sudo: SudoSettings) -> None:
     if is_pytest():
