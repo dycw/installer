@@ -12,7 +12,6 @@ from utilities.core import (
     log_info,
     normalize_multi_line_str,
     one,
-    repr_str,
     which,
 )
 from utilities.logging import to_logger
@@ -782,6 +781,7 @@ def setup_starship(
 
 def setup_taplo(
     *,
+    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -790,7 +790,7 @@ def setup_taplo(
     group: str | int | None = None,
 ) -> None:
     """Setup 'taplo'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    log_info(logger, "Setting up 'taplo'...")
     with yield_gzip_asset(
         "tamasfe", "taplo", token=token, match_system=True, match_machine=True
     ) as src:
@@ -818,6 +818,7 @@ def setup_rsync(
 
 def setup_ruff(
     *,
+    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -826,7 +827,7 @@ def setup_ruff(
     group: str | int | None = None,
 ) -> None:
     """Setup 'ruff'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    log_info(logger, "Setting up 'ruff'...")
     with yield_gzip_asset(
         "astral-sh",
         "ruff",
@@ -846,6 +847,7 @@ def setup_ruff(
 
 def setup_sd(
     *,
+    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -854,7 +856,7 @@ def setup_sd(
     group: str | int | None = None,
 ) -> None:
     """Setup 'sd'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    log_info(logger, "Setting up 'sd'...")
     with yield_gzip_asset(
         "chmln",
         "sd",
@@ -873,6 +875,7 @@ def setup_sd(
 
 def setup_shellcheck(
     *,
+    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -881,7 +884,7 @@ def setup_shellcheck(
     group: str | int | None = None,
 ) -> None:
     """Setup 'shellcheck'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    log_info(logger, "Setting up 'shellcheck'...")
     with yield_gzip_asset(
         "koalaman",
         "shellcheck",
@@ -900,6 +903,7 @@ def setup_shellcheck(
 
 def setup_shfmt(
     *,
+    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -908,7 +912,7 @@ def setup_shfmt(
     group: str | int | None = None,
 ) -> None:
     """Setup 'shfmt'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    log_info(logger, "Setting up 'shfmt'...")
     dest = Path(path_binaries, "shfmt")
     setup_asset(
         "mvdan",
@@ -929,6 +933,7 @@ def setup_shfmt(
 
 def setup_sops(
     *,
+    logger: LoggerLike | None = None,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -937,10 +942,9 @@ def setup_sops(
     owner: str | int | None = None,
     group: str | int | None = None,
     retry: Retry | None = None,
-    logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'sops'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    log_info(logger, "Setting up 'sops'...")
     if ssh is None:
         dest = Path(path_binaries, "sops")
         setup_asset(
@@ -957,7 +961,18 @@ def setup_sops(
             group=group,
         )
     else:
-        ssh_install(ssh, "sops", retry=retry, logger=logger)
+        ssh_install(
+            ssh,
+            "sops",
+            group=group,
+            owner=owner,
+            path_binaries=path_binaries,
+            perms=perms,
+            sudo=sudo,
+            token=token,
+            retry=retry,
+            logger=logger,
+        )
 
 
 ##
@@ -965,6 +980,7 @@ def setup_sops(
 
 def setup_uv(
     *,
+    logger: LoggerLike | None = None,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -973,10 +989,9 @@ def setup_uv(
     owner: str | int | None = None,
     group: str | int | None = None,
     retry: Retry | None = None,
-    logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'uv'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    log_info(logger, "Setting up 'uv'...")
     if ssh is None:
         with yield_gzip_asset(
             "astral-sh",
@@ -1020,6 +1035,7 @@ def setup_uv(
 
 def setup_watchexec(
     *,
+    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -1028,7 +1044,7 @@ def setup_watchexec(
     group: str | int | None = None,
 ) -> None:
     """Setup 'watchexec'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    log_info(logger, "Setting up 'watchexec'...")
     with yield_lzma_asset(
         "watchexec",
         "watchexec",
@@ -1048,6 +1064,7 @@ def setup_watchexec(
 
 def setup_yq(
     *,
+    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -1056,7 +1073,7 @@ def setup_yq(
     group: str | int | None = None,
 ) -> None:
     """Setup 'yq'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    log_info(logger, "Setting up 'yq'...")
     dest = Path(path_binaries, "yq")
     setup_asset(
         "mikefarah",
@@ -1078,6 +1095,7 @@ def setup_yq(
 
 def setup_zoxide(
     *,
+    logger: LoggerLike | None = None,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -1087,11 +1105,10 @@ def setup_zoxide(
     group: str | int | None = None,
     etc: bool = False,
     retry: Retry | None = None,
-    logger: LoggerLike | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'zoxide'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    log_info(logger, "Setting up 'zoxide'...")
     if ssh is None:
         with yield_gzip_asset(
             "ajeetdsouza", "zoxide", token=token, match_system=True, match_machine=True
@@ -1106,7 +1123,19 @@ def setup_zoxide(
             __root=__root,
         )
     else:
-        ssh_install(ssh, "zoxide", sudo=sudo, etc=etc, retry=retry, logger=logger)
+        ssh_install(
+            ssh,
+            "zoxide",
+            etc=etc,
+            group=group,
+            owner=owner,
+            path_binaries=path_binaries,
+            perms=perms,
+            sudo=sudo,
+            token=token,
+            retry=retry,
+            logger=logger,
+        )
 
 
 __all__ = [
