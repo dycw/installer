@@ -173,7 +173,6 @@ def setup_age(
             match_system=True,
             match_machine=True,
             not_endswith=["proof"],
-            timeout=timeout,
             chunk_size=chunk_size,
         ) as temp:
             downloads: list[Path] = []
@@ -207,7 +206,6 @@ def setup_bat(
         match_system=True,
         match_c_std_lib=True,
         match_machine=True,
-        timeout=timeout,
         chunk_size=chunk_size,
     ) as temp:
         src = temp / "bat"
@@ -237,7 +235,6 @@ def setup_bottom(
         match_c_std_lib=True,
         match_machine=True,
         not_matches=[r"\d+\.tar\.gz$"],
-        timeout=timeout,
         chunk_size=chunk_size,
     ) as temp:
         src = temp / "btm"
@@ -280,7 +277,6 @@ def setup_delta(
         match_system=True,
         match_c_std_lib=True,
         match_machine=True,
-        timeout=timeout,
         chunk_size=chunk_size,
     ) as temp:
         src = temp / "delta"
@@ -316,7 +312,6 @@ def setup_direnv(
             token=token,
             match_system=True,
             match_machine=True,
-            timeout=timeout,
             chunk_size=chunk_size,
             sudo=sudo,
             perms=perms,
@@ -446,7 +441,6 @@ def setup_dust(
         match_system=True,
         match_c_std_lib=True,
         match_machine=match_machine,
-        timeout=timeout,
         chunk_size=chunk_size,
     ) as temp:
         src = temp / "dust"
@@ -492,7 +486,6 @@ def setup_eza(
         match_c_std_lib=match_c_std_lib,
         match_machine=True,
         not_endswith=not_endswith,
-        timeout=timeout,
         chunk_size=chunk_size,
     ) as src:
         dest = Path(path_binaries, src.name)
@@ -520,7 +513,6 @@ def setup_fd(
         match_system=True,
         match_c_std_lib=True,
         match_machine=True,
-        timeout=timeout,
         chunk_size=chunk_size,
     ) as temp:
         src = temp / "fd"
@@ -554,7 +546,6 @@ def setup_fzf(
             token=token,
             match_system=True,
             match_machine=True,
-            timeout=timeout,
             chunk_size=chunk_size,
         ) as src:
             dest = Path(path_binaries, src.name)
@@ -607,7 +598,6 @@ def setup_jq(
         match_system=True,
         match_machine=True,
         not_endswith=["linux64"],
-        timeout=timeout,
         chunk_size=chunk_size,
         sudo=sudo,
         perms=perms,
@@ -640,7 +630,6 @@ def setup_just(
             token=token,
             match_system=True,
             match_machine=True,
-            timeout=timeout,
             chunk_size=chunk_size,
         ) as temp:
             src = temp / "just"
@@ -671,7 +660,6 @@ def setup_neovim(
         match_system=True,
         match_machine=True,
         not_endswith=["appimage", "zsync"],
-        timeout=timeout,
         chunk_size=chunk_size,
     ) as temp:
         dest_dir = Path(path_binaries, "nvim-dir")
@@ -704,7 +692,6 @@ def setup_restic(
             token=token,
             match_system=True,
             match_machine=True,
-            timeout=timeout,
             chunk_size=chunk_size,
         ) as src:
             dest = Path(path_binaries, "restic")
@@ -734,7 +721,6 @@ def setup_ripgrep(
         match_system=True,
         match_machine=True,
         not_endswith=["sha256"],
-        timeout=timeout,
         chunk_size=chunk_size,
     ) as temp:
         src = temp / "rg"
@@ -770,7 +756,6 @@ def setup_starship(
             match_c_std_lib=True,
             match_machine=True,
             not_endswith=["sha256"],
-            timeout=timeout,
             chunk_size=chunk_size,
         ) as src:
             dest = Path(path_binaries, src.name)
@@ -805,7 +790,6 @@ def setup_taplo(
         token=token,
         match_system=True,
         match_machine=True,
-        timeout=timeout,
         chunk_size=chunk_size,
     ) as src:
         dest = Path(path_binaries, "taplo")
@@ -848,7 +832,6 @@ def setup_ruff(
         match_c_std_lib=True,
         match_machine=True,
         not_endswith=["sha256"],
-        timeout=timeout,
         chunk_size=chunk_size,
     ) as temp:
         src = temp / "ruff"
@@ -877,7 +860,6 @@ def setup_sd(
         match_system=True,
         match_c_std_lib=True,
         match_machine=True,
-        timeout=timeout,
         chunk_size=chunk_size,
     ) as temp:
         src = temp / "sd"
@@ -906,7 +888,6 @@ def setup_shellcheck(
         match_system=True,
         match_machine=True,
         not_endswith=["tar.xz"],
-        timeout=timeout,
         chunk_size=chunk_size,
     ) as temp:
         src = temp / "shellcheck"
@@ -936,7 +917,6 @@ def setup_shfmt(
         token=token,
         match_system=True,
         match_machine=True,
-        timeout=timeout,
         chunk_size=chunk_size,
         sudo=sudo,
         perms=perms,
@@ -972,7 +952,6 @@ def setup_sops(
             match_system=True,
             match_machine=True,
             not_endswith=["json"],
-            timeout=timeout,
             chunk_size=chunk_size,
             sudo=sudo,
             perms=perms,
@@ -1009,7 +988,6 @@ def setup_uv(
             match_c_std_lib=True,
             match_machine=True,
             not_endswith=["sha256"],
-            timeout=timeout,
             chunk_size=chunk_size,
         ) as temp:
             src = temp / "uv"
@@ -1063,7 +1041,6 @@ def setup_watchexec(
         match_c_std_lib=True,
         match_machine=True,
         not_endswith=["b3", "deb", "rpm", "sha256", "sha512"],
-        timeout=timeout,
         chunk_size=chunk_size,
     ) as temp:
         src = temp / "watchexec"
@@ -1094,7 +1071,6 @@ def setup_yq(
         match_system=True,
         match_machine=True,
         not_endswith=["tar.gz"],
-        timeout=timeout,
         chunk_size=chunk_size,
         sudo=sudo,
         perms=perms,
@@ -1112,7 +1088,6 @@ def setup_zoxide(
     ssh: str | None = None,
     token: Secret[str] | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
-    a2path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike | None = None,
     owner: str | int | None = None,
@@ -1130,7 +1105,6 @@ def setup_zoxide(
             token=token,
             match_system=True,
             match_machine=True,
-            timeout=timeout,
             chunk_size=chunk_size,
         ) as temp:
             src = temp / "zoxide"
