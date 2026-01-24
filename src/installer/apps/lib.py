@@ -304,7 +304,7 @@ def setup_direnv(
             f'eval "$(direnv hook {SHELL})"',
             "direnv hook fish | source",
             etc="direnv" if etc else None,
-            __root=__root,
+            home=__root,
         )
     else:
         ssh_install(
@@ -540,7 +540,7 @@ def setup_fzf(
             "fzf --fish | source",
             etc="fzf" if etc else None,
             zsh="source <(fzf --zsh)",
-            __root=__root,
+            home=__root,
         )
     else:
         ssh_install(
@@ -950,7 +950,7 @@ def setup_starship(
                 f'eval "$(starship init {SHELL})"',
                 "starship init fish | source",
                 etc="starship" if etc else None,
-                __root=__root,
+                home=__root,
             )
     else:
         ssh_install(
@@ -1136,7 +1136,7 @@ def setup_zoxide(
             f'eval "$(fzf --{SHELL})"',
             "zoxide init fish | source",
             etc="zoxide" if etc else None,
-            __root=__root,
+            home=__root,
         )
     else:
         ssh_install(
