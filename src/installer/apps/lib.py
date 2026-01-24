@@ -593,6 +593,7 @@ def setup_jq(
 
 def setup_just(
     *,
+    logger: LoggerLike | None = None,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -601,10 +602,9 @@ def setup_just(
     owner: str | int | None = None,
     group: str | int | None = None,
     retry: Retry | None = None,
-    logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'just'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    log_info(logger, "Setting up 'just'...")
     if ssh is None:
         with yield_gzip_asset(
             "casey", "just", token=token, match_system=True, match_machine=True
@@ -613,7 +613,18 @@ def setup_just(
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
     else:
-        ssh_install(ssh, "just", retry=retry, logger=logger)
+        ssh_install(
+            ssh,
+            "just",
+            group=group,
+            owner=owner,
+            path_binaries=path_binaries,
+            perms=perms,
+            sudo=sudo,
+            token=token,
+            retry=retry,
+            logger=logger,
+        )
 
 
 ##
@@ -621,6 +632,7 @@ def setup_just(
 
 def setup_neovim(
     *,
+    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -629,7 +641,7 @@ def setup_neovim(
     group: str | int | None = None,
 ) -> None:
     """Setup 'neovim'."""
-    log_info(logger, "Downloaded to %r", str(dest_bin))
+    log_info(logger, "Setting up 'neovim'...")
     with yield_gzip_asset(
         "neovim",
         "neovim",
@@ -649,6 +661,7 @@ def setup_neovim(
 
 def setup_restic(
     *,
+    logger: LoggerLike | None = None,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -657,10 +670,9 @@ def setup_restic(
     owner: str | int | None = None,
     group: str | int | None = None,
     retry: Retry | None = None,
-    logger: LoggerLike | None = None,
 ) -> None:
     """Setup 'restic'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    log_info(logger, "Setting up 'restic'...")
     if ssh is None:
         with yield_bz2_asset(
             "restic", "restic", token=token, match_system=True, match_machine=True
@@ -668,7 +680,17 @@ def setup_restic(
             dest = Path(path_binaries, "restic")
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
     else:
-        ssh_install(ssh, "restic", retry=retry, logger=logger)
+        ssh_install(
+            ssh,
+            "restic",
+            group=group,
+            owner=owner,
+            path_binaries=path_binaries,
+            sudo=sudo,
+            token=token,
+            retry=retry,
+            logger=logger,
+        )
 
 
 ##
@@ -676,6 +698,7 @@ def setup_restic(
 
 def setup_ripgrep(
     *,
+    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -684,7 +707,7 @@ def setup_ripgrep(
     group: str | int | None = None,
 ) -> None:
     """Setup 'ripgrep'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    log_info(logger, "Setting up 'ripgrep'...")
     with yield_gzip_asset(
         "burntsushi",
         "ripgrep",
@@ -703,6 +726,7 @@ def setup_ripgrep(
 
 def setup_starship(
     *,
+    logger: LoggerLike | None = None,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -710,13 +734,13 @@ def setup_starship(
     perms: PermissionsLike | None = None,
     owner: str | int | None = None,
     group: str | int | None = None,
+    custom_shell_config: bool = False,
     etc: bool = False,
     retry: Retry | None = None,
-    logger: LoggerLike | None = None,
     __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Setup 'starship'."""
-    log_info(logger, "Downloaded to %r", str(dest))
+    log_info(logger, "Setting up 'starship'...")
     if ssh is None:
         with yield_gzip_asset(
             "starship",
@@ -729,14 +753,28 @@ def setup_starship(
         ) as src:
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        setup_shell_config(
-            f'eval "$(starship init {SHELL})"',
-            "starship init fish | source",
-            etc="starship" if etc else None,
-            __root=__root,
-        )
+        if not custom_shell_config:
+            setup_shell_config(
+                f'eval "$(starship init {SHELL})"',
+                "starship init fish | source",
+                etc="starship" if etc else None,
+                __root=__root,
+            )
     else:
-        ssh_install(ssh, "starship", sudo=sudo, etc=etc, retry=retry, logger=logger)
+        ssh_install(
+            ssh,
+            "starship",
+            custom_shell_config=custom_shell_config,
+            etc=etc,
+            group=group,
+            owner=owner,
+            path_binaries=path_binaries,
+            perms=perms,
+            sudo=sudo,
+            token=token,
+            retry=retry,
+            logger=logger,
+        )
 
 
 ##

@@ -83,6 +83,7 @@ def ssh_install(
     cmd: str,
     /,
     *args: str,
+    custom_shell_config: bool = False,
     etc: bool = False,
     group: str | int | None = None,
     owner: str | int | None = None,
@@ -96,6 +97,8 @@ def ssh_install(
 ) -> None:
     user, hostname = split_ssh(ssh)
     parts: list[str] = []
+    if custom_shell_config:
+        parts.append("--custom-shell-config")
     if etc:
         parts.append("--etc")
     if group is not None:
