@@ -733,84 +733,6 @@ def setup_ripgrep(
 ##
 
 
-def setup_starship(
-    *,
-    logger: LoggerLike | None = None,
-    ssh: str | None = None,
-    token: SecretLike | None = GITHUB_TOKEN,
-    path_binaries: PathLike = PATH_BINARIES,
-    sudo: bool = False,
-    perms: PermissionsLike | None = None,
-    owner: str | int | None = None,
-    group: str | int | None = None,
-    custom_shell_config: bool = False,
-    etc: bool = False,
-    retry: Retry | None = None,
-    __root: PathLike = FILE_SYSTEM_ROOT,
-) -> None:
-    """Setup 'starship'."""
-    log_info(logger, "Setting up 'starship'...")
-    if ssh is None:
-        with yield_gzip_asset(
-            "starship",
-            "starship",
-            token=token,
-            match_system=True,
-            match_c_std_lib=True,
-            match_machine=True,
-            not_endswith=["sha256"],
-        ) as src:
-            dest = Path(path_binaries, src.name)
-            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        if not custom_shell_config:
-            setup_shell_config(
-                f'eval "$(starship init {SHELL})"',
-                "starship init fish | source",
-                etc="starship" if etc else None,
-                __root=__root,
-            )
-    else:
-        ssh_install(
-            ssh,
-            "starship",
-            custom_shell_config=custom_shell_config,
-            etc=etc,
-            group=group,
-            owner=owner,
-            path_binaries=path_binaries,
-            perms=perms,
-            sudo=sudo,
-            token=token,
-            retry=retry,
-            logger=logger,
-        )
-
-
-##
-
-
-def setup_taplo(
-    *,
-    logger: LoggerLike | None = None,
-    token: SecretLike | None = GITHUB_TOKEN,
-    path_binaries: PathLike = PATH_BINARIES,
-    sudo: bool = False,
-    perms: PermissionsLike | None = None,
-    owner: str | int | None = None,
-    group: str | int | None = None,
-) -> None:
-    """Setup 'taplo'."""
-    log_info(logger, "Setting up 'taplo'...")
-    with yield_gzip_asset(
-        "tamasfe", "taplo", token=token, match_system=True, match_machine=True
-    ) as src:
-        dest = Path(path_binaries, "taplo")
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-
-
-##
-
-
 def setup_rsync(
     *,
     logger: LoggerLike | None = None,
@@ -983,6 +905,84 @@ def setup_sops(
             retry=retry,
             logger=logger,
         )
+
+
+##
+
+
+def setup_starship(
+    *,
+    logger: LoggerLike | None = None,
+    ssh: str | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike | None = None,
+    owner: str | int | None = None,
+    group: str | int | None = None,
+    custom_shell_config: bool = False,
+    etc: bool = False,
+    retry: Retry | None = None,
+    __root: PathLike = FILE_SYSTEM_ROOT,
+) -> None:
+    """Setup 'starship'."""
+    log_info(logger, "Setting up 'starship'...")
+    if ssh is None:
+        with yield_gzip_asset(
+            "starship",
+            "starship",
+            token=token,
+            match_system=True,
+            match_c_std_lib=True,
+            match_machine=True,
+            not_endswith=["sha256"],
+        ) as src:
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+        if not custom_shell_config:
+            setup_shell_config(
+                f'eval "$(starship init {SHELL})"',
+                "starship init fish | source",
+                etc="starship" if etc else None,
+                __root=__root,
+            )
+    else:
+        ssh_install(
+            ssh,
+            "starship",
+            custom_shell_config=custom_shell_config,
+            etc=etc,
+            group=group,
+            owner=owner,
+            path_binaries=path_binaries,
+            perms=perms,
+            sudo=sudo,
+            token=token,
+            retry=retry,
+            logger=logger,
+        )
+
+
+##
+
+
+def setup_taplo(
+    *,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
+    perms: PermissionsLike | None = None,
+    owner: str | int | None = None,
+    group: str | int | None = None,
+) -> None:
+    """Setup 'taplo'."""
+    log_info(logger, "Setting up 'taplo'...")
+    with yield_gzip_asset(
+        "tamasfe", "taplo", token=token, match_system=True, match_machine=True
+    ) as src:
+        dest = Path(path_binaries, "taplo")
+        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
 
 ##
