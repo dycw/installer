@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
+import click
 from click import argument, option
 from utilities.core import is_pytest
 from utilities.logging import basic_config
 
 from installer.click import logger_option, retry_option, ssh_option, sudo_option
+from installer.configs.click import home_option
+from installer.configs.constants import FILE_SYSTEM_ROOT
 from installer.configs.lib import (
     setup_authorized_keys,
     setup_ssh_config,
@@ -14,11 +18,12 @@ from installer.configs.lib import (
 )
 
 if TYPE_CHECKING:
-    from utilities.types import LoggerLike, Retry
+    from utilities.types import LoggerLike, PathLike, Retry
 
 
 @argument("keys", type=str, nargs=-1)
 @logger_option
+@home_option
 @ssh_option
 @option("--batch-mode", is_flag=True, default=None, help="SSH batch mode")
 @retry_option
@@ -26,6 +31,7 @@ def setup_authorized_keys_sub_cmd(
     *,
     keys: tuple[str, ...],
     logger: LoggerLike,
+    home: PathLike,
     ssh: str | None,
     batch_mode: bool,
     retry: Retry | None,
@@ -34,24 +40,36 @@ def setup_authorized_keys_sub_cmd(
         return
     basic_config(obj=logger)
     setup_authorized_keys(
-        list(keys), logger=logger, ssh=ssh, batch_mode=batch_mode, retry=retry
+        list(keys),
+        logger=logger,
+        home=home,
+        ssh=ssh,
+        batch_mode=batch_mode,
+        retry=retry,
     )
 
 
 @logger_option
+@home_option
 @ssh_option
 @retry_option
 def setup_ssh_config_sub_cmd(
-    *, logger: LoggerLike, ssh: str | None, retry: Retry | None
+    *, logger: LoggerLike, home: PathLike, ssh: str | None, retry: Retry | None
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=logger)
-    setup_ssh_config(logger=logger, ssh=ssh, retry=retry)
+    setup_ssh_config(logger=logger, home=home, ssh=ssh, retry=retry)
 
 
 @logger_option
 @option("--permit-root-login", is_flag=True, default=False, help="Permit root login")
+@option(
+    "--root",
+    type=click.Path(path_type=Path),
+    default=FILE_SYSTEM_ROOT,
+    help="File system root",
+)
 @ssh_option
 @sudo_option
 @retry_option
@@ -59,6 +77,7 @@ def setup_sshd_sub_cmd(
     *,
     logger: LoggerLike,
     permit_root_login: bool,
+    root: PathLike,
     ssh: str | None,
     sudo: bool,
     retry: Retry | None,
@@ -69,6 +88,7 @@ def setup_sshd_sub_cmd(
     setup_sshd_config(
         logger=logger,
         permit_root_login=permit_root_login,
+        root=root,
         ssh=ssh,
         sudo=sudo,
         retry=retry,

@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import utilities.subprocess
-from utilities.constants import HOME
 from utilities.core import (
     Permissions,
     PermissionsLike,
@@ -37,34 +36,6 @@ def ensure_line(
         with Path(path).open(mode="a") as fh:
             _ = fh.write(f"\n\n{text}")
         log_info(logger, "Appended %r to %r", text, str(path))
-
-
-##
-
-
-def get_home(
-    *,
-    ssh: str | None = None,
-    batch_mode: bool = False,
-    retry: Retry | None = None,
-    logger: LoggerLike | None = None,
-) -> Path:
-    if ssh is None:
-        return HOME
-    user, hostname = split_ssh(ssh)
-    result = utilities.subprocess.ssh(
-        user,
-        hostname,
-        "getent",
-        "passwd",
-        user,
-        batch_mode=batch_mode,
-        return_=True,
-        retry=retry,
-        logger=logger,
-    )
-    _, _, _, _, _, home, _ = result.split(":")
-    return Path(home)
 
 
 ##
@@ -128,4 +99,4 @@ def ssh_install(
     )
 
 
-__all__ = ["ensure_line", "get_home", "split_ssh", "ssh_install"]
+__all__ = ["ensure_line", "split_ssh", "ssh_install"]

@@ -46,7 +46,7 @@ from installer.apps.lib import (
     setup_zoxide,
 )
 from installer.click import logger_option, retry_option, ssh_option, sudo_option
-from installer.configs.click import etc_option
+from installer.configs.click import etc_option, home_option
 
 if TYPE_CHECKING:
     from utilities.pydantic import SecretLike
@@ -242,6 +242,7 @@ def delta_sub_cmd(
 @owner_option
 @group_option
 @etc_option
+@home_option
 @retry_option
 def direnv_sub_cmd(
     *,
@@ -254,6 +255,7 @@ def direnv_sub_cmd(
     owner: str | int | None,
     group: str | int | None,
     etc: bool,
+    home: PathLike,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
@@ -269,6 +271,7 @@ def direnv_sub_cmd(
         owner=owner,
         group=group,
         etc=etc,
+        home=home,
         retry=retry,
     )
 
@@ -409,6 +412,7 @@ def fd_sub_cmd(
 @owner_option
 @group_option
 @etc_option
+@home_option
 @retry_option
 def fzf_sub_cmd(
     *,
@@ -421,6 +425,7 @@ def fzf_sub_cmd(
     owner: str | int | None,
     group: str | int | None,
     etc: bool,
+    home: PathLike,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
@@ -436,6 +441,7 @@ def fzf_sub_cmd(
         owner=owner,
         group=group,
         etc=etc,
+        home=home,
         retry=retry,
     )
 
@@ -848,6 +854,7 @@ def sops_sub_cmd(
     help="Use a custom shell config, so skip the standard one",
 )
 @etc_option
+@home_option
 @retry_option
 def starship_sub_cmd(
     *,
@@ -861,6 +868,7 @@ def starship_sub_cmd(
     group: str | int | None,
     custom_shell_config: bool,
     etc: bool,
+    home: PathLike,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
@@ -877,6 +885,7 @@ def starship_sub_cmd(
         group=group,
         custom_shell_config=custom_shell_config,
         etc=etc,
+        home=home,
         retry=retry,
     )
 
@@ -1035,6 +1044,7 @@ def yq_sub_cmd(
 @owner_option
 @group_option
 @etc_option
+@home_option
 @retry_option
 def zoxide_sub_cmd(
     *,
@@ -1047,6 +1057,7 @@ def zoxide_sub_cmd(
     owner: str | int | None,
     group: str | int | None,
     etc: bool,
+    home: PathLike,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
@@ -1062,6 +1073,7 @@ def zoxide_sub_cmd(
         owner=owner,
         group=group,
         etc=etc,
+        home=home,
         retry=retry,
     )
 

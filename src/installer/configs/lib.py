@@ -5,6 +5,7 @@ from shlex import join
 from typing import TYPE_CHECKING, assert_never
 
 import utilities.subprocess
+from utilities.constants import HOME
 from utilities.core import (
     log_info,
     normalize_multi_line_str,
@@ -14,10 +15,9 @@ from utilities.core import (
 )
 from utilities.shellingham import SHELL
 from utilities.subprocess import BASH_LS, maybe_sudo_cmd, mkdir_cmd, tee, tee_cmd
-from xdg_base_dirs import xdg_config_home
 
-from installer.constants import FILE_SYSTEM_ROOT, RELATIVE_HOME
-from installer.utilities import ensure_line, get_home, split_ssh
+from installer.configs.constants import FILE_SYSTEM_ROOT
+from installer.utilities import ensure_line, split_ssh
 
 if TYPE_CHECKING:
     from utilities.types import LoggerLike, PathLike, Retry
@@ -28,26 +28,23 @@ def setup_authorized_keys(
     /,
     *,
     logger: LoggerLike | None = None,
+    home: PathLike = HOME,
     ssh: str | None = None,
     batch_mode: bool = False,
     retry: Retry | None = None,
-    __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Set up the SSH authorized keys."""
     log_info(logger, "Setting up authorized keys...")
+    path = Path(home, ".ssh/authorized_keys")
     text = normalize_str("\n".join(keys))
     if ssh is None:
-        home = Path(__root, RELATIVE_HOME)
-        dest = home / ".ssh/authorized_keys"
-        write_text(dest, text, overwrite=True)
+        write_text(path, text, overwrite=True)
     else:
         user, hostname = split_ssh(ssh)
-        home = get_home(ssh=ssh, batch_mode=batch_mode, retry=retry, logger=logger)
-        dest = home / ".ssh/authorized_keys"
         utilities.subprocess.ssh(
             user,
             hostname,
-            *tee_cmd(dest),
+            *tee_cmd(path),
             batch_mode=batch_mode,
             input=text,
             retry=retry,
@@ -66,21 +63,22 @@ def setup_shell_config(
     logger: LoggerLike | None = None,
     etc: str | None = None,
     zsh: str | None = None,
-    __root: PathLike = FILE_SYSTEM_ROOT,
+    home: PathLike = HOME,
 ) -> None:
     log_info(logger, "Setting up shell config...")
     match etc, SHELL, zsh:
         case None, "bash" | "posix" | "sh", _:
-            home = Path(__root, RELATIVE_HOME)
-            ensure_line(home / ".bashrc", bash)
+            path = Path(home, ".bashrc")
+            ensure_line(path, bash)
         case None, "zsh", None:
-            home = Path(__root, RELATIVE_HOME)
-            ensure_line(home / ".zshrc", bash)
+            path = Path(home, ".zshrc")
+            ensure_line(path, bash)
         case None, "zsh", str():
-            home = Path(__root, RELATIVE_HOME)
-            ensure_line(home / ".zshrc", zsh)
+            path = Path(home, ".zshrc")
+            ensure_line(path, zsh)
         case None, "fish", _:
-            ensure_line(xdg_config_home() / "fish/config.fish", fish)
+            path = Path(home, ".config/fish/config.fish")
+            ensure_line(path, fish)
         case str(), "bash" | "posix" | "sh", _:
             text = normalize_multi_line_str(f"""
                 #!/usr/bin/env sh
@@ -100,24 +98,20 @@ def setup_shell_config(
 def setup_ssh_config(
     *,
     logger: LoggerLike | None = None,
+    home: PathLike = HOME,
     ssh: str | None = None,
     retry: Retry | None = None,
-    __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     """Set up the SSH config."""
     log_info(logger, "Setting up SSH config...")
+    config = Path(home, ".ssh/config")
+    config_d = Path(home, ".ssh/config.d")
+    text = f"Include {config_d}/*.conf"
     if ssh is None:
-        home = Path(__root, RELATIVE_HOME)
-        config = home / ".ssh/config"
-        config_d = home / ".ssh/config.d"
-        config_d.mkdir(parents=True, exist_ok=True)
-        text = f"Include {config_d}/*.conf"
         write_text(config, text, overwrite=True)
+        config_d.mkdir(parents=True, exist_ok=True)
     else:
         user, hostname = split_ssh(ssh)
-        home = get_home(ssh=ssh, retry=retry, logger=logger)
-        config = home / ".ssh/config"
-        config_d = home / ".ssh/config.d"
         cmds: list[list[str]] = [mkdir_cmd(config, parent=True), mkdir_cmd(config_d)]
         utilities.subprocess.ssh(
             user,
@@ -127,7 +121,6 @@ def setup_ssh_config(
             retry=retry,
             logger=logger,
         )
-        text = f"Include {config_d}/*.conf\n"
         utilities.subprocess.ssh(
             user, hostname, *tee_cmd(config), input=text, retry=retry, logger=logger
         )
@@ -140,15 +133,15 @@ def setup_sshd_config(
     *,
     logger: LoggerLike | None = None,
     permit_root_login: bool = False,
+    root: PathLike = FILE_SYSTEM_ROOT,
     ssh: str | None = None,
     sudo: bool = False,
     retry: Retry | None = None,
-    __root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     log_info(logger, "Setting up SSHD config...")
+    path = Path(root, "etc/ssh/sshd_config.d/default.conf")
     text = sshd_config(permit_root_login=permit_root_login)
     if ssh is None:
-        path = Path(__root, "etc/ssh/sshd_config.d/default.conf")
         tee(path, text, sudo=sudo)
     else:
         user, hostname = split_ssh(ssh)
