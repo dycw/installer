@@ -18,5 +18,8 @@ home_option = option(
     default=HOME,
     help="Path to the home directory",
 )
+permit_root_login_option = option(
+    "--permit-root-login", is_flag=True, default=False, help="Permit root login"
+)
 
-__all__ = ["etc_option", "home_option"]
+__all__ = ["etc_option", "home_option", "permit_root_login_option"]

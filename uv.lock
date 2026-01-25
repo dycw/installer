@@ -245,6 +245,19 @@ wheels = [
 ]
 
 [[package]]
+name = "coverage-conditional-plugin"
+version = "0.9.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "coverage" },
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2e/6e/82f411d325a38cc24289060ca5f80d990ee8d026f4de9782006acf061f9b/coverage_conditional_plugin-0.9.0.tar.gz", hash = "sha256:6893dab0542695dbd5ea714281dae0dfec8d0e36480ba32d839e9fa7344f8215", size = 10579, upload-time = "2023-06-02T10:25:10.166Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/06/83/df10dd1911cb1695274da836e786ade7eaace9ed625b14056eb0bd6117d8/coverage_conditional_plugin-0.9.0-py3-none-any.whl", hash = "sha256:1b37bc469019d2ab5b01f5eee453abe1846b3431e64e209720c2a9ec4afb8130", size = 7317, upload-time = "2023-06-02T10:25:08.177Z" },
+]
+
+[[package]]
 name = "cryptography"
 version = "46.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -302,7 +315,7 @@ wheels = [
 
 [[package]]
 name = "dycw-installer"
-version = "0.5.1"
+version = "0.5.2"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
@@ -328,7 +341,7 @@ dev = [
 requires-dist = [
     { name = "click", specifier = ">=8.3.1" },
     { name = "coloredlogs", specifier = ">=15.0.1" },
-    { name = "dycw-utilities", specifier = ">=0.186.1" },
+    { name = "dycw-utilities", specifier = ">=0.186.2" },
     { name = "inflect", specifier = ">=7.5.0" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pygithub", specifier = ">=2.8.1" },
@@ -340,7 +353,7 @@ provides-extras = ["cli"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "dycw-utilities", extras = ["test"], specifier = ">=0.186.1" },
+    { name = "dycw-utilities", extras = ["test"], specifier = ">=0.186.2" },
     { name = "orjson", specifier = ">=3.11.5" },
     { name = "pyright", specifier = ">=1.1.408" },
     { name = "rich", specifier = ">=14.3.1" },
@@ -360,7 +373,7 @@ wheels = [
 
 [[package]]
 name = "dycw-utilities"
-version = "0.186.1"
+version = "0.186.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "typing-extensions" },
@@ -369,11 +382,12 @@ dependencies = [
     { name = "whenever" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/a5/675fa3f7a47f1d66774033d80329aef5cbccbe4823c0169da46777b3a14b/dycw_utilities-0.186.1-py3-none-any.whl", hash = "sha256:dddc66dbb97df46b43f5aef3e171af84079e3bf408b61fb32435c13bd2404b85", size = 206354, upload-time = "2026-01-24T04:45:19.527Z" },
+    { url = "https://files.pythonhosted.org/packages/d7/e4/47a5c98e9d6aa2ab67aa3aa00fa7ec354e4182103c85f5e5767a1be7e882/dycw_utilities-0.186.2-py3-none-any.whl", hash = "sha256:bd7b486156a5b2bad579a04802bf7758e3da3c085384cc9b0c64c8c7d2ce4031", size = 207855, upload-time = "2026-01-25T00:02:48.718Z" },
 ]
 
 [package.optional-dependencies]
 test = [
+    { name = "coverage-conditional-plugin" },
     { name = "dycw-pytest-only" },
     { name = "hypothesis" },
     { name = "pytest" },
