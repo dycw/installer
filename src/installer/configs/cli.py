@@ -25,6 +25,7 @@ if TYPE_CHECKING:
 @logger_option
 @home_option
 @ssh_option
+@sudo_option
 @option("--batch-mode", is_flag=True, default=None, help="SSH batch mode")
 @retry_option
 def setup_authorized_keys_sub_cmd(
@@ -33,6 +34,7 @@ def setup_authorized_keys_sub_cmd(
     logger: LoggerLike,
     home: PathLike,
     ssh: str | None,
+    sudo: bool,
     batch_mode: bool,
     retry: Retry | None,
 ) -> None:
@@ -44,6 +46,7 @@ def setup_authorized_keys_sub_cmd(
         logger=logger,
         home=home,
         ssh=ssh,
+        sudo=sudo,
         batch_mode=batch_mode,
         retry=retry,
     )
@@ -52,14 +55,20 @@ def setup_authorized_keys_sub_cmd(
 @logger_option
 @home_option
 @ssh_option
+@sudo_option
 @retry_option
 def setup_ssh_config_sub_cmd(
-    *, logger: LoggerLike, home: PathLike, ssh: str | None, retry: Retry | None
+    *,
+    logger: LoggerLike,
+    home: PathLike,
+    ssh: str | None,
+    sudo: bool,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=logger)
-    setup_ssh_config(logger=logger, home=home, ssh=ssh, retry=retry)
+    setup_ssh_config(logger=logger, home=home, ssh=ssh, sudo=sudo, retry=retry)
 
 
 @logger_option

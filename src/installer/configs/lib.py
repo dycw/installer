@@ -6,15 +6,9 @@ from typing import TYPE_CHECKING, assert_never
 
 import utilities.subprocess
 from utilities.constants import HOME
-from utilities.core import (
-    log_info,
-    normalize_multi_line_str,
-    normalize_str,
-    repr_str,
-    write_text,
-)
+from utilities.core import log_info, normalize_multi_line_str, normalize_str, repr_str
 from utilities.shellingham import SHELL
-from utilities.subprocess import BASH_LS, maybe_sudo_cmd, mkdir_cmd, tee, tee_cmd
+from utilities.subprocess import BASH_LS, maybe_sudo_cmd, mkdir, mkdir_cmd, tee, tee_cmd
 
 from installer.configs.constants import FILE_SYSTEM_ROOT
 from installer.utilities import ensure_line, split_ssh
@@ -30,6 +24,7 @@ def setup_authorized_keys(
     logger: LoggerLike | None = None,
     home: PathLike = HOME,
     ssh: str | None = None,
+    sudo: bool = False,
     batch_mode: bool = False,
     retry: Retry | None = None,
 ) -> None:
@@ -38,13 +33,13 @@ def setup_authorized_keys(
     path = Path(home, ".ssh/authorized_keys")
     text = normalize_str("\n".join(keys))
     if ssh is None:
-        write_text(path, text, overwrite=True)
+        tee(path, text, sudo=sudo)
     else:
         user, hostname = split_ssh(ssh)
         utilities.subprocess.ssh(
             user,
             hostname,
-            *tee_cmd(path),
+            *maybe_sudo_cmd(*tee_cmd(path), sudo=sudo),
             batch_mode=batch_mode,
             input=text,
             retry=retry,
@@ -100,6 +95,7 @@ def setup_ssh_config(
     logger: LoggerLike | None = None,
     home: PathLike = HOME,
     ssh: str | None = None,
+    sudo: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Set up the SSH config."""
@@ -108,8 +104,8 @@ def setup_ssh_config(
     config_d = Path(home, ".ssh/config.d")
     text = f"Include {config_d}/*.conf"
     if ssh is None:
-        write_text(config, text, overwrite=True)
-        config_d.mkdir(parents=True, exist_ok=True)
+        tee(config, text, sudo=sudo)
+        mkdir(config_d, sudo=sudo)
     else:
         user, hostname = split_ssh(ssh)
         cmds: list[list[str]] = [mkdir_cmd(config, parent=True), mkdir_cmd(config_d)]
