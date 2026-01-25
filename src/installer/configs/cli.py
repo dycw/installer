@@ -9,7 +9,7 @@ from utilities.core import is_pytest
 from utilities.logging import basic_config
 
 from installer.click import logger_option, retry_option, ssh_option, sudo_option
-from installer.configs.click import home_option
+from installer.configs.click import home_option, permit_root_login_option
 from installer.configs.constants import FILE_SYSTEM_ROOT
 from installer.configs.lib import (
     setup_authorized_keys,
@@ -63,7 +63,7 @@ def setup_ssh_config_sub_cmd(
 
 
 @logger_option
-@option("--permit-root-login", is_flag=True, default=False, help="Permit root login")
+@permit_root_login_option
 @option(
     "--root",
     type=click.Path(path_type=Path),
