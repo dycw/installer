@@ -30,6 +30,7 @@ from installer.apps.lib import (
     setup_starship,
     setup_taplo,
     setup_uv,
+    setup_uv_cmd,
     setup_watchexec,
     setup_yq,
     setup_zoxide,
@@ -370,6 +371,35 @@ class TestSetupUv:
             Usage: uv [OPTIONS] <COMMAND>
         """)
         assert search(escape(pattern), result.out)
+
+
+class TestSetupUvCmd:
+    def test_main(self, *, tmp_path: Path) -> None:
+        result = setup_uv_cmd(tmp_path)
+        path = tmp_path / "install.sh"
+        expected = normalize_multi_line_str(f"""
+            curl --fail --location --create-dirs --output {path} --show-error --silent https://astral.sh/uv/install.sh
+            env UV_INSTALL_DIR=/usr/local/bin UV_NO_MODIFY_PATH=1 sh {path}
+        """)
+        assert result == expected
+
+    def test_path_binaries(self, *, tmp_path: Path) -> None:
+        result = setup_uv_cmd(tmp_path, path_binaries=tmp_path / "bin")
+        path = tmp_path / "install.sh"
+        expected = normalize_multi_line_str(f"""
+            curl --fail --location --create-dirs --output {path} --show-error --silent https://astral.sh/uv/install.sh
+            env UV_INSTALL_DIR={tmp_path}/bin UV_NO_MODIFY_PATH=1 sh {path}
+        """)
+        assert result == expected
+
+    def test_sudo(self, *, tmp_path: Path) -> None:
+        result = setup_uv_cmd(tmp_path, sudo=True)
+        path = tmp_path / "install.sh"
+        expected = normalize_multi_line_str(f"""
+            curl --fail --location --create-dirs --output {path} --show-error --silent https://astral.sh/uv/install.sh
+            sudo env UV_INSTALL_DIR=/usr/local/bin UV_NO_MODIFY_PATH=1 sh {path}
+        """)
+        assert result == expected
 
 
 class TestSetupWatchexec:
