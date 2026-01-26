@@ -1202,6 +1202,7 @@ __all__ = [
     "setup_starship",
     "setup_taplo",
     "setup_uv",
+    "setup_uv_cmd",
     "setup_yq",
     "setup_zoxide",
 ]
