@@ -12,6 +12,7 @@ from utilities.core import (
     extract_group,
     log_info,
     normalize_multi_line_str,
+    normalize_str,
     one,
     which,
 )
@@ -1055,11 +1056,11 @@ def setup_uv_cmd(
             f"UV_INSTALL_DIR={path_binaries}",
             "UV_NO_MODIFY_PATH=1",
             "sh",
-            str(temp_dir),
+            str(output),
             sudo=sudo,
         ),
     ]
-    return "\n".join(map(join, cmds))
+    return normalize_str("\n".join(map(join, cmds)))
 
 
 ##
