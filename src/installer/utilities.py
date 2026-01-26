@@ -16,8 +16,6 @@ from utilities.core import (
 from utilities.pydantic import extract_secret
 from utilities.subprocess import uv_tool_run_cmd
 
-from installer.apps.constants import GITHUB_TOKEN, PATH_BINARIES, PERMISSIONS
-
 if TYPE_CHECKING:
     from utilities.pydantic import SecretLike
     from utilities.types import LoggerLike, PathLike, Retry
@@ -57,11 +55,12 @@ def ssh_install(
     custom_shell_config: bool = False,
     etc: bool = False,
     group: str | int | None = None,
+    home: PathLike | None = None,
     owner: str | int | None = None,
-    path_binaries: PathLike = PATH_BINARIES,
-    perms: PermissionsLike = PERMISSIONS,
+    path_binaries: PathLike | None = None,
+    perms: PermissionsLike | None = None,
     sudo: bool = False,
-    token: SecretLike | None = GITHUB_TOKEN,
+    token: SecretLike | None = None,
     user: str | None = None,
     retry: Retry | None = None,
     logger: LoggerLike | None = None,
@@ -74,14 +73,14 @@ def ssh_install(
         parts.append("--etc")
     if group is not None:
         parts.extend(["--group", str(group)])
+    if home is not None:
+        parts.extend(["--home", str(home)])
     if owner is not None:
         parts.extend(["--owner", str(owner)])
-    parts.extend([
-        "--path-binaries",
-        str(path_binaries),
-        "--perms",
-        str(Permissions.new(perms)),
-    ])
+    if path_binaries is not None:
+        parts.extend(["--path-binaries", str(path_binaries)])
+    if perms is not None:
+        parts.extend(["--perms", str(Permissions.new(perms))])
     if sudo:
         parts.append("--sudo")
     if token is not None:
