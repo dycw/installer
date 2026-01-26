@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING
 
-import click
+import utilities.click
 from click import argument, option
+from utilities.click import Str
 from utilities.core import is_pytest
 from utilities.logging import basic_config
 
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from utilities.types import LoggerLike, PathLike, Retry
 
 
-@argument("keys", type=str, nargs=-1)
+@argument("keys", type=Str(), nargs=-1)
 @logger_option
 @home_option
 @ssh_option
@@ -75,7 +75,7 @@ def setup_ssh_config_sub_cmd(
 @permit_root_login_option
 @option(
     "--root",
-    type=click.Path(path_type=Path),
+    type=utilities.click.Path(exist="dir if exists"),
     default=FILE_SYSTEM_ROOT,
     help="File system root",
 )

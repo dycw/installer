@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING
 
-import click
+import utilities.click
 from click import argument, option
+from utilities.click import Str
 from utilities.core import is_pytest
 from utilities.logging import basic_config
 
@@ -16,21 +16,21 @@ if TYPE_CHECKING:
     from utilities.types import LoggerLike, PathLike, Retry
 
 
-@argument("key", type=click.Path(exists=True, dir_okay=False, path_type=Path))
-@argument("owner", type=str)
-@argument("repo", type=str)
+@argument("key", type=utilities.click.Path(exist="existing file"))
+@argument("owner", type=Str())
+@argument("repo", type=Str())
 @logger_option
 @ssh_option
 @retry_option
-@option("--host", type=str, default=GIT_CLONE_HOST, help="Repository host")
+@option("--host", type=Str(), default=GIT_CLONE_HOST, help="Repository host")
 @option("--port", type=int, default=None, help="Repository port")
 @option(
     "--dest",
-    type=click.Path(file_okay=False, path_type=Path),
+    type=utilities.click.Path(exist="dir if exists"),
     default=None,
     help="Path to clone to",
 )
-@option("--branch", type=str, default=None, help="Branch to check out")
+@option("--branch", type=Str(), default=None, help="Branch to check out")
 def git_clone_sub_cmd(
     *,
     key: PathLike,
