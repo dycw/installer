@@ -12,7 +12,7 @@ etc_option = option(
 )
 home_option = option(
     "--home",
-    type=Path(exist="existing dir"),
+    type=Path(exist="dir if exists"),
     default=HOME,
     help="Path to the home directory",
 )

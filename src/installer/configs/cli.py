@@ -75,7 +75,7 @@ def setup_ssh_config_sub_cmd(
 @permit_root_login_option
 @option(
     "--root",
-    type=utilities.click.Path(exist="existing dir"),
+    type=utilities.click.Path(exist="dir if exists"),
     default=FILE_SYSTEM_ROOT,
     help="File system root",
 )
