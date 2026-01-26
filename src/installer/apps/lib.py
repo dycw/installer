@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, assert_never
 import utilities.subprocess
 from utilities.constants import HOME
 from utilities.core import (
-    TemporaryFile,
     WhichError,
     extract_group,
     log_info,
@@ -1035,33 +1034,31 @@ def setup_uv(
                 user,
                 hostname,
                 *BASH_LS,
-                input=setup_uv_cmd(dir_=temp, path_binaries=path_binaries, sudo=sudo),
+                input=setup_uv_cmd(
+                    temp / "install.sh", path_binaries=path_binaries, sudo=sudo
+                ),
                 retry=retry,
                 logger=logger,
             )
 
 
 def setup_uv_cmd(
-    *,
-    dir_: PathLike | None = None,
-    path_binaries: PathLike = PATH_BINARIES,
-    sudo: bool = False,
+    path: PathLike, /, *, path_binaries: PathLike = PATH_BINARIES, sudo: bool = False
 ) -> str:
     """Command to setup 'uv'."""
 
-    with TemporaryFile(dir=dir_) as temp:
-        cmds: list[list[str]] = [
-            curl_cmd("https://astral.sh/uv/install.sh", output=temp),
-            maybe_sudo_cmd(
-                "env",
-                f"UV_INSTALL_DIR={path_binaries}",
-                "UV_NO_MODIFY_PATH=1",
-                "sh",
-                str(temp),
-                sudo=sudo,
-            ),
-        ]
-        return "\n".join(map(join, cmds))
+    cmds: list[list[str]] = [
+        curl_cmd("https://astral.sh/uv/install.sh", output=path),
+        maybe_sudo_cmd(
+            "env",
+            f"UV_INSTALL_DIR={path_binaries}",
+            "UV_NO_MODIFY_PATH=1",
+            "sh",
+            str(path),
+            sudo=sudo,
+        ),
+    ]
+    return "\n".join(map(join, cmds))
 
 
 ##
