@@ -1034,27 +1034,29 @@ def setup_uv(
                 user,
                 hostname,
                 *BASH_LS,
-                input=setup_uv_cmd(
-                    temp / "install.sh", path_binaries=path_binaries, sudo=sudo
-                ),
+                input=setup_uv_cmd(temp, path_binaries=path_binaries, sudo=sudo),
                 retry=retry,
                 logger=logger,
             )
 
 
 def setup_uv_cmd(
-    path: PathLike, /, *, path_binaries: PathLike = PATH_BINARIES, sudo: bool = False
+    temp_dir: PathLike,
+    /,
+    *,
+    path_binaries: PathLike = PATH_BINARIES,
+    sudo: bool = False,
 ) -> str:
     """Command to setup 'uv'."""
-
+    output = Path(temp_dir, "install.sh")
     cmds: list[list[str]] = [
-        curl_cmd("https://astral.sh/uv/install.sh", output=path),
+        curl_cmd("https://astral.sh/uv/install.sh", output=output),
         maybe_sudo_cmd(
             "env",
             f"UV_INSTALL_DIR={path_binaries}",
             "UV_NO_MODIFY_PATH=1",
             "sh",
-            str(path),
+            str(temp_dir),
             sudo=sudo,
         ),
     ]
