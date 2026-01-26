@@ -76,7 +76,6 @@ def setup_apt_package(
             case "Linux":
                 run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
                 run(*maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo))
-                log_info(logger, "Installed %r", package)
             case never:
                 assert_never(never)
     else:
