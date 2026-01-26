@@ -55,7 +55,7 @@ def ssh_install(
     custom_shell_config: bool = False,
     etc: bool = False,
     group: str | int | None = None,
-    home: str | None = None,
+    home: PathLike | None = None,
     owner: str | int | None = None,
     path_binaries: PathLike | None = None,
     perms: PermissionsLike | None = None,
@@ -74,7 +74,7 @@ def ssh_install(
     if group is not None:
         parts.extend(["--group", str(group)])
     if home is not None:
-        parts.extend(["--home", home])
+        parts.extend(["--home", str(home)])
     if owner is not None:
         parts.extend(["--owner", str(owner)])
     if path_binaries is not None:
