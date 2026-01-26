@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from pathlib import Path
-
-import click
 from click import option
+from utilities.click import Path
 from utilities.constants import HOME
 
 etc_option = option(
@@ -14,7 +12,7 @@ etc_option = option(
 )
 home_option = option(
     "--home",
-    type=click.Path(path_type=Path),
+    type=Path(exist="existing dir"),
     default=HOME,
     help="Path to the home directory",
 )

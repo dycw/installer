@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from click import argument, option
+from utilities.click import Str
 from utilities.core import PermissionsLike, is_pytest
 from utilities.logging import basic_config
 
@@ -282,7 +283,7 @@ def direnv_sub_cmd(
 @logger_option
 @ssh_option
 @sudo_option
-@option("--user", type=str, default=None, help="User to add to the 'docker' group")
+@option("--user", type=Str(), default=None, help="User to add to the 'docker' group")
 @retry_option
 def docker_sub_cmd(
     *,
