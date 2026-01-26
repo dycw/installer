@@ -4,7 +4,8 @@ from typing import TYPE_CHECKING
 
 from click.testing import CliRunner
 from pytest import mark, param
-from utilities.pytest import skipif_ci
+from utilities.constants import MINUTE
+from utilities.pytest import skipif_ci, throttle_test
 from utilities.subprocess import run
 
 from installer.cli import cli
@@ -20,12 +21,41 @@ class TestCLI:
             ##
             param(["apt-package", "git"], id="apt-package"),
             param(["age"], id="age"),
+            param(["age", "--logger", "logger"]),
+            param(["age", "--ssh", "user@hostname"]),
+            param(["age", "--token", "token"]),
+            param(["age", "--path-binaries", "path"]),
+            param(["age", "--sudo"]),
+            param(["age", "--perms", "perms"]),
+            param(["age", "--owner", "owner"]),
+            param(["age", "--group", "group"]),
+            param(["age", "--retry", "1", "1"]),
             param(["bat"], id="bat"),
             param(["btm"], id="btm"),
             param(["curl"], id="curl"),
+            param(["curl", "--logger", "logger"]),
+            param(["curl", "--ssh", "user@hostname"]),
+            param(["curl", "--sudo"]),
+            param(["curl", "--retry", "1", "1"]),
             param(["delta"], id="delta"),
             param(["direnv"], id="direnv"),
+            param(["direnv", "--logger", "logger"]),
+            param(["direnv", "--ssh", "user@hostname"]),
+            param(["direnv", "--path-binaries", "path"]),
+            param(["direnv", "--token", "token"]),
+            param(["direnv", "--sudo"]),
+            param(["direnv", "--perms", "perms"]),
+            param(["direnv", "--owner", "owner"]),
+            param(["direnv", "--group", "group"]),
+            param(["direnv", "--etc"]),
+            param(["direnv", "--home", "home"]),
+            param(["direnv", "--retry", "1", "1"]),
             param(["docker"], id="docker"),
+            param(["docker", "--logger", "logger"]),
+            param(["docker", "--ssh", "user@hostname"]),
+            param(["docker", "--sudo"]),
+            param(["docker", "--user", "user"]),
+            param(["docker", "--retry", "1", "1"]),
             param(["dust"], id="dust"),
             param(["eza"], id="eza"),
             param(["fd"], id="fd"),
@@ -59,11 +89,13 @@ class TestCLI:
             param(["--version"], id="version"),
         ],
     )
+    @throttle_test(duration=MINUTE)
     def test_commands(self, *, commands: list[str]) -> None:
         runner = CliRunner()
         result = runner.invoke(cli, commands)
         assert result.exit_code == 0, result.stderr
 
+    @throttle_test(duration=MINUTE)
     def test_git_clone(self, *, tmp_path: Path) -> None:
         key = tmp_path / "key.txt"
         key.touch()
@@ -71,9 +103,11 @@ class TestCLI:
         result = runner.invoke(cli, ["git-clone", str(key), "owner", "repo"])
         assert result.exit_code == 0, result.stderr
 
+    @throttle_test(duration=MINUTE)
     def test_entrypoint(self) -> None:
         run("cli", "--help")
 
     @skipif_ci
+    @throttle_test(duration=MINUTE)
     def test_justfile(self) -> None:
         run("just", "cli", "--help")
