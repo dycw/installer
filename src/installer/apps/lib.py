@@ -157,11 +157,12 @@ def setup_age(
         ssh_install(
             ssh,
             "age",
-            owner=owner,
-            path_binaries=path_binaries,
-            perms=perms,
-            sudo=sudo,
             token=token,
+            path_binaries=path_binaries,
+            sudo=sudo,
+            perms=perms,
+            owner=owner,
+            group=group,
             retry=retry,
             logger=logger,
         )
@@ -281,7 +282,7 @@ def setup_direnv(
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
-    home: PathLike = HOME,
+    home: PathLike | None = None,
     retry: Retry | None = None,
 ) -> None:
     """Setup 'direnv'."""
@@ -304,19 +305,20 @@ def setup_direnv(
             f'eval "$(direnv hook {SHELL})"',
             "direnv hook fish | source",
             etc="direnv" if etc else None,
-            home=home,
+            home=HOME if home is None else home,
         )
     else:
         ssh_install(
             ssh,
             "direnv",
-            etc=etc,
-            group=group,
-            owner=owner,
             path_binaries=path_binaries,
-            perms=perms,
-            sudo=sudo,
             token=token,
+            sudo=sudo,
+            perms=perms,
+            owner=owner,
+            group=group,
+            etc=etc,
+            home=home,
             retry=retry,
             logger=logger,
         )
@@ -400,7 +402,7 @@ def setup_docker(
             case never:
                 assert_never(never)
     else:
-        ssh_install(ssh, "docker", user=user, retry=retry, logger=logger)
+        ssh_install(ssh, "docker", sudo=sudo, user=user, retry=retry, logger=logger)
 
 
 ##
@@ -524,7 +526,7 @@ def setup_fzf(
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
-    home: PathLike = HOME,
+    home: PathLike | None = None,
     retry: Retry | None = None,
 ) -> None:
     """Setup 'fzf'."""
@@ -540,18 +542,20 @@ def setup_fzf(
             "fzf --fish | source",
             etc="fzf" if etc else None,
             zsh="source <(fzf --zsh)",
-            home=home,
+            home=HOME if home is None else home,
         )
     else:
         ssh_install(
             ssh,
             "fzf",
-            etc=etc,
-            group=group,
-            owner=owner,
-            perms=perms,
-            sudo=sudo,
             token=token,
+            path_binaries=path_binaries,
+            sudo=sudo,
+            perms=perms,
+            owner=owner,
+            group=group,
+            etc=etc,
+            home=home,
             retry=retry,
             logger=logger,
         )
@@ -928,7 +932,7 @@ def setup_starship(
     group: str | int | None = None,
     custom_shell_config: bool = False,
     etc: bool = False,
-    home: PathLike = HOME,
+    home: PathLike | None = None,
     retry: Retry | None = None,
 ) -> None:
     """Setup 'starship'."""
@@ -950,20 +954,21 @@ def setup_starship(
                 f'eval "$(starship init {SHELL})"',
                 "starship init fish | source",
                 etc="starship" if etc else None,
-                home=home,
+                home=HOME if home is None else home,
             )
     else:
         ssh_install(
             ssh,
             "starship",
+            token=token,
+            path_binaries=path_binaries,
+            sudo=sudo,
+            perms=perms,
+            owner=owner,
+            group=group,
             custom_shell_config=custom_shell_config,
             etc=etc,
-            group=group,
-            owner=owner,
-            path_binaries=path_binaries,
-            perms=perms,
-            sudo=sudo,
-            token=token,
+            home=home,
             retry=retry,
             logger=logger,
         )
@@ -1120,7 +1125,7 @@ def setup_zoxide(
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
-    home: PathLike = HOME,
+    home: PathLike | None = None,
     retry: Retry | None = None,
 ) -> None:
     """Setup 'zoxide'."""
@@ -1136,19 +1141,20 @@ def setup_zoxide(
             f'eval "$(fzf --{SHELL})"',
             "zoxide init fish | source",
             etc="zoxide" if etc else None,
-            home=home,
+            home=HOME if home is None else home,
         )
     else:
         ssh_install(
             ssh,
             "zoxide",
-            etc=etc,
-            group=group,
-            owner=owner,
-            path_binaries=path_binaries,
-            perms=perms,
-            sudo=sudo,
             token=token,
+            path_binaries=path_binaries,
+            sudo=sudo,
+            perms=perms,
+            owner=owner,
+            group=group,
+            etc=etc,
+            home=home,
             retry=retry,
             logger=logger,
         )
