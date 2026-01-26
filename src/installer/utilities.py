@@ -65,7 +65,7 @@ def ssh_install(
     retry: Retry | None = None,
     logger: LoggerLike | None = None,
 ) -> None:
-    user, hostname = split_ssh(ssh)
+    ssh_user, ssh_hostname = split_ssh(ssh)
     parts: list[str] = []
     if custom_shell_config:
         parts.append("--custom-shell-config")
@@ -88,8 +88,8 @@ def ssh_install(
     if user is not None:
         parts.extend(["--user", user])
     utilities.subprocess.ssh(
-        user,
-        hostname,
+        ssh_user,
+        ssh_hostname,
         *uv_tool_run_cmd(
             "cli", cmd, *parts, *args, from_="dycw-installer", latest=True
         ),
