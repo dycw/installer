@@ -635,12 +635,12 @@ def setup_just(
         ssh_install(
             ssh,
             "just",
-            group=group,
-            owner=owner,
-            path_binaries=path_binaries,
-            perms=perms,
-            sudo=sudo,
             token=token,
+            path_binaries=path_binaries,
+            sudo=sudo,
+            perms=perms,
+            owner=owner,
+            group=group,
             retry=retry,
             logger=logger,
         )
