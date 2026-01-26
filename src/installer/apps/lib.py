@@ -702,11 +702,12 @@ def setup_restic(
         ssh_install(
             ssh,
             "restic",
-            group=group,
-            owner=owner,
+            token=token,
             path_binaries=path_binaries,
             sudo=sudo,
-            token=token,
+            perms=perms,
+            owner=owner,
+            group=group,
             retry=retry,
             logger=logger,
         )
@@ -906,12 +907,12 @@ def setup_sops(
         ssh_install(
             ssh,
             "sops",
-            group=group,
-            owner=owner,
-            path_binaries=path_binaries,
-            perms=perms,
-            sudo=sudo,
             token=token,
+            path_binaries=path_binaries,
+            sudo=sudo,
+            perms=perms,
+            owner=owner,
+            group=group,
             retry=retry,
             logger=logger,
         )
