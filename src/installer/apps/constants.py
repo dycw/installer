@@ -22,7 +22,8 @@ TIMEOUT = 60
 CHUNK_SIZE = 8196
 GITHUB_TOKEN = SecretStr(get_env("GITHUB_TOKEN")) if has_env("GITHUB_TOKEN") else None
 PATH_BINARIES = Path("/usr/local/bin/")
-PERMISSIONS = "u=rwx,g=rx,o=rx"
+PERMISSIONS_BINARY = "u=rwx,g=rx,o=rx"
+PERMISSIONS_CONFIG = "u=rw,g=r,o=r"
 SHELL = get_shell()
 
 
@@ -107,7 +108,8 @@ __all__ = [
     "GITHUB_TOKEN",
     "MACHINE_TYPE_GROUP",
     "PATH_BINARIES",
-    "PERMISSIONS",
+    "PERMISSIONS_BINARY",
+    "PERMISSIONS_CONFIG",
     "SHELL",
     "SYSTEM_NAME",
     "SYSTEM_NAME_GROUP",

@@ -12,6 +12,8 @@ from installer.apps.click import (
     group_option,
     owner_option,
     path_binaries_option,
+    perms_binary_option,
+    perms_config_option,
     perms_option,
     token_option,
 )
@@ -846,7 +848,7 @@ def sops_sub_cmd(
 @token_option
 @path_binaries_option
 @sudo_option
-@perms_option
+@perms_binary_option
 @owner_option
 @group_option
 @etc_option
@@ -854,6 +856,7 @@ def sops_sub_cmd(
 @option(
     "--starship-toml", type=utilities.click.Path(exist="file if exists"), default=None
 )
+@perms_config_option
 @retry_option
 def starship_sub_cmd(
     *,
@@ -862,12 +865,13 @@ def starship_sub_cmd(
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
-    perms: PermissionsLike,
+    perms_binary: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
     etc: bool,
     home: PathLike,
     starship_toml: PathLike | None,
+    perms_config: PermissionsLike,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
@@ -879,12 +883,13 @@ def starship_sub_cmd(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
-        perms=perms,
+        perms_binary=perms_binary,
         owner=owner,
         group=group,
         etc=etc,
         home=home,
         starship_toml=starship_toml,
+        perms_config=perms_config,
         retry=retry,
     )
 
