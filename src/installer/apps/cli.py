@@ -851,7 +851,9 @@ def sops_sub_cmd(
 @group_option
 @etc_option
 @home_option
-@option("--starship-toml", type=utilities.click.Path(exist="file if exists"))
+@option(
+    "--starship-toml", type=utilities.click.Path(exist="file if exists", default=None)
+)
 @retry_option
 def starship_sub_cmd(
     *,
@@ -865,7 +867,7 @@ def starship_sub_cmd(
     group: str | int | None,
     etc: bool,
     home: PathLike,
-    starship_toml: bool,
+    starship_toml: PathLike | None,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
