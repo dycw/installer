@@ -980,6 +980,7 @@ def setup_starship(
             group=group,
             etc=etc,
             home=home,
+            starship_toml=starship_toml,
             retry=retry,
             logger=logger,
         )

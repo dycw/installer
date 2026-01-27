@@ -64,6 +64,7 @@ def ssh_install(
     owner: str | int | None = None,
     path_binaries: PathLike | None = None,
     perms: PermissionsLike | None = None,
+    starship_toml: PathLike | None = None,
     sudo: bool = False,
     token: SecretLike | None = None,
     user: str | None = None,
@@ -84,6 +85,8 @@ def ssh_install(
         parts.extend(["--path-binaries", str(path_binaries)])
     if perms is not None:
         parts.extend(["--perms", str(Permissions.new(perms))])
+    if starship_toml is not None:
+        parts.extend(["--starship-toml", str(starship_toml)])
     if sudo:
         parts.append("--sudo")
     if token is not None:

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import utilities.click
 from click import argument, option
 from utilities.click import Str
 from utilities.core import PermissionsLike, is_pytest
@@ -850,6 +851,7 @@ def sops_sub_cmd(
 @group_option
 @etc_option
 @home_option
+@option("--starship.toml", type=utilities.click.Path(exist="file if exists"))
 @retry_option
 def starship_sub_cmd(
     *,
@@ -861,9 +863,9 @@ def starship_sub_cmd(
     perms: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
-    custom_shell_config: bool,
     etc: bool,
     home: PathLike,
+    starship_toml: bool,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
@@ -878,9 +880,9 @@ def starship_sub_cmd(
         perms=perms,
         owner=owner,
         group=group,
-        custom_shell_config=custom_shell_config,
         etc=etc,
         home=home,
+        starship_toml=starship_toml,
         retry=retry,
     )
 
