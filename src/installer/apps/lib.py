@@ -307,13 +307,12 @@ def setup_direnv(
             owner=owner,
             group=group,
         )
-        shell_use = SHELL if shell is None else shell
         setup_shell_config(
-            f'eval "$(direnv hook {shell_use})"',
+            'eval "$(direnv hook bash)"',
+            'eval "$(direnv hook fish)"',
             "direnv hook fish | source",
-            logger=logger,
             etc="direnv" if etc else None,
-            shell=shell_use,
+            shell=SHELL if shell is None else shell,
             home=HOME if home is None else home,
             perms=perms_config,
             owner=owner,
@@ -558,11 +557,10 @@ def setup_fzf(
             cp(src, dest, sudo=sudo, perms=perms_binary, owner=owner, group=group)
         setup_shell_config(
             'eval "$(fzf --bash)"',
+            "source <(fzf --zsh)",
             "fzf --fish | source",
-            logger=logger,
             etc="fzf" if etc else None,
             shell=SHELL if shell is None else shell,
-            zsh="source <(fzf --zsh)",
             home=HOME if home is None else home,
             perms=perms_config,
             owner=owner,
@@ -983,13 +981,12 @@ def setup_starship(
             cp(src, dest, sudo=sudo, perms=perms_binary, owner=owner, group=group)
         shell_use = SHELL if shell is None else shell
         export = ["export STARSHIP_CONFIG='/etc/starship.toml'"] if etc else []
-        bash = [*export, f'eval "$(starship init {shell_use})"']
-        fish = [*export, "starship init fish | source"]
         home_use = HOME if home is None else home
         root_use = FILE_SYSTEM_ROOT if root is None else root
         setup_shell_config(
-            bash,
-            fish,
+            [*export, 'eval "$(starship init bash)"'],
+            [*export, 'eval "$(starship init zsh)"'],
+            [*export, "starship init fish | source"],
             etc="starship" if etc else None,
             shell=shell_use,
             home=home_use,
@@ -1211,9 +1208,9 @@ def setup_zoxide(
             cp(src, dest, sudo=sudo, perms=perms_binary, owner=owner, group=group)
         shell_use = SHELL if shell is None else shell
         setup_shell_config(
-            f'eval "$(fzf --{shell_use})"',
-            "zoxide init fish | source",
-            logger=logger,
+            'eval "$(zoxide init --cmd j bash)"',
+            'eval "$(zoxide init --cmd j zsh)"',
+            "zoxide init --cmd j fish | source",
             etc="zoxide" if etc else None,
             shell=shell_use,
             home=HOME if home is None else home,
