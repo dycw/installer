@@ -71,6 +71,7 @@ class TestCLI:
             param(["fzf", "--group", "group"]),
             param(["fzf", "--etc"]),
             param(["fzf", "--home", "home"]),
+            param(["fzf", "--perms-config", "perms"]),
             param(["fzf", "--retry", "1", "1"]),
             param(["git"], id="git"),
             param(["git", "--logger", "logger"]),
