@@ -84,7 +84,7 @@ def setup_shell_config(
             ensure_line_or_lines(path, fish, perms=perms, owner=owner, group=group)
         case str(), "bash" | "posix" | "sh":
             path = Path(root, f"etc/profile.d/{etc}.sh")
-            lines = ["#!/usr/bin/env sh", *always_iterable(bash)]
+            lines = ["#!/usr/bin/env sh", "", *always_iterable(bash)]
             text = normalize_str("\n".join(always_iterable(lines)))
             write_text(
                 path, text, overwrite=True, perms=perms, owner=owner, group=group
