@@ -3,7 +3,12 @@ from __future__ import annotations
 from click import option
 from utilities.click import Path, Str
 
-from installer.apps.constants import GITHUB_TOKEN, PATH_BINARIES, PERMISSIONS
+from installer.apps.constants import (
+    GITHUB_TOKEN,
+    PATH_BINARIES,
+    PERMISSIONS_BINARY,
+    PERMISSIONS_CONFIG,
+)
 
 group_option = option("--group", type=Str(), default=None, help="Binary group")
 owner_option = option("--owner", type=Str(), default=None, help="Binary owner")
@@ -14,7 +19,13 @@ path_binaries_option = option(
     help="Path to the binaries",
 )
 perms_option = option(
-    "--perms", type=Str(), default=PERMISSIONS, help="Binary permissions"
+    "--perms", type=Str(), default=PERMISSIONS_BINARY, help="Binary permissions"
+)
+perms_binary_option = option(
+    "--perms-binary", type=Str(), default=PERMISSIONS_BINARY, help="Binary permissions"
+)
+perms_config_option = option(
+    "--perms-config", type=Str(), default=PERMISSIONS_CONFIG, help="Binary permissions"
 )
 token_option = option("--token", type=Str(), default=GITHUB_TOKEN, help="GitHub token")
 
@@ -23,6 +34,8 @@ __all__ = [
     "group_option",
     "owner_option",
     "path_binaries_option",
+    "perms_binary_option",
+    "perms_config_option",
     "perms_option",
     "token_option",
 ]

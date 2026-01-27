@@ -879,7 +879,7 @@ def starship_sub_cmd(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
-        perms=perms,
+        perms_binary=perms,
         owner=owner,
         group=group,
         etc=etc,

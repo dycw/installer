@@ -6,7 +6,13 @@ from typing import TYPE_CHECKING, assert_never
 
 import utilities.subprocess
 from utilities.constants import HOME
-from utilities.core import log_info, normalize_multi_line_str, normalize_str, repr_str
+from utilities.core import (
+    PermissionsLike,
+    log_info,
+    normalize_multi_line_str,
+    normalize_str,
+    repr_str,
+)
 from utilities.shellingham import SHELL
 from utilities.subprocess import BASH_LS, maybe_sudo_cmd, mkdir, mkdir_cmd, tee, tee_cmd
 
@@ -59,27 +65,45 @@ def setup_shell_config(
     etc: str | None = None,
     zsh: str | None = None,
     home: PathLike = HOME,
+    perms: PermissionsLike | None = None,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
     log_info(logger, "Setting up shell config...")
     match etc, SHELL, zsh:
         case None, "bash" | "posix" | "sh", _:
             path = Path(home, ".bashrc")
-            ensure_line_or_lines(path, bash, logger=logger)
+            ensure_line_or_lines(
+                path, bash, logger=logger, perms=perms, owner=owner, group=group
+            )
         case None, "zsh", None:
             path = Path(home, ".zshrc")
-            ensure_line_or_lines(path, bash, logger=logger)
+            ensure_line_or_lines(
+                path, bash, logger=logger, perms=perms, owner=owner, group=group
+            )
         case None, "zsh", str():
             path = Path(home, ".zshrc")
-            ensure_line_or_lines(path, zsh, logger=logger)
+            ensure_line_or_lines(
+                path, zsh, logger=logger, perms=perms, owner=owner, group=group
+            )
         case None, "fish", _:
             path = Path(home, ".config/fish/config.fish")
-            ensure_line_or_lines(path, fish, logger=logger)
+            ensure_line_or_lines(
+                path, fish, logger=logger, perms=perms, owner=owner, group=group
+            )
         case str(), "bash" | "posix" | "sh", _:
             text = normalize_multi_line_str(f"""
                 #!/usr/bin/env sh
                 {bash}
             """)
-            ensure_line_or_lines(f"/etc/profile/{etc}.sh", text, logger=logger)
+            ensure_line_or_lines(
+                f"/etc/profile/{etc}.sh",
+                text,
+                logger=logger,
+                perms=perms,
+                owner=owner,
+                group=group,
+            )
         case str(), _, _:
             msg = f"Invalid shell for 'etc': {repr_str(SHELL)}"
             raise ValueError(msg)

@@ -28,18 +28,21 @@ def ensure_line_or_lines(
     /,
     *,
     logger: LoggerLike | None = None,
+    perms: PermissionsLike | None = None,
+    owner: str | int | None = None,
+    group: str | int | None = None,
 ) -> None:
     text = "\n".join(always_iterable(line_or_lines))
     try:
         contents = read_text(path)
     except ReadTextError:
-        write_text(path, text)
-        log_info(logger, "Wrote %r to %r", text, str(path))
+        log_info(logger, "Writing %r to %r...", text, str(path))
+        write_text(path, text, perms=perms, owner=owner, group=group)
         return
     if text not in contents:
+        log_info(logger, "Appending %r to %r...", text, str(path))
         with Path(path).open(mode="a") as fh:
             _ = fh.write(f"\n\n{text}")
-        log_info(logger, "Appended %r to %r", text, str(path))
 
 
 ##
@@ -64,6 +67,8 @@ def ssh_install(
     owner: str | int | None = None,
     path_binaries: PathLike | None = None,
     perms: PermissionsLike | None = None,
+    perms_binary: PermissionsLike | None = None,
+    perms_config: PermissionsLike | None = None,
     starship_toml: PathLike | None = None,
     sudo: bool = False,
     token: SecretLike | None = None,
@@ -85,6 +90,10 @@ def ssh_install(
         parts.extend(["--path-binaries", str(path_binaries)])
     if perms is not None:
         parts.extend(["--perms", str(Permissions.new(perms))])
+    if perms_binary is not None:
+        parts.extend(["--perms-binary", str(Permissions.new(perms_binary))])
+    if perms_config is not None:
+        parts.extend(["--perms-config", str(Permissions.new(perms_config))])
     if starship_toml is not None:
         parts.extend(["--starship-toml", str(starship_toml)])
     if sudo:
