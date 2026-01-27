@@ -55,6 +55,7 @@ class TestSetupShellConfig:
         path = tmp_path / "etc/profile.d/etc.sh"
         assert path.read_text() == normalize_multi_line_str("""
            #!/usr/bin/env sh
+
            bash
         """)
 
@@ -65,6 +66,7 @@ class TestSetupShellConfig:
         path = tmp_path / "etc/profile.d/etc.sh"
         assert path.read_text() == normalize_multi_line_str("""
            #!/usr/bin/env sh
+
            bash 1
            bash 2
         """)
