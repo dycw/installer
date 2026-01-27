@@ -50,10 +50,11 @@ from installer.apps.lib import (
     setup_zoxide,
 )
 from installer.click import logger_option, retry_option, ssh_option, sudo_option
-from installer.configs.click import etc_option, home_option
+from installer.configs.click import etc_option, home_option, root_option, shell_option
 
 if TYPE_CHECKING:
     from utilities.pydantic import SecretLike
+    from utilities.shellingham import Shell
     from utilities.types import LoggerLike, PathLike, Retry
 
 
@@ -247,7 +248,9 @@ def delta_sub_cmd(
 @group_option
 @etc_option
 @home_option
+@shell_option
 @perms_config_option
+@root_option
 @retry_option
 def direnv_sub_cmd(
     *,
@@ -261,7 +264,9 @@ def direnv_sub_cmd(
     group: str | int | None,
     etc: bool,
     home: PathLike,
+    shell: Shell | None,
     perms_config: PermissionsLike,
+    root: PathLike | None,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
@@ -278,7 +283,9 @@ def direnv_sub_cmd(
         group=group,
         etc=etc,
         home=home,
+        shell=shell,
         perms_config=perms_config,
+        root=root,
         retry=retry,
     )
 
@@ -419,8 +426,10 @@ def fd_sub_cmd(
 @owner_option
 @group_option
 @etc_option
+@shell_option
 @home_option
 @perms_config_option
+@root_option
 @retry_option
 def fzf_sub_cmd(
     *,
@@ -433,8 +442,10 @@ def fzf_sub_cmd(
     owner: str | int | None,
     group: str | int | None,
     etc: bool,
+    shell: Shell | None,
     home: PathLike,
     perms_config: PermissionsLike,
+    root: PathLike | None,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
@@ -450,8 +461,10 @@ def fzf_sub_cmd(
         owner=owner,
         group=group,
         etc=etc,
+        shell=shell,
         home=home,
         perms_config=perms_config,
+        root=root,
         retry=retry,
     )
 
@@ -859,10 +872,12 @@ def sops_sub_cmd(
 @group_option
 @etc_option
 @home_option
+@shell_option
 @option(
     "--starship-toml", type=utilities.click.Path(exist="file if exists"), default=None
 )
 @perms_config_option
+@root_option
 @retry_option
 def starship_sub_cmd(
     *,
@@ -876,8 +891,10 @@ def starship_sub_cmd(
     group: str | int | None,
     etc: bool,
     home: PathLike,
+    shell: Shell | None,
     starship_toml: PathLike | None,
     perms_config: PermissionsLike,
+    root: PathLike | None,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
@@ -894,8 +911,10 @@ def starship_sub_cmd(
         group=group,
         etc=etc,
         home=home,
+        shell=shell,
         starship_toml=starship_toml,
         perms_config=perms_config,
+        root=root,
         retry=retry,
     )
 
@@ -1054,8 +1073,10 @@ def yq_sub_cmd(
 @owner_option
 @group_option
 @etc_option
+@shell_option
 @home_option
 @perms_config_option
+@root_option
 @retry_option
 def zoxide_sub_cmd(
     *,
@@ -1068,8 +1089,10 @@ def zoxide_sub_cmd(
     owner: str | int | None,
     group: str | int | None,
     etc: bool,
+    shell: Shell | None,
     home: PathLike,
     perms_config: PermissionsLike,
+    root: PathLike | None,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
@@ -1085,8 +1108,10 @@ def zoxide_sub_cmd(
         owner=owner,
         group=group,
         etc=etc,
+        shell=shell,
         home=home,
         perms_config=perms_config,
+        root=root,
         retry=retry,
     )
 
