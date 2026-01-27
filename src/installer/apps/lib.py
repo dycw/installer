@@ -951,14 +951,9 @@ def setup_starship(
         ) as src:
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        bash: list[str] = []
-        fish: list[str] = []
-        if etc:
-            export = "export STARSHIP_CONFIG='/etc/starship.toml'"
-            bash.append(export)
-            fish.append(export)
-        bash.append(f'eval "$(starship init {SHELL})"')
-        fish.append("starship init fish | source")
+        export = ["export STARSHIP_CONFIG='/etc/starship.toml'"] if etc else []
+        bash = [*export, f'eval "$(starship init {SHELL})"']
+        fish = [*export, "starship init fish | source"]
         setup_shell_config(
             bash,
             fish,
@@ -966,7 +961,9 @@ def setup_starship(
             home=HOME if home is None else home,
         )
         if starship_toml is not None:
-            dest = "/etc/starship.toml" if etc else xdg_config_home() / "starship.toml"
+            dest = (
+                "/etc/starship.toml" if etc else (xdg_config_home() / "starship.toml")
+            )
             cp(starship_toml, dest)
     else:
         ssh_install(
