@@ -101,7 +101,7 @@ def setup_shell_config(
                 path, lines, logger=logger, perms=perms, owner=owner, group=group
             )
         case str(), _, _:
-            msg = f"Invalid shell for 'etc': {repr_str(SHELL)}"
+            msg = f"Invalid shell for 'etc': {repr_str(shell)}"
             raise ValueError(msg)
         case never:
             assert_never(never)
