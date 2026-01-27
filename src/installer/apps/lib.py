@@ -979,6 +979,7 @@ def setup_starship(
             etc=etc,
             home=home,
             starship_toml=starship_toml,
+            perms_config=perms_config,
             retry=retry,
             logger=logger,
         )
