@@ -75,7 +75,7 @@ class TestSetupShellConfig:
         """)
 
     def test_error_etc_zsh(self) -> None:
-        with raises(ValueError, match="Invalid shell for 'etc': 'fish'"):
+        with raises(ValueError, match="Invalid shell for 'etc': 'zsh'"):
             setup_shell_config(  # noqa: S604
                 ["bash 1", "bash 2"], "fish", shell="zsh", etc="etc"
             )
