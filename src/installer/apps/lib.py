@@ -960,6 +960,9 @@ def setup_starship(
             fish,
             etc="starship" if etc else None,
             home=HOME if home is None else home,
+            perms=perms_config,
+            owner=owner,
+            group=group,
         )
         if starship_toml is not None:
             dest = (
