@@ -2,15 +2,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import utilities.click
 from click import argument, option
 from utilities.click import Str
 from utilities.core import is_pytest
 from utilities.logging import basic_config
 
 from installer.click import logger_option, retry_option, ssh_option, sudo_option
-from installer.configs.click import home_option, permit_root_login_option
-from installer.configs.constants import FILE_SYSTEM_ROOT
+from installer.configs.click import home_option, permit_root_login_option, root_option
 from installer.configs.lib import (
     setup_authorized_keys,
     setup_ssh_config,
@@ -73,12 +71,7 @@ def setup_ssh_config_sub_cmd(
 
 @logger_option
 @permit_root_login_option
-@option(
-    "--root",
-    type=utilities.click.Path(exist="dir if exists"),
-    default=FILE_SYSTEM_ROOT,
-    help="File system root",
-)
+@root_option
 @ssh_option
 @sudo_option
 @retry_option

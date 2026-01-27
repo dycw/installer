@@ -8,6 +8,7 @@ import utilities.subprocess
 from utilities.constants import HOME
 from utilities.core import (
     PermissionsLike,
+    always_iterable,
     log_info,
     normalize_multi_line_str,
     normalize_str,
@@ -95,17 +96,9 @@ def setup_shell_config(
             )
         case str(), "bash" | "posix" | "sh", _:
             path = Path(root, f"etc/profile.d/{etc}.sh")
-            text = normalize_multi_line_str(f"""
-                #!/usr/bin/env sh
-                {bash}
-            """)
+            lines = ["#!/usr/bin/env sh", *always_iterable(bash)]
             ensure_line_or_lines(
-                f"/etc/profile.d/{etc}.sh",
-                text,
-                logger=logger,
-                perms=perms,
-                owner=owner,
-                group=group,
+                path, lines, logger=logger, perms=perms, owner=owner, group=group
             )
         case str(), _, _:
             msg = f"Invalid shell for 'etc': {repr_str(SHELL)}"
