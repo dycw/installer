@@ -34,28 +34,23 @@ class TestSetupSSHDConfig:
 
 class TestSetupShellConfig:
     def test_home_bash(self, *, tmp_path: Path) -> None:
-        setup_shell_config("bash", "fish", shell="bash", home=tmp_path)  # noqa: S604
+        setup_shell_config("bash", "zsh", "fish", shell="bash", home=tmp_path)  # noqa: S604
         path = tmp_path / ".bashrc"
         assert path.read_text() == "bash\n"
 
-    def test_home_zsh_default(self, *, tmp_path: Path) -> None:
-        setup_shell_config("bash", "fish", shell="zsh", home=tmp_path)  # noqa: S604
-        path = tmp_path / ".zshrc"
-        assert path.read_text() == "bash\n"
-
-    def test_home_zsh_custom(self, *, tmp_path: Path) -> None:
-        setup_shell_config("bash", "fish", shell="zsh", zsh="zsh", home=tmp_path)  # noqa: S604
+    def test_home_zsh(self, *, tmp_path: Path) -> None:
+        setup_shell_config("bash", "zsh", "fish", shell="zsh", home=tmp_path)  # noqa: S604
         path = tmp_path / ".zshrc"
         assert path.read_text() == "zsh\n"
 
     def test_home_fish(self, *, tmp_path: Path) -> None:
-        setup_shell_config("bash", "fish", shell="fish", home=tmp_path)  # noqa: S604
+        setup_shell_config("bash", "zsh", "fish", shell="fish", home=tmp_path)  # noqa: S604
         path = tmp_path / ".config/fish/config.fish"
         assert path.read_text() == "fish\n"
 
     def test_etc_bash_single(self, *, tmp_path: Path) -> None:
         setup_shell_config(  # noqa: S604
-            "bash", "fish", shell="bash", etc="etc", root=tmp_path
+            "bash", "zsh", "fish", shell="bash", etc="etc", root=tmp_path
         )
         path = tmp_path / "etc/profile.d/etc.sh"
         assert path.read_text() == normalize_multi_line_str("""
@@ -65,7 +60,7 @@ class TestSetupShellConfig:
 
     def test_etc_bash_multiple(self, *, tmp_path: Path) -> None:
         setup_shell_config(  # noqa: S604
-            ["bash 1", "bash 2"], "fish", shell="bash", etc="etc", root=tmp_path
+            ["bash 1", "bash 2"], "zsh", "fish", shell="bash", etc="etc", root=tmp_path
         )
         path = tmp_path / "etc/profile.d/etc.sh"
         assert path.read_text() == normalize_multi_line_str("""
