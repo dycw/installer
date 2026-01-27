@@ -41,6 +41,7 @@ from installer.apps.constants import (
     GITHUB_TOKEN,
     PATH_BINARIES,
     PERMISSIONS_BINARY,
+    PERMISSIONS_CONFIG,
     SHELL,
     SYSTEM_NAME,
 )
@@ -279,11 +280,12 @@ def setup_direnv(
     path_binaries: PathLike = PATH_BINARIES,
     token: SecretLike | None = GITHUB_TOKEN,
     sudo: bool = False,
-    perms: PermissionsLike = PERMISSIONS_BINARY,
+    perms_binary: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
     home: PathLike | None = None,
+    perms_config: PermissionsLike = PERMISSIONS_CONFIG,
     retry: Retry | None = None,
 ) -> None:
     """Setup 'direnv'."""
@@ -298,15 +300,19 @@ def setup_direnv(
             match_system=True,
             match_machine=True,
             sudo=sudo,
-            perms=perms,
+            perms=perms_binary,
             owner=owner,
             group=group,
         )
         setup_shell_config(
             f'eval "$(direnv hook {SHELL})"',
             "direnv hook fish | source",
+            logger=logger,
             etc="direnv" if etc else None,
             home=HOME if home is None else home,
+            perms=perms_config,
+            owner=owner,
+            group=group,
         )
     else:
         ssh_install(
@@ -315,11 +321,12 @@ def setup_direnv(
             path_binaries=path_binaries,
             token=token,
             sudo=sudo,
-            perms=perms,
+            perms_binary=perms_binary,
             owner=owner,
             group=group,
             etc=etc,
             home=home,
+            perms_config=perms_config,
             retry=retry,
             logger=logger,
         )
@@ -523,11 +530,12 @@ def setup_fzf(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike = PERMISSIONS_BINARY,
+    perms_binary: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
     home: PathLike | None = None,
+    perms_config: PermissionsLike = PERMISSIONS_CONFIG,
     retry: Retry | None = None,
 ) -> None:
     """Setup 'fzf'."""
@@ -537,13 +545,17 @@ def setup_fzf(
             "junegunn", "fzf", token=token, match_system=True, match_machine=True
         ) as src:
             dest = Path(path_binaries, src.name)
-            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+            cp(src, dest, sudo=sudo, perms=perms_binary, owner=owner, group=group)
         setup_shell_config(
             'eval "$(fzf --bash)"',
             "fzf --fish | source",
+            logger=logger,
             etc="fzf" if etc else None,
             zsh="source <(fzf --zsh)",
             home=HOME if home is None else home,
+            perms=perms_config,
+            owner=owner,
+            group=group,
         )
     else:
         ssh_install(
@@ -552,11 +564,12 @@ def setup_fzf(
             token=token,
             path_binaries=path_binaries,
             sudo=sudo,
-            perms=perms,
+            perms_binary=perms_binary,
             owner=owner,
             group=group,
             etc=etc,
             home=home,
+            perms_config=perms_config,
             retry=retry,
             logger=logger,
         )
@@ -1146,11 +1159,12 @@ def setup_zoxide(
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
-    perms: PermissionsLike = PERMISSIONS_BINARY,
+    perms_binary: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
     home: PathLike | None = None,
+    perms_config: PermissionsLike = PERMISSIONS_CONFIG,
     retry: Retry | None = None,
 ) -> None:
     """Setup 'zoxide'."""
@@ -1161,12 +1175,16 @@ def setup_zoxide(
         ) as temp:
             src = temp / "zoxide"
             dest = Path(path_binaries, src.name)
-            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+            cp(src, dest, sudo=sudo, perms=perms_binary, owner=owner, group=group)
         setup_shell_config(
             f'eval "$(fzf --{SHELL})"',
             "zoxide init fish | source",
+            logger=logger,
             etc="zoxide" if etc else None,
             home=HOME if home is None else home,
+            perms=perms_config,
+            owner=owner,
+            group=group,
         )
     else:
         ssh_install(
@@ -1175,11 +1193,12 @@ def setup_zoxide(
             token=token,
             path_binaries=path_binaries,
             sudo=sudo,
-            perms=perms,
+            perms_binary=perms_binary,
             owner=owner,
             group=group,
             etc=etc,
             home=home,
+            perms_config=perms_config,
             retry=retry,
             logger=logger,
         )
