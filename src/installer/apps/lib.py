@@ -1003,7 +1003,14 @@ def setup_starship(
                 dest = Path(root_use, "etc/starship.toml")
             else:
                 dest = Path(home_use, ".config/starship.toml")
-            cp(src, dest, sudo=sudo, perms=perms_config, owner=owner, group=group)
+            cp(
+                starship_toml,
+                dest,
+                sudo=sudo,
+                perms=perms_config,
+                owner=owner,
+                group=group,
+            )
     else:
         ssh_install(
             ssh,
