@@ -6,6 +6,7 @@ from utilities.core import normalize_multi_line_str
 
 from installer.configs.lib import (
     setup_authorized_keys,
+    setup_shell_config,
     setup_ssh_config,
     setup_sshd_config,
     sshd_config,
@@ -28,6 +29,18 @@ class TestSetupSSHConfig:
 class TestSetupSSHDConfig:
     def test_main(self, *, tmp_path: Path) -> None:
         setup_sshd_config(root=tmp_path)
+
+
+class TestSetupShellConfig:
+    def test_home_bash(self, *, tmp_path: Path) -> None:
+        setup_shell_config("bash", "fish", shell="bash", home=tmp_path)  # noqa: S604
+        path = tmp_path / ".bashrc"
+        assert path.read_text() == "bash\n"
+
+    def test_home_zsh(self, *, tmp_path: Path) -> None:
+        setup_shell_config("bash", "fish", shell="zsh", zsh="zsh", home=tmp_path)  # noqa: S604
+        path = tmp_path / ".zshrc"
+        assert path.read_text() == "zsh\n"
 
 
 class TestSSHDConfig:
