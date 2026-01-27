@@ -86,7 +86,9 @@ def setup_shell_config(
             path = Path(root, f"etc/profile.d/{etc}.sh")
             lines = ["#!/usr/bin/env sh", *always_iterable(bash)]
             text = normalize_str("\n".join(always_iterable(lines)))
-            write_text(path, text, perms=perms, owner=owner, group=group)
+            write_text(
+                path, text, overwrite=True, perms=perms, owner=owner, group=group
+            )
         case str(), _:
             msg = f"Invalid shell for 'etc': {repr_str(shell)}"
             raise ValueError(msg)
