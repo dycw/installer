@@ -21,6 +21,7 @@ from utilities.subprocess import (
     chmod,
     chmod_cmd,
     chown,
+    chown_cmd,
     maybe_sudo_cmd,
     mkdir,
     mkdir_cmd,
@@ -57,8 +58,8 @@ def setup_authorized_keys(
         tee(path, text, sudo=sudo)
         if perms is not None:
             chmod(path, perms, sudo=sudo, recursive=True)
-        if perms is not None:
-            chown(path, sudo=sudo, user=owner, group=group)
+        if (owner is not None) or (group is not None):
+            chown(path, sudo=sudo, recursive=True, user=owner, group=group)
     else:
         user, hostname = split_ssh(ssh)
         utilities.subprocess.ssh(
@@ -72,7 +73,21 @@ def setup_authorized_keys(
         )
         if perms is not None:
             utilities.subprocess.ssh(
-                user, hostname, *maybe_sudo_cmd(*chmod_cmd(path, perms), sudo=sudo)
+                user,
+                hostname,
+                *maybe_sudo_cmd(*chmod_cmd(path, perms, recursive=True), sudo=sudo),
+                retry=retry,
+                logger=logger,
+            )
+        if (owner is not None) or (group is not None):
+            utilities.subprocess.ssh(
+                user,
+                hostname,
+                *maybe_sudo_cmd(
+                    *chown_cmd(path, recursive=True, user=owner, group=group), sudo=sudo
+                ),
+                retry=retry,
+                logger=logger,
             )
 
 
