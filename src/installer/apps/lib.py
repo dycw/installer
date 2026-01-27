@@ -35,7 +35,6 @@ from utilities.subprocess import (
     tee,
     yield_ssh_temp_dir,
 )
-from xdg_base_dirs import xdg_config_home
 
 from installer.apps.constants import (
     GITHUB_TOKEN,
@@ -51,12 +50,14 @@ from installer.apps.download import (
     yield_gzip_asset,
     yield_lzma_asset,
 )
+from installer.configs.constants import FILE_SYSTEM_ROOT
 from installer.configs.lib import setup_shell_config
 from installer.utilities import split_ssh, ssh_install
 
 if TYPE_CHECKING:
     from utilities.core import PermissionsLike
     from utilities.pydantic import SecretLike
+    from utilities.shellingham import Shell
     from utilities.types import LoggerLike, MaybeSequenceStr, PathLike, Retry
 
 
@@ -284,8 +285,10 @@ def setup_direnv(
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
+    shell: Shell | None = None,
     home: PathLike | None = None,
     perms_config: PermissionsLike = PERMISSIONS_CONFIG,
+    root: PathLike | None = None,
     retry: Retry | None = None,
 ) -> None:
     """Setup 'direnv'."""
@@ -304,15 +307,18 @@ def setup_direnv(
             owner=owner,
             group=group,
         )
+        shell_use = SHELL if shell is None else shell
         setup_shell_config(
-            f'eval "$(direnv hook {SHELL})"',
+            f'eval "$(direnv hook {shell_use})"',
             "direnv hook fish | source",
             logger=logger,
             etc="direnv" if etc else None,
+            shell=shell_use,
             home=HOME if home is None else home,
             perms=perms_config,
             owner=owner,
             group=group,
+            root=FILE_SYSTEM_ROOT if root is None else root,
         )
     else:
         ssh_install(
@@ -325,8 +331,10 @@ def setup_direnv(
             owner=owner,
             group=group,
             etc=etc,
+            shell=shell,
             home=home,
             perms_config=perms_config,
+            root=root,
             retry=retry,
             logger=logger,
         )
@@ -534,8 +542,10 @@ def setup_fzf(
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
+    shell: Shell | None = None,
     home: PathLike | None = None,
     perms_config: PermissionsLike = PERMISSIONS_CONFIG,
+    root: PathLike | None = None,
     retry: Retry | None = None,
 ) -> None:
     """Setup 'fzf'."""
@@ -551,11 +561,13 @@ def setup_fzf(
             "fzf --fish | source",
             logger=logger,
             etc="fzf" if etc else None,
+            shell=SHELL if shell is None else shell,
             zsh="source <(fzf --zsh)",
             home=HOME if home is None else home,
             perms=perms_config,
             owner=owner,
             group=group,
+            root=FILE_SYSTEM_ROOT if root is None else root,
         )
     else:
         ssh_install(
@@ -568,8 +580,10 @@ def setup_fzf(
             owner=owner,
             group=group,
             etc=etc,
+            shell=shell,
             home=home,
             perms_config=perms_config,
+            root=root,
             retry=retry,
             logger=logger,
         )
@@ -947,8 +961,10 @@ def setup_starship(
     group: str | int | None = None,
     etc: bool = False,
     home: PathLike | None = None,
+    shell: Shell | None = None,
     starship_toml: PathLike | None = None,
     perms_config: PermissionsLike = PERMISSIONS_BINARY,
+    root: PathLike | None = None,
     retry: Retry | None = None,
 ) -> None:
     """Setup 'starship'."""
@@ -965,22 +981,28 @@ def setup_starship(
         ) as src:
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms_binary, owner=owner, group=group)
+        shell_use = SHELL if shell is None else shell
         export = ["export STARSHIP_CONFIG='/etc/starship.toml'"] if etc else []
-        bash = [*export, f'eval "$(starship init {SHELL})"']
+        bash = [*export, f'eval "$(starship init {shell_use})"']
         fish = [*export, "starship init fish | source"]
+        home_use = HOME if home is None else home
+        root_use = FILE_SYSTEM_ROOT if root is None else root
         setup_shell_config(
             bash,
             fish,
             etc="starship" if etc else None,
-            home=HOME if home is None else home,
+            shell=shell_use,
+            home=home_use,
             perms=perms_config,
             owner=owner,
             group=group,
+            root=root_use,
         )
         if starship_toml is not None:
-            dest = (
-                "/etc/starship.toml" if etc else (xdg_config_home() / "starship.toml")
-            )
+            if etc:
+                dest = Path(root_use, "etc/starship.toml")
+            else:
+                dest = Path(home_use, ".config/starship.toml")
             cp(src, dest, sudo=sudo, perms=perms_config, owner=owner, group=group)
     else:
         ssh_install(
@@ -994,8 +1016,10 @@ def setup_starship(
             group=group,
             etc=etc,
             home=home,
+            shell=shell,
             starship_toml=starship_toml,
             perms_config=perms_config,
+            root=root,
             retry=retry,
             logger=logger,
         )
@@ -1163,8 +1187,10 @@ def setup_zoxide(
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
+    shell: Shell | None = None,
     home: PathLike | None = None,
     perms_config: PermissionsLike = PERMISSIONS_CONFIG,
+    root: PathLike | None = None,
     retry: Retry | None = None,
 ) -> None:
     """Setup 'zoxide'."""
@@ -1176,15 +1202,18 @@ def setup_zoxide(
             src = temp / "zoxide"
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms_binary, owner=owner, group=group)
+        shell_use = SHELL if shell is None else shell
         setup_shell_config(
-            f'eval "$(fzf --{SHELL})"',
+            f'eval "$(fzf --{shell_use})"',
             "zoxide init fish | source",
             logger=logger,
             etc="zoxide" if etc else None,
+            shell=shell_use,
             home=HOME if home is None else home,
             perms=perms_config,
             owner=owner,
             group=group,
+            root=FILE_SYSTEM_ROOT if root is None else root,
         )
     else:
         ssh_install(
@@ -1197,8 +1226,10 @@ def setup_zoxide(
             owner=owner,
             group=group,
             etc=etc,
+            shell=shell,
             home=home,
             perms_config=perms_config,
+            root=root,
             retry=retry,
             logger=logger,
         )

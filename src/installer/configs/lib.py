@@ -8,12 +8,13 @@ import utilities.subprocess
 from utilities.constants import HOME
 from utilities.core import (
     PermissionsLike,
+    always_iterable,
     log_info,
     normalize_multi_line_str,
     normalize_str,
     repr_str,
 )
-from utilities.shellingham import SHELL
+from utilities.shellingham import SHELL, Shell
 from utilities.subprocess import BASH_LS, maybe_sudo_cmd, mkdir, mkdir_cmd, tee, tee_cmd
 
 from installer.configs.constants import FILE_SYSTEM_ROOT
@@ -63,14 +64,16 @@ def setup_shell_config(
     *,
     logger: LoggerLike | None = None,
     etc: str | None = None,
+    shell: Shell = SHELL,
     zsh: str | None = None,
     home: PathLike = HOME,
     perms: PermissionsLike | None = None,
     owner: str | int | None = None,
     group: str | int | None = None,
+    root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
     log_info(logger, "Setting up shell config...")
-    match etc, SHELL, zsh:
+    match etc, shell, zsh:
         case None, "bash" | "posix" | "sh", _:
             path = Path(home, ".bashrc")
             ensure_line_or_lines(
@@ -92,20 +95,13 @@ def setup_shell_config(
                 path, fish, logger=logger, perms=perms, owner=owner, group=group
             )
         case str(), "bash" | "posix" | "sh", _:
-            text = normalize_multi_line_str(f"""
-                #!/usr/bin/env sh
-                {bash}
-            """)
+            path = Path(root, f"etc/profile.d/{etc}.sh")
+            lines = ["#!/usr/bin/env sh", *always_iterable(bash)]
             ensure_line_or_lines(
-                f"/etc/profile.d/{etc}.sh",
-                text,
-                logger=logger,
-                perms=perms,
-                owner=owner,
-                group=group,
+                path, lines, logger=logger, perms=perms, owner=owner, group=group
             )
         case str(), _, _:
-            msg = f"Invalid shell for 'etc': {repr_str(SHELL)}"
+            msg = f"Invalid shell for 'etc': {repr_str(shell)}"
             raise ValueError(msg)
         case never:
             assert_never(never)

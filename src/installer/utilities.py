@@ -20,6 +20,7 @@ from utilities.subprocess import uv_tool_run_cmd
 
 if TYPE_CHECKING:
     from utilities.pydantic import SecretLike
+    from utilities.shellingham import Shell
     from utilities.types import LoggerLike, MaybeSequenceStr, PathLike, Retry
 
 
@@ -70,6 +71,8 @@ def ssh_install(
     perms: PermissionsLike | None = None,
     perms_binary: PermissionsLike | None = None,
     perms_config: PermissionsLike | None = None,
+    root: PathLike | None = None,
+    shell: Shell | None = None,
     starship_toml: PathLike | None = None,
     sudo: bool = False,
     token: SecretLike | None = None,
@@ -95,6 +98,10 @@ def ssh_install(
         parts.extend(["--perms-binary", str(Permissions.new(perms_binary))])
     if perms_config is not None:
         parts.extend(["--perms-config", str(Permissions.new(perms_config))])
+    if root is not None:
+        parts.extend(["--root", str(root)])
+    if shell is not None:
+        parts.extend(["--shell", shell])
     if starship_toml is not None:
         parts.extend(["--starship-toml", str(starship_toml)])
     if sudo:
