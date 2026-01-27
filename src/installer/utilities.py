@@ -11,6 +11,7 @@ from utilities.core import (
     always_iterable,
     extract_groups,
     log_info,
+    normalize_str,
     read_text,
     write_text,
 )
@@ -32,7 +33,7 @@ def ensure_line_or_lines(
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    text = "\n".join(always_iterable(line_or_lines))
+    text = normalize_str("\n".join(always_iterable(line_or_lines)))
     try:
         contents = read_text(path)
     except ReadTextError:
