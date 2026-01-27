@@ -951,9 +951,15 @@ def setup_starship(
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
         if not custom_shell_config:
+            bash: list[str] = [f'eval "$(starship init {SHELL})"']
+            fish: list[str] = ["starship init fish | source"]
+            if etc:
+                export = "export STARSHIP_CONFIG='/etc/starship.toml'"
+                bash.append(export)
+                fish.append(export)
             setup_shell_config(
-                f'eval "$(starship init {SHELL})"',
-                "starship init fish | source",
+                bash,
+                fish,
                 etc="starship" if etc else None,
                 home=HOME if home is None else home,
             )

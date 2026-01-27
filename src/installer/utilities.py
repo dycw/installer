@@ -8,6 +8,7 @@ from utilities.core import (
     Permissions,
     PermissionsLike,
     ReadTextError,
+    always_iterable,
     extract_groups,
     log_info,
     read_text,
@@ -18,12 +19,17 @@ from utilities.subprocess import uv_tool_run_cmd
 
 if TYPE_CHECKING:
     from utilities.pydantic import SecretLike
-    from utilities.types import LoggerLike, PathLike, Retry
+    from utilities.types import LoggerLike, MaybeSequenceStr, PathLike, Retry
 
 
-def ensure_line(
-    path: PathLike, text: str, /, *, logger: LoggerLike | None = None
+def ensure_line_or_lines(
+    path: PathLike,
+    line_or_lines: MaybeSequenceStr,
+    /,
+    *,
+    logger: LoggerLike | None = None,
 ) -> None:
+    text = "\n".join(always_iterable(line_or_lines))
     try:
         contents = read_text(path)
     except ReadTextError:
@@ -98,4 +104,4 @@ def ssh_install(
     )
 
 
-__all__ = ["ensure_line", "split_ssh", "ssh_install"]
+__all__ = ["ensure_line_or_lines", "split_ssh", "ssh_install"]

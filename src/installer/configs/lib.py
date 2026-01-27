@@ -11,10 +11,10 @@ from utilities.shellingham import SHELL
 from utilities.subprocess import BASH_LS, maybe_sudo_cmd, mkdir, mkdir_cmd, tee, tee_cmd
 
 from installer.configs.constants import FILE_SYSTEM_ROOT
-from installer.utilities import ensure_line, split_ssh
+from installer.utilities import ensure_line_or_lines, split_ssh
 
 if TYPE_CHECKING:
-    from utilities.types import LoggerLike, PathLike, Retry
+    from utilities.types import LoggerLike, MaybeSequenceStr, PathLike, Retry
 
 
 def setup_authorized_keys(
@@ -51,8 +51,8 @@ def setup_authorized_keys(
 
 
 def setup_shell_config(
-    bash: str,
-    fish: str,
+    bash: MaybeSequenceStr,
+    fish: MaybeSequenceStr,
     /,
     *,
     logger: LoggerLike | None = None,
@@ -64,22 +64,22 @@ def setup_shell_config(
     match etc, SHELL, zsh:
         case None, "bash" | "posix" | "sh", _:
             path = Path(home, ".bashrc")
-            ensure_line(path, bash)
+            ensure_line_or_lines(path, bash, logger=logger)
         case None, "zsh", None:
             path = Path(home, ".zshrc")
-            ensure_line(path, bash)
+            ensure_line_or_lines(path, bash, logger=logger)
         case None, "zsh", str():
             path = Path(home, ".zshrc")
-            ensure_line(path, zsh)
+            ensure_line_or_lines(path, zsh, logger=logger)
         case None, "fish", _:
             path = Path(home, ".config/fish/config.fish")
-            ensure_line(path, fish)
+            ensure_line_or_lines(path, fish, logger=logger)
         case str(), "bash" | "posix" | "sh", _:
             text = normalize_multi_line_str(f"""
                 #!/usr/bin/env sh
                 {bash}
             """)
-            ensure_line(f"/etc/profile/{etc}.sh", text)
+            ensure_line_or_lines(f"/etc/profile/{etc}.sh", text, logger=logger)
         case str(), _, _:
             msg = f"Invalid shell for 'etc': {repr_str(SHELL)}"
             raise ValueError(msg)
