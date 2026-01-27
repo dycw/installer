@@ -18,14 +18,12 @@ path_binaries_option = option(
     default=PATH_BINARIES,
     help="Path to the binaries",
 )
-perms_option = option(
-    "--perms", type=Str(), default=PERMISSIONS_BINARY, help="Binary permissions"
-)
-perms_binary_option = option(
-    "--perms-binary", type=Str(), default=PERMISSIONS_BINARY, help="Binary permissions"
-)
+perms_option, perms_binary_option = [
+    option(p, type=Str(), default=PERMISSIONS_BINARY, help="Binary permissions")
+    for p in ["--perms", "--perms-binary"]
+]
 perms_config_option = option(
-    "--perms-config", type=Str(), default=PERMISSIONS_CONFIG, help="Binary permissions"
+    "--perms-config", type=Str(), default=PERMISSIONS_CONFIG, help="Config permissions"
 )
 token_option = option("--token", type=Str(), default=GITHUB_TOKEN, help="GitHub token")
 
