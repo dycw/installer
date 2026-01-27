@@ -129,7 +129,7 @@ class TestCLI:
             param(["starship", "--group", "group"]),
             param(["starship", "--etc"]),
             param(["starship", "--home", "home"]),
-            param(["starship", "--starship.toml", "starship.toml"]),
+            param(["starship", "--starship-toml", "starship.toml"]),
             param(["starship", "--retry", "1", "1"]),
             param(["taplo"], id="taplo"),
             param(["uv"], id="uv"),
