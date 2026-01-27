@@ -16,7 +16,17 @@ from utilities.core import (
     write_text,
 )
 from utilities.shellingham import SHELL, Shell
-from utilities.subprocess import BASH_LS, maybe_sudo_cmd, mkdir, mkdir_cmd, tee, tee_cmd
+from utilities.subprocess import (
+    BASH_LS,
+    chmod,
+    chmod_cmd,
+    chown,
+    maybe_sudo_cmd,
+    mkdir,
+    mkdir_cmd,
+    tee,
+    tee_cmd,
+)
 
 from installer.configs.constants import FILE_SYSTEM_ROOT
 from installer.utilities import ensure_line_or_lines, split_ssh
@@ -33,6 +43,9 @@ def setup_authorized_keys(
     home: PathLike = HOME,
     ssh: str | None = None,
     sudo: bool = False,
+    perms: PermissionsLike | None = None,
+    owner: str | int | None = None,
+    group: str | int | None = None,
     batch_mode: bool = False,
     retry: Retry | None = None,
 ) -> None:
@@ -42,6 +55,10 @@ def setup_authorized_keys(
     text = normalize_str("\n".join(keys))
     if ssh is None:
         tee(path, text, sudo=sudo)
+        if perms is not None:
+            chmod(path, perms, sudo=sudo)
+        if perms is not None:
+            chown(path, sudo=sudo, user=user, group=group)
     else:
         user, hostname = split_ssh(ssh)
         utilities.subprocess.ssh(
@@ -53,6 +70,10 @@ def setup_authorized_keys(
             retry=retry,
             logger=logger,
         )
+        if perms is not None:
+            utilities.subprocess.ssh(
+                user, hostname, *maybe_sudo_cmd(*chmod_cmd(path, perms), sudo=sudo)
+            )
 
 
 ##
