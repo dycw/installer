@@ -285,10 +285,10 @@ def setup_direnv(
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
-    shell: Shell = SHELL,
+    shell: Shell | None = None,
     home: PathLike | None = None,
     perms_config: PermissionsLike = PERMISSIONS_CONFIG,
-    root: PathLike = FILE_SYSTEM_ROOT,
+    root: PathLike | None = None,
     retry: Retry | None = None,
 ) -> None:
     """Setup 'direnv'."""
@@ -307,17 +307,18 @@ def setup_direnv(
             owner=owner,
             group=group,
         )
+        shell_use = SHELL if shell is None else shell
         setup_shell_config(
-            f'eval "$(direnv hook {SHELL})"',
+            f'eval "$(direnv hook {shell_use})"',
             "direnv hook fish | source",
             logger=logger,
             etc="direnv" if etc else None,
-            shell=shell,
+            shell=shell_use,
             home=HOME if home is None else home,
             perms=perms_config,
             owner=owner,
             group=group,
-            root=root,
+            root=FILE_SYSTEM_ROOT if root is None else root,
         )
     else:
         ssh_install(
@@ -541,10 +542,10 @@ def setup_fzf(
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
-    shell: Shell = SHELL,
+    shell: Shell | None = None,
     home: PathLike | None = None,
     perms_config: PermissionsLike = PERMISSIONS_CONFIG,
-    root: PathLike = FILE_SYSTEM_ROOT,
+    root: PathLike | None = None,
     retry: Retry | None = None,
 ) -> None:
     """Setup 'fzf'."""
@@ -560,13 +561,13 @@ def setup_fzf(
             "fzf --fish | source",
             logger=logger,
             etc="fzf" if etc else None,
-            shell=shell,
+            shell=SHELL if shell is None else shell,
             zsh="source <(fzf --zsh)",
             home=HOME if home is None else home,
             perms=perms_config,
             owner=owner,
             group=group,
-            root=root,
+            root=FILE_SYSTEM_ROOT if root is None else root,
         )
     else:
         ssh_install(
@@ -1186,10 +1187,10 @@ def setup_zoxide(
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
-    shell: Shell = SHELL,
+    shell: Shell | None = None,
     home: PathLike | None = None,
     perms_config: PermissionsLike = PERMISSIONS_CONFIG,
-    root: PathLike = FILE_SYSTEM_ROOT,
+    root: PathLike | None = None,
     retry: Retry | None = None,
 ) -> None:
     """Setup 'zoxide'."""
@@ -1201,17 +1202,18 @@ def setup_zoxide(
             src = temp / "zoxide"
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms_binary, owner=owner, group=group)
+        shell_use = SHELL if shell is None else shell
         setup_shell_config(
-            f'eval "$(fzf --{SHELL})"',
+            f'eval "$(fzf --{shell_use})"',
             "zoxide init fish | source",
             logger=logger,
             etc="zoxide" if etc else None,
-            shell=shell,
+            shell=shell_use,
             home=HOME if home is None else home,
             perms=perms_config,
             owner=owner,
             group=group,
-            root=root,
+            root=FILE_SYSTEM_ROOT if root is None else root,
         )
     else:
         ssh_install(
