@@ -127,7 +127,6 @@ class TestCLI:
             param(["starship", "--perms", "perms"]),
             param(["starship", "--owner", "owner"]),
             param(["starship", "--group", "group"]),
-            param(["starship", "--custom-shell-config"]),
             param(["starship", "--etc"]),
             param(["starship", "--home", "home"]),
             param(["starship", "--retry", "1", "1"]),

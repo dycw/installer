@@ -848,12 +848,6 @@ def sops_sub_cmd(
 @perms_option
 @owner_option
 @group_option
-@option(
-    "--custom-shell-config",
-    is_flag=True,
-    default=False,
-    help="Use a custom shell config, so skip the standard one",
-)
 @etc_option
 @home_option
 @retry_option
