@@ -35,6 +35,7 @@ from utilities.subprocess import (
     tee,
     yield_ssh_temp_dir,
 )
+from xdg_base_dirs import xdg_config_home
 
 from installer.apps.constants import (
     GITHUB_TOKEN,
@@ -931,9 +932,9 @@ def setup_starship(
     perms: PermissionsLike = PERMISSIONS,
     owner: str | int | None = None,
     group: str | int | None = None,
-    custom_shell_config: bool = False,
     etc: bool = False,
     home: PathLike | None = None,
+    starship_toml: PathLike | None = None,
     retry: Retry | None = None,
 ) -> None:
     """Setup 'starship'."""
@@ -950,19 +951,20 @@ def setup_starship(
         ) as src:
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        if not custom_shell_config:
-            bash: list[str] = [f'eval "$(starship init {SHELL})"']
-            fish: list[str] = ["starship init fish | source"]
-            if etc:
-                export = "export STARSHIP_CONFIG='/etc/starship.toml'"
-                bash.append(export)
-                fish.append(export)
-            setup_shell_config(
-                bash,
-                fish,
-                etc="starship" if etc else None,
-                home=HOME if home is None else home,
+        export = ["export STARSHIP_CONFIG='/etc/starship.toml'"] if etc else []
+        bash = [*export, f'eval "$(starship init {SHELL})"']
+        fish = [*export, "starship init fish | source"]
+        setup_shell_config(
+            bash,
+            fish,
+            etc="starship" if etc else None,
+            home=HOME if home is None else home,
+        )
+        if starship_toml is not None:
+            dest = (
+                "/etc/starship.toml" if etc else (xdg_config_home() / "starship.toml")
             )
+            cp(starship_toml, dest)
     else:
         ssh_install(
             ssh,
@@ -973,9 +975,9 @@ def setup_starship(
             perms=perms,
             owner=owner,
             group=group,
-            custom_shell_config=custom_shell_config,
             etc=etc,
             home=home,
+            starship_toml=starship_toml,
             retry=retry,
             logger=logger,
         )

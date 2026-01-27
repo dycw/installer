@@ -58,13 +58,13 @@ def ssh_install(
     cmd: str,
     /,
     *args: str,
-    custom_shell_config: bool = False,
     etc: bool = False,
     group: str | int | None = None,
     home: PathLike | None = None,
     owner: str | int | None = None,
     path_binaries: PathLike | None = None,
     perms: PermissionsLike | None = None,
+    starship_toml: PathLike | None = None,
     sudo: bool = False,
     token: SecretLike | None = None,
     user: str | None = None,
@@ -73,8 +73,6 @@ def ssh_install(
 ) -> None:
     ssh_user, ssh_hostname = split_ssh(ssh)
     parts: list[str] = []
-    if custom_shell_config:
-        parts.append("--custom-shell-config")
     if etc:
         parts.append("--etc")
     if group is not None:
@@ -87,6 +85,8 @@ def ssh_install(
         parts.extend(["--path-binaries", str(path_binaries)])
     if perms is not None:
         parts.extend(["--perms", str(Permissions.new(perms))])
+    if starship_toml is not None:
+        parts.extend(["--starship-toml", str(starship_toml)])
     if sudo:
         parts.append("--sudo")
     if token is not None:
