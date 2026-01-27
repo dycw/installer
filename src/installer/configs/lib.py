@@ -56,9 +56,9 @@ def setup_authorized_keys(
     if ssh is None:
         tee(path, text, sudo=sudo)
         if perms is not None:
-            chmod(path, perms, sudo=sudo)
+            chmod(path, perms, sudo=sudo, recursive=True)
         if perms is not None:
-            chown(path, sudo=sudo, user=user, group=group)
+            chown(path, sudo=sudo, user=owner, group=group)
     else:
         user, hostname = split_ssh(ssh)
         utilities.subprocess.ssh(
