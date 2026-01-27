@@ -4,7 +4,7 @@
 
 [dependency-groups]
   dev = [
-    "dycw-utilities[test]>=0.186.10",
+    "dycw-utilities[test]>=0.186.11",
     "orjson>=3.11.5",
     "pyright>=1.1.408",
     "rich>=14.3.1",
@@ -15,7 +15,7 @@
   dependencies = [
     "click>=8.3.1",
     "coloredlogs>=15.0.1",
-    "dycw-utilities>=0.186.10",
+    "dycw-utilities>=0.186.11",
     "inflect>=7.5.0",
     "pydantic>=2.12.5",
     "pygithub>=2.8.1",
@@ -28,13 +28,13 @@
   name = "dycw-installer"
   readme = "README.md"
   requires-python = ">= 3.12"
-  version = "0.5.16"
+  version = "0.5.17"
 
   [project.optional-dependencies]
     cli = [
       "click==8.3.1",
       "coloredlogs==15.0.1",
-      "dycw-utilities==0.186.10",
+      "dycw-utilities==0.186.11",
       "inflect==7.5.0",
       "pydantic==2.12.5",
       "pygithub==2.8.1",
