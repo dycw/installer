@@ -242,11 +242,12 @@ def delta_sub_cmd(
 @path_binaries_option
 @token_option
 @sudo_option
-@perms_option
+@perms_binary_option
 @owner_option
 @group_option
 @etc_option
 @home_option
+@perms_config_option
 @retry_option
 def direnv_sub_cmd(
     *,
@@ -255,11 +256,12 @@ def direnv_sub_cmd(
     path_binaries: PathLike,
     token: SecretLike | None,
     sudo: bool,
-    perms: PermissionsLike,
+    perms_binary: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
     etc: bool,
     home: PathLike,
+    perms_config: PermissionsLike,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
@@ -271,11 +273,12 @@ def direnv_sub_cmd(
         path_binaries=path_binaries,
         token=token,
         sudo=sudo,
-        perms_binary=perms,
+        perms_binary=perms_binary,
         owner=owner,
         group=group,
         etc=etc,
         home=home,
+        perms_config=perms_config,
         retry=retry,
     )
 
@@ -412,11 +415,12 @@ def fd_sub_cmd(
 @token_option
 @path_binaries_option
 @sudo_option
-@perms_option
+@perms_binary_option
 @owner_option
 @group_option
 @etc_option
 @home_option
+@perms_config_option
 @retry_option
 def fzf_sub_cmd(
     *,
@@ -425,11 +429,12 @@ def fzf_sub_cmd(
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
-    perms: PermissionsLike,
+    perms_binary: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
     etc: bool,
     home: PathLike,
+    perms_config: PermissionsLike,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
@@ -441,11 +446,12 @@ def fzf_sub_cmd(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
-        perms_binary=perms,
+        perms_binary=perms_binary,
         owner=owner,
         group=group,
         etc=etc,
         home=home,
+        perms_config=perms_config,
         retry=retry,
     )
 
@@ -1044,11 +1050,12 @@ def yq_sub_cmd(
 @token_option
 @path_binaries_option
 @sudo_option
-@perms_option
+@perms_binary_option
 @owner_option
 @group_option
 @etc_option
 @home_option
+@perms_config_option
 @retry_option
 def zoxide_sub_cmd(
     *,
@@ -1057,11 +1064,12 @@ def zoxide_sub_cmd(
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
-    perms: PermissionsLike,
+    perms_binary: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
     etc: bool,
     home: PathLike,
+    perms_config: PermissionsLike,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
@@ -1073,11 +1081,12 @@ def zoxide_sub_cmd(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
-        perms_binary=perms,
+        perms_binary=perms_binary,
         owner=owner,
         group=group,
         etc=etc,
         home=home,
+        perms_config=perms_config,
         retry=retry,
     )
 
