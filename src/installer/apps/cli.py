@@ -852,7 +852,7 @@ def sops_sub_cmd(
 @etc_option
 @home_option
 @option(
-    "--starship-toml", type=utilities.click.Path(exist="file if exists", default=None)
+    "--starship-toml", type=utilities.click.Path(exist="file if exists"), default=None
 )
 @retry_option
 def starship_sub_cmd(
