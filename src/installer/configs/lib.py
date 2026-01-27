@@ -97,7 +97,7 @@ def setup_shell_config(
                 {bash}
             """)
             ensure_line_or_lines(
-                f"/etc/profile/{etc}.sh",
+                f"/etc/profile.d/{etc}.sh",
                 text,
                 logger=logger,
                 perms=perms,
