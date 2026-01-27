@@ -10,7 +10,6 @@ from utilities.core import (
     ReadTextError,
     always_iterable,
     extract_groups,
-    log_info,
     normalize_str,
     read_text,
     write_text,
@@ -29,7 +28,6 @@ def ensure_line_or_lines(
     line_or_lines: MaybeSequenceStr,
     /,
     *,
-    logger: LoggerLike | None = None,
     perms: PermissionsLike | None = None,
     owner: str | int | None = None,
     group: str | int | None = None,
@@ -38,11 +36,9 @@ def ensure_line_or_lines(
     try:
         contents = read_text(path)
     except ReadTextError:
-        log_info(logger, "Writing %r to %r...", text, str(path))
         write_text(path, text, perms=perms, owner=owner, group=group)
         return
     if text not in contents:
-        log_info(logger, "Appending %r to %r...", text, str(path))
         with Path(path).open(mode="a") as fh:
             _ = fh.write(f"\n\n{text}")
 

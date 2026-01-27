@@ -13,6 +13,7 @@ from utilities.core import (
     normalize_multi_line_str,
     normalize_str,
     repr_str,
+    write_text,
 )
 from utilities.shellingham import SHELL, Shell
 from utilities.subprocess import BASH_LS, maybe_sudo_cmd, mkdir, mkdir_cmd, tee, tee_cmd
@@ -59,48 +60,36 @@ def setup_authorized_keys(
 
 def setup_shell_config(
     bash: MaybeSequenceStr,
+    zsh: MaybeSequenceStr,
     fish: MaybeSequenceStr,
     /,
     *,
-    logger: LoggerLike | None = None,
     etc: str | None = None,
     shell: Shell = SHELL,
-    zsh: str | None = None,
     home: PathLike = HOME,
     perms: PermissionsLike | None = None,
     owner: str | int | None = None,
     group: str | int | None = None,
     root: PathLike = FILE_SYSTEM_ROOT,
 ) -> None:
-    log_info(logger, "Setting up shell config...")
-    match etc, shell, zsh:
-        case None, "bash" | "posix" | "sh", _:
+    match etc, shell:
+        case None, "bash" | "posix" | "sh":
             path = Path(home, ".bashrc")
-            ensure_line_or_lines(
-                path, bash, logger=logger, perms=perms, owner=owner, group=group
-            )
-        case None, "zsh", None:
+            ensure_line_or_lines(path, bash, perms=perms, owner=owner, group=group)
+        case None, "zsh":
             path = Path(home, ".zshrc")
-            ensure_line_or_lines(
-                path, bash, logger=logger, perms=perms, owner=owner, group=group
-            )
-        case None, "zsh", str():
-            path = Path(home, ".zshrc")
-            ensure_line_or_lines(
-                path, zsh, logger=logger, perms=perms, owner=owner, group=group
-            )
-        case None, "fish", _:
+            ensure_line_or_lines(path, zsh, perms=perms, owner=owner, group=group)
+        case None, "fish":
             path = Path(home, ".config/fish/config.fish")
-            ensure_line_or_lines(
-                path, fish, logger=logger, perms=perms, owner=owner, group=group
-            )
-        case str(), "bash" | "posix" | "sh", _:
+            ensure_line_or_lines(path, fish, perms=perms, owner=owner, group=group)
+        case str(), "bash" | "posix" | "sh":
             path = Path(root, f"etc/profile.d/{etc}.sh")
-            lines = ["#!/usr/bin/env sh", *always_iterable(bash)]
-            ensure_line_or_lines(
-                path, lines, logger=logger, perms=perms, owner=owner, group=group
+            lines = ["#!/usr/bin/env sh", "", *always_iterable(bash)]
+            text = normalize_str("\n".join(always_iterable(lines)))
+            write_text(
+                path, text, overwrite=True, perms=perms, owner=owner, group=group
             )
-        case str(), _, _:
+        case str(), _:
             msg = f"Invalid shell for 'etc': {repr_str(shell)}"
             raise ValueError(msg)
         case never:
