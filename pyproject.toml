@@ -3,43 +3,34 @@
   requires = ["uv_build"]
 
 [dependency-groups]
-  dev = [
-    "dycw-utilities[test]>=0.186.13",
-    "orjson>=3.11.5",
-    "pyright>=1.1.408",
-    "rich>=14.3.1",
-  ]
+  dev = ["dycw-utilities[test]>=0.187.0", "orjson>=3.11.5", "pyright>=1.1.408"]
 
 [project]
   authors = [{ email = "d.wan@icloud.com", name = "Derek Wan" }]
   dependencies = [
     "click>=8.3.1",
     "coloredlogs>=15.0.1",
-    "dycw-utilities>=0.186.13",
+    "dycw-utilities>=0.187.0",
     "inflect>=7.5.0",
     "pydantic>=2.12.5",
     "pygithub>=2.8.1",
-    "rich>=14.3.1",
     "shellingham>=1.5.4",
-    "tabulate>=0.9.0",
   ]
   description = "Installer"
   name = "dycw-installer"
   readme = "README.md"
   requires-python = ">= 3.12"
-  version = "0.5.21"
+  version = "0.5.22"
 
   [project.optional-dependencies]
     cli = [
       "click==8.3.1",
       "coloredlogs==15.0.1",
-      "dycw-utilities==0.186.13",
+      "dycw-utilities==0.187.0",
       "inflect==7.5.0",
       "pydantic==2.12.5",
       "pygithub==2.8.1",
-      "rich==14.3.1",
       "shellingham==1.5.4",
-      "tabulate==0.9.0",
     ]
 
   [project.scripts]
