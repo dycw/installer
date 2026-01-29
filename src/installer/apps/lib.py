@@ -391,73 +391,71 @@ def setup_docker(
     user: str | None = None,
     retry: Retry | None = None,
 ) -> None:
-    if ssh is None:
-        match SYSTEM_NAME:
-            case "Darwin":
-                msg = f"Unsupported system: {SYSTEM_NAME!r}"
-                raise ValueError(msg)
-            case "Linux":
-                try:
-                    _ = which("docker")
-                    log_info(logger, "'docker' is already set up")
-                except WhichError:
-                    log_info(logger, "Setting up 'docker'....")
-                    apt_remove(
-                        "docker.io",
-                        "docker-doc",
-                        "docker-compose",
-                        "podman-docker",
-                        "containerd",
-                        "runc",
-                        sudo=sudo,
-                    )
-                    apt_update(sudo=sudo)
-                    apt_install("ca-certificates", "curl", sudo=sudo)
-                    docker_asc = Path("/etc/apt/keyrings/docker.asc")
-                    install(
-                        docker_asc.parent,
-                        directory=True,
-                        mode="u=rwx,g=rx,o=rx",
-                        sudo=sudo,
-                    )
-                    curl(
-                        "https://download.docker.com/linux/debian/gpg",
-                        output=docker_asc,
-                        sudo=sudo,
-                    )
-                    chmod(docker_asc, "u=rw,g=r,o=r", sudo=sudo)
-                    release = Path("/etc/os-release").read_text()
-                    pattern = re.compile(r"^VERSION_CODENAME=(\w+)$")
-                    line = one(
-                        line for line in release.splitlines() if pattern.search(line)
-                    )
-                    codename = extract_group(pattern, line)
-                    tee(
-                        "/etc/apt/sources.list.d/docker.sources",
-                        normalize_multi_line_str(f"""
+    match ssh, SYSTEM_NAME:
+        case None, "Darwin":
+            msg = f"Unsupported system: {SYSTEM_NAME!r}"
+            raise ValueError(msg)
+        case None, "Linux":
+            try:
+                _ = which("docker")
+                log_info(logger, "'docker' is already set up")
+            except WhichError:
+                log_info(logger, "Setting up 'docker'....")
+                apt_remove(
+                    "docker.io",
+                    "docker-doc",
+                    "docker-compose",
+                    "podman-docker",
+                    "containerd",
+                    "runc",
+                    sudo=sudo,
+                )
+                apt_update(sudo=sudo)
+                apt_install("ca-certificates", "curl", sudo=sudo)
+                docker_asc = Path("/etc/apt/keyrings/docker.asc")
+                install(
+                    docker_asc.parent, directory=True, mode="u=rwx,g=rx,o=rx", sudo=sudo
+                )
+                curl(
+                    "https://download.docker.com/linux/debian/gpg",
+                    output=docker_asc,
+                    sudo=sudo,
+                )
+                chmod(docker_asc, "u=rw,g=r,o=r", sudo=sudo)
+                release = Path("/etc/os-release").read_text()
+                pattern = re.compile(r"^VERSION_CODENAME=(\w+)$")
+                line = one(
+                    line for line in release.splitlines() if pattern.search(line)
+                )
+                codename = extract_group(pattern, line)
+                tee(
+                    "/etc/apt/sources.list.d/docker.sources",
+                    normalize_multi_line_str(f"""
                             Types: deb
                             URIs: https://download.docker.com/linux/debian
                             Suites: {codename}
                             Components: stable
                             Signed-By: /etc/apt/keyrings/docker.asc
                         """),
-                        sudo=sudo,
-                    )
-                    apt_install(
-                        "docker-ce",
-                        "docker-ce-cli",
-                        "containerd.io",
-                        "docker-buildx-plugin",
-                        "docker-compose-plugin",
-                        update=True,
-                        sudo=sudo,
-                    )
-                if user is not None:
-                    run(*maybe_sudo_cmd("usermod", "-aG", "docker", user, sudo=sudo))
-                return
-            case never:
-                assert_never(never)
-    ssh_uv_install(ssh, "docker", logger=logger, sudo=sudo, user=user, retry=retry)
+                    sudo=sudo,
+                )
+                apt_install(
+                    "docker-ce",
+                    "docker-ce-cli",
+                    "containerd.io",
+                    "docker-buildx-plugin",
+                    "docker-compose-plugin",
+                    update=True,
+                    sudo=sudo,
+                )
+            if user is not None:
+                run(*maybe_sudo_cmd("usermod", "-aG", "docker", user, sudo=sudo))
+        case str(), _:
+            ssh_uv_install(
+                ssh, "docker", logger=logger, sudo=sudo, user=user, retry=retry
+            )
+        case never:
+            assert_never(never)
 
 
 ##
