@@ -69,8 +69,8 @@ def setup_apt_package(
     package: str,
     /,
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
+    logger: LoggerLike | None = None,
     sudo: bool = False,
     retry: Retry | None = None,
 ) -> None:

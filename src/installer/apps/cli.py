@@ -59,22 +59,22 @@ if TYPE_CHECKING:
 
 
 @argument("package", type=str)
-@logger_option
 @ssh_option
+@logger_option
 @sudo_option
 @retry_option
 def apt_package_sub_cmd(
     *,
     package: str,
-    logger: LoggerLike | None,
     ssh: str | None,
+    logger: LoggerLike | None,
     sudo: bool,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=logger)
-    setup_apt_package(package, logger=logger, ssh=ssh, sudo=sudo, retry=retry)
+    setup_apt_package(package, ssh=ssh, logger=logger, sudo=sudo, retry=retry)
 
 
 ##

@@ -20,6 +20,10 @@ class TestCLI:
         [
             ##
             param(["apt-package", "git"], id="apt-package"),
+            param(["apt-package", "git", "--ssh", "user@hostname"]),
+            param(["apt-package", "git", "--logger", "logger"]),
+            param(["apt-package", "git", "--sudo"]),
+            param(["apt-package", "git", "--retry", "1", "1"]),
             param(["age"], id="age"),
             param(["age", "--logger", "logger"]),
             param(["age", "--ssh", "user@hostname"]),
