@@ -690,9 +690,7 @@ def setup_jq(
     group: str | int | None = None,
 ) -> None:
     """Set up 'jq'."""
-    if (shutil.which("jq") is None) and not force:
-        log_info(logger, "'jq' is already set up")
-    else:
+    if (shutil.which("jq") is None) or force:
         log_info(logger, "Setting up 'jq'...")
         dest = Path(path_binaries, "jq")
         setup_asset(
@@ -708,6 +706,8 @@ def setup_jq(
             owner=owner,
             group=group,
         )
+    else:
+        log_info(logger, "'jq' is already set up")
 
 
 ##
@@ -1303,8 +1303,9 @@ def setup_yq(
 
 def setup_zoxide(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
+    force: bool = False,
+    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -1319,45 +1320,62 @@ def setup_zoxide(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'zoxide'."""
-    log_info(logger, "Setting up 'zoxide'...")
-    if ssh is None:
-        with yield_gzip_asset(
-            "ajeetdsouza", "zoxide", token=token, match_system=True, match_machine=True
-        ) as temp:
-            src = temp / "zoxide"
-            dest = Path(path_binaries, src.name)
-            cp(src, dest, sudo=sudo, perms=perms_binary, owner=owner, group=group)
-        shell_use = SHELL if shell is None else shell
-        setup_shell_config(
-            'eval "$(zoxide init --cmd j bash)"',
-            'eval "$(zoxide init --cmd j zsh)"',
-            "zoxide init --cmd j fish | source",
-            etc="zoxide" if etc else None,
-            shell=shell_use,
-            home=HOME if home is None else home,
-            perms=perms_config,
-            owner=owner,
-            group=group,
-            root=FILE_SYSTEM_ROOT if root is None else root,
-        )
-        return
-    ssh_uv_install(
-        ssh,
-        "zoxide",
-        token=token,
-        path_binaries=path_binaries,
-        sudo=sudo,
-        perms_binary=perms_binary,
-        owner=owner,
-        group=group,
-        etc=etc,
-        shell=shell,
-        home=home,
-        perms_config=perms_config,
-        root=root,
-        retry=retry,
-        logger=logger,
-    )
+    match ssh:
+        case None:
+            if (shutil.which("zoxide") is None) or force:
+                log_info(logger, "Setting up 'zoxide'...")
+                with yield_gzip_asset(
+                    "ajeetdsouza",
+                    "zoxide",
+                    token=token,
+                    match_system=True,
+                    match_machine=True,
+                ) as temp:
+                    src = temp / "zoxide"
+                    dest = Path(path_binaries, src.name)
+                    cp(
+                        src,
+                        dest,
+                        sudo=sudo,
+                        perms=perms_binary,
+                        owner=owner,
+                        group=group,
+                    )
+                shell_use = SHELL if shell is None else shell
+                setup_shell_config(
+                    'eval "$(zoxide init --cmd j bash)"',
+                    'eval "$(zoxide init --cmd j zsh)"',
+                    "zoxide init --cmd j fish | source",
+                    etc="zoxide" if etc else None,
+                    shell=shell_use,
+                    home=HOME if home is None else home,
+                    perms=perms_config,
+                    owner=owner,
+                    group=group,
+                    root=FILE_SYSTEM_ROOT if root is None else root,
+                )
+            else:
+                log_info(logger, "'zoxide' is already set up")
+        case str():
+            ssh_uv_install(
+                ssh,
+                "zoxide",
+                token=token,
+                path_binaries=path_binaries,
+                sudo=sudo,
+                perms_binary=perms_binary,
+                owner=owner,
+                group=group,
+                etc=etc,
+                shell=shell,
+                home=home,
+                perms_config=perms_config,
+                root=root,
+                retry=retry,
+                logger=logger,
+            )
+        case never:
+            assert_never(never)
 
 
 __all__ = [

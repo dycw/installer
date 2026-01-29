@@ -1088,8 +1088,9 @@ def yq_sub_cmd(
 ##
 
 
-@logger_option
 @ssh_option
+@force_option
+@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -1104,8 +1105,9 @@ def yq_sub_cmd(
 @retry_option
 def zoxide_sub_cmd(
     *,
-    logger: LoggerLike | None,
     ssh: str | None,
+    force: bool,
+    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -1123,8 +1125,9 @@ def zoxide_sub_cmd(
         return
     basic_config(obj=logger)
     setup_zoxide(
-        logger=logger,
         ssh=ssh,
+        force=force,
+        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
