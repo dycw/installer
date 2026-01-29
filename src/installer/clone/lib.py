@@ -32,28 +32,14 @@ def git_clone(
     branch: str | None = None,
 ) -> None:
     log_info(logger, "Cloning repository...")
-    _git_clone_prepare(key, logger=logger, home=home, host=host, retry=retry, port=port)
-    stem = Path(key).stem
-    utilities.subprocess.git_clone(f"git@{stem}:{owner}/{repo}", dest, branch=branch)
-
-
-def _git_clone_prepare(
-    key: PathLike,
-    /,
-    *,
-    logger: LoggerLike | None = None,
-    home: PathLike = HOME,
-    host: str = GIT_CLONE_HOST,
-    retry: Retry | None = None,
-    port: int | None = None,
-) -> None:
-    key = Path(key)
     setup_ssh_config(logger=logger, home=home)
     _set_up_deploy_key(key, logger=logger, home=home)
     _set_up_ssh_conf(key, logger=logger, home=home, host=host, port=port)
     _set_up_known_hosts(  # last step
         logger=logger, host=host, home=home, retry=retry, port=port
     )
+    stem = Path(key).stem
+    utilities.subprocess.git_clone(f"git@{stem}:{owner}/{repo}", dest, branch=branch)
 
 
 def _set_up_deploy_key(
