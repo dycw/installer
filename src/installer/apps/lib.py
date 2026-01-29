@@ -732,7 +732,7 @@ def setup_pve_fake_subscription(
     log_info(logger, "Setting up 'restic'...")
     if ssh is None:
         match SYSTEM_NAME:
-            case "Darwin":
+            case "Darwinnn":
                 msg = f"Unsupported system: {SYSTEM_NAME!r}"
                 raise ValueError(msg)
             case "Linux":
