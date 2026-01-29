@@ -34,6 +34,7 @@ from installer.apps.lib import (
     setup_jq,
     setup_just,
     setup_neovim,
+    setup_pve_fake_subscription,
     setup_restic,
     setup_ripgrep,
     setup_rsync,
@@ -596,6 +597,26 @@ def neovim_sub_cmd(
 
 
 @logger_option
+@token_option
+@ssh_option
+@retry_option
+def pve_fake_subscription_sub_cmd(
+    *,
+    logger: LoggerLike | None,
+    token: SecretLike | None,
+    ssh: str | None,
+    retry: Retry | None,
+) -> None:
+    if is_pytest():
+        return
+    basic_config(obj=logger)
+    setup_pve_fake_subscription(logger=logger, token=token, ssh=ssh, retry=retry)
+
+
+##
+
+
+@logger_option
 @ssh_option
 @token_option
 @path_binaries_option
@@ -1131,6 +1152,7 @@ __all__ = [
     "jq_sub_cmd",
     "just_sub_cmd",
     "neovim_sub_cmd",
+    "pve_fake_subscription_sub_cmd",
     "restic_sub_cmd",
     "ripgrep_sub_cmd",
     "rsync_sub_cmd",

@@ -312,7 +312,7 @@ wheels = [
 
 [[package]]
 name = "dycw-installer"
-version = "0.6.0"
+version = "0.6.1"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
@@ -335,7 +335,7 @@ dev = [
 requires-dist = [
     { name = "click", specifier = ">=8.3.1" },
     { name = "coloredlogs", specifier = ">=15.0.1" },
-    { name = "dycw-utilities", specifier = ">=0.187.2" },
+    { name = "dycw-utilities", specifier = ">=0.187.3" },
     { name = "inflect", specifier = ">=7.5.0" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pygithub", specifier = ">=2.8.1" },
@@ -345,7 +345,7 @@ provides-extras = ["cli"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "dycw-utilities", extras = ["test"], specifier = ">=0.187.2" },
+    { name = "dycw-utilities", extras = ["test"], specifier = ">=0.187.3" },
     { name = "orjson", specifier = ">=3.11.5" },
     { name = "pyright", specifier = ">=1.1.408" },
 ]
@@ -364,7 +364,7 @@ wheels = [
 
 [[package]]
 name = "dycw-utilities"
-version = "0.187.2"
+version = "0.187.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "rich" },
@@ -374,7 +374,7 @@ dependencies = [
     { name = "whenever" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4e/97/e33037687ceb5b156befe496a8b2347490cdad1de2b44042539de192a405/dycw_utilities-0.187.2-py3-none-any.whl", hash = "sha256:0338f2249047dbaeeb01e08b55fd0ef487aee0d9ecd1cf133fb6633e18e8b808", size = 209993, upload-time = "2026-01-29T06:49:28.712Z" },
+    { url = "https://files.pythonhosted.org/packages/9b/36/4febdb8be9a5c52d9d97a7eca3e701655036898ed0244d90c767c7b77d4a/dycw_utilities-0.187.3-py3-none-any.whl", hash = "sha256:1c2f68d912471c244ce3db7d1b2be4bcc8c7359123b40dad06dc9081a6d7afbc", size = 209997, upload-time = "2026-01-29T07:28:24.405Z" },
 ]
 
 [package.optional-dependencies]
