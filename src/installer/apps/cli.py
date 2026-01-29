@@ -65,8 +65,8 @@ if TYPE_CHECKING:
 @retry_option
 def apt_package_sub_cmd(
     *,
-    logger: LoggerLike | None,
     package: str,
+    logger: LoggerLike | None,
     ssh: str | None,
     sudo: bool,
     retry: Retry | None,
