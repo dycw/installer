@@ -32,8 +32,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
 
-    from utilities.pydantic import SecretLike
-    from utilities.types import LoggerLike, MaybeSequenceStr
+    from utilities.types import LoggerLike, MaybeSequenceStr, SecretLike
 
 
 @contextmanager

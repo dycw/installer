@@ -18,9 +18,14 @@ from utilities.pydantic import extract_secret
 from utilities.subprocess import uv_tool_run_cmd
 
 if TYPE_CHECKING:
-    from utilities.pydantic import SecretLike
     from utilities.shellingham import Shell
-    from utilities.types import LoggerLike, MaybeSequenceStr, PathLike, Retry
+    from utilities.types import (
+        LoggerLike,
+        MaybeSequenceStr,
+        PathLike,
+        Retry,
+        SecretLike,
+    )
 
 
 def ensure_line_or_lines(
