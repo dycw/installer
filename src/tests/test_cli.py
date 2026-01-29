@@ -185,12 +185,23 @@ class TestCLI:
         result = runner.invoke(cli, commands)
         assert result.exit_code == 0, result.stderr
 
+    @mark.parametrize(
+        "args",
+        [
+            param([]),
+            param(["--logger", "logger"]),
+            param(["--host", "host"]),
+            param(["--port", "1234"]),
+            param(["--dest", "dest"]),
+            param(["--branch", "branch"]),
+        ],
+    )
     @throttle_test(duration=MINUTE)
-    def test_git_clone(self, *, tmp_path: Path) -> None:
+    def test_git_clone(self, *, tmp_path: Path, args: list[str]) -> None:
         key = tmp_path / "key.txt"
         key.touch()
         runner = CliRunner()
-        result = runner.invoke(cli, ["git-clone", str(key), "owner", "repo"])
+        result = runner.invoke(cli, ["git-clone", str(key), "owner", "repo", *args])
         assert result.exit_code == 0, result.stderr
 
     @throttle_test(duration=MINUTE)

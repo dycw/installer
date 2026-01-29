@@ -312,7 +312,7 @@ wheels = [
 
 [[package]]
 name = "dycw-installer"
-version = "0.5.26"
+version = "0.6.0"
 source = { editable = "." }
 dependencies = [
     { name = "click" },

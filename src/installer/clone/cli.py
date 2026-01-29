@@ -8,20 +8,18 @@ from utilities.click import Str
 from utilities.core import is_pytest
 from utilities.logging import basic_config
 
-from installer.click import logger_option, retry_option, ssh_option
+from installer.click import logger_option
 from installer.clone.constants import GIT_CLONE_HOST
 from installer.clone.lib import git_clone
 
 if TYPE_CHECKING:
-    from utilities.types import LoggerLike, PathLike, Retry
+    from utilities.types import LoggerLike, PathLike
 
 
 @argument("key", type=utilities.click.Path(exist="existing file"))
 @argument("owner", type=Str())
 @argument("repo", type=Str())
 @logger_option
-@ssh_option
-@retry_option
 @option("--host", type=Str(), default=GIT_CLONE_HOST, help="Repository host")
 @option("--port", type=int, default=None, help="Repository port")
 @option(
@@ -37,8 +35,6 @@ def git_clone_sub_cmd(
     owner: str,
     repo: str,
     logger: LoggerLike | None,
-    ssh: str | None,
-    retry: Retry | None,
     host: str,
     port: int | None,
     dest: PathLike,
@@ -48,16 +44,7 @@ def git_clone_sub_cmd(
         return
     basic_config(obj=logger)
     git_clone(
-        key,
-        owner,
-        repo,
-        logger=logger,
-        ssh=ssh,
-        retry=retry,
-        host=host,
-        port=port,
-        dest=dest,
-        branch=branch,
+        key, owner, repo, logger=logger, host=host, port=port, dest=dest, branch=branch
     )
 
 
