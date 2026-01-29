@@ -50,8 +50,10 @@ def _git_clone_prepare(
     key = Path(key)
     setup_ssh_config(logger=logger, home=home)
     _set_up_deploy_key(key, logger=logger, home=home)
-    _set_up_known_hosts(logger=logger, host=host, home=home, retry=retry, port=port)
     _set_up_ssh_conf(key, logger=logger, home=home, host=host, port=port)
+    _set_up_known_hosts(  # last step
+        logger=logger, host=host, home=home, retry=retry, port=port
+    )
 
 
 def _set_up_deploy_key(
