@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from click import option
-from utilities.click import Path, Str
+from utilities.click import Path, SecretStr, Str
 
 from installer.apps.constants import (
     GITHUB_TOKEN,
@@ -25,7 +25,9 @@ perms_option, perms_binary_option = [
 perms_config_option = option(
     "--perms-config", type=Str(), default=PERMISSIONS_CONFIG, help="Config permissions"
 )
-token_option = option("--token", type=Str(), default=GITHUB_TOKEN, help="GitHub token")
+token_option = option(
+    "--token", type=SecretStr(), default=GITHUB_TOKEN, help="GitHub token"
+)
 
 
 __all__ = [
