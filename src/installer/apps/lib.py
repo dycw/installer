@@ -76,18 +76,24 @@ def setup_apt_package(
     retry: Retry | None = None,
 ) -> None:
     """Setup an 'apt' package."""
-    log_info(logger, "Setting up 'apt' package...")
     if ssh is None:
         match SYSTEM_NAME:
             case "Darwin":
                 msg = f"Unsupported system: {SYSTEM_NAME!r}"
                 raise ValueError(msg)
             case "Linux":
-                run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
-                run(*maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo))
+                try:
+                    _ = which(package)
+                except WhichError:
+                    log_info(logger, "Setting up 'apt' package %r...", package)
+                    run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
+                    run(*maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo))
+                else:
+                    log_info(logger, "'apt' package %r is already installed", package)
             case never:
                 assert_never(never)
     else:
+        log_info(logger, "Setting up 'apt' package on %r...", ssh)
         user, hostname = split_ssh(ssh)
         cmds: list[list[str]] = [
             maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
