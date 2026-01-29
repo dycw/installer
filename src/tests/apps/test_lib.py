@@ -181,7 +181,7 @@ class TestSetupJq:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_jq(path_binaries=tmp_path)
+        setup_jq(path_binaries=tmp_path, force=True)
         result = run(str(tmp_path / "jq"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage:\tjq [options] <jq filter> [file...]

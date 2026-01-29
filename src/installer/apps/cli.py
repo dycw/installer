@@ -9,6 +9,7 @@ from utilities.core import PermissionsLike, is_pytest
 from utilities.logging import basic_config
 
 from installer.apps.click import (
+    force_option,
     group_option,
     owner_option,
     path_binaries_option,
@@ -489,6 +490,7 @@ def git_sub_cmd(
 
 
 @logger_option
+@force_option
 @path_binaries_option
 @token_option
 @sudo_option
@@ -498,6 +500,7 @@ def git_sub_cmd(
 def jq_sub_cmd(
     *,
     logger: LoggerLike | None,
+    force: bool,
     path_binaries: PathLike,
     token: SecretLike | None,
     sudo: bool,
@@ -509,6 +512,7 @@ def jq_sub_cmd(
         return
     basic_config(obj=logger)
     setup_jq(
+        force=force,
         logger=logger,
         path_binaries=path_binaries,
         token=token,

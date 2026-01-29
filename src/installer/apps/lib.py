@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import shutil
 from pathlib import Path
 from shlex import join
 from typing import TYPE_CHECKING, assert_never
@@ -679,6 +680,7 @@ def setup_git(
 
 def setup_jq(
     *,
+    force: bool = False,
     logger: LoggerLike | None = None,
     path_binaries: PathLike = PATH_BINARIES,
     token: SecretLike | None = GITHUB_TOKEN,
@@ -688,10 +690,9 @@ def setup_jq(
     group: str | int | None = None,
 ) -> None:
     """Set up 'jq'."""
-    try:
-        _ = which("jq")
+    if (shutil.which("jq") is None) and not force:
         log_info(logger, "'jq' is already set up")
-    except WhichError:
+    else:
         log_info(logger, "Setting up 'jq'...")
         dest = Path(path_binaries, "jq")
         setup_asset(
