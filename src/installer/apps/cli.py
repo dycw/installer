@@ -489,8 +489,8 @@ def git_sub_cmd(
 ##
 
 
-@logger_option
 @force_option
+@logger_option
 @path_binaries_option
 @token_option
 @sudo_option
@@ -499,8 +499,8 @@ def git_sub_cmd(
 @group_option
 def jq_sub_cmd(
     *,
-    logger: LoggerLike | None,
     force: bool,
+    logger: LoggerLike | None,
     path_binaries: PathLike,
     token: SecretLike | None,
     sudo: bool,

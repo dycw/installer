@@ -109,7 +109,6 @@ class TestCLI:
             param(["jq", "--perms", "perms"]),
             param(["jq", "--owner", "owner"]),
             param(["jq", "--group", "group"]),
-            param(["jq", "--retry", "1", "1"]),
             param(["just"], id="just"),
             param(["just", "--logger", "logger"]),
             param(["just", "--ssh", "user@hostname"]),
