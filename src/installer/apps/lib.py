@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import shutil
 from pathlib import Path
 from shlex import join
 from typing import TYPE_CHECKING, assert_never
@@ -16,7 +17,6 @@ from utilities.core import (
     one,
     which,
 )
-from utilities.logging import to_logger
 from utilities.subprocess import (
     APT_UPDATE,
     BASH_LS,
@@ -70,37 +70,41 @@ def setup_apt_package(
     package: str,
     /,
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
+    logger: LoggerLike | None = None,
     sudo: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Setup an 'apt' package."""
-    log_info(logger, "Setting up 'apt' package...")
-    if ssh is None:
-        match SYSTEM_NAME:
-            case "Darwin":
-                msg = f"Unsupported system: {SYSTEM_NAME!r}"
-                raise ValueError(msg)
-            case "Linux":
+    match ssh, SYSTEM_NAME:
+        case None, "Darwin":
+            msg = f"Unsupported system: {SYSTEM_NAME!r}"
+            raise ValueError(msg)
+        case None, "Linux":
+            try:
+                _ = which(package)
+                log_info(logger, "'apt' package %r is already set up", package)
+            except WhichError:
+                log_info(logger, "Setting up 'apt' package %r...", package)
                 run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
                 run(*maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo))
-            case never:
-                assert_never(never)
-    else:
-        user, hostname = split_ssh(ssh)
-        cmds: list[list[str]] = [
-            maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
-            maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo),
-        ]
-        utilities.subprocess.ssh(
-            user,
-            hostname,
-            *BASH_LS,
-            input=normalize_str("\n".join(map(join, cmds))),
-            retry=retry,
-            logger=logger,
-        )
+        case str(), _:
+            user, hostname = split_ssh(ssh)
+            log_info(logger, "Setting up 'apt' package %r on %r...", package, hostname)
+            cmds: list[list[str]] = [
+                maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
+                maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo),
+            ]
+            utilities.subprocess.ssh(
+                user,
+                hostname,
+                *BASH_LS,
+                input=normalize_str("\n".join(map(join, cmds))),
+                retry=retry,
+                logger=logger,
+            )
+        case never:
+            assert_never(never)
 
 
 ##
@@ -159,35 +163,40 @@ def setup_age(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'age'."""
-    log_info(logger, "Setting up 'age'...")
-    if ssh is None:
-        with yield_gzip_asset(
-            "FiloSottile",
-            "age",
-            token=token,
-            match_system=True,
-            match_machine=True,
-            not_endswith=["proof"],
-        ) as temp:
-            downloads: list[Path] = []
-            for src in temp.iterdir():
-                if src.name.startswith("age"):
-                    dest = Path(path_binaries, src.name)
-                    cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-                    downloads.append(dest)
-    else:
-        ssh_uv_install(
-            ssh,
-            "age",
-            token=token,
-            path_binaries=path_binaries,
-            sudo=sudo,
-            perms=perms,
-            owner=owner,
-            group=group,
-            retry=retry,
-            logger=logger,
-        )
+    match ssh:
+        case None:
+            try:
+                _ = which("age")
+                log_info(logger, "'age' is already set up")
+            except WhichError:
+                log_info(logger, "Setting up 'age'...")
+                with yield_gzip_asset(
+                    "FiloSottile",
+                    "age",
+                    token=token,
+                    match_system=True,
+                    match_machine=True,
+                    not_endswith=["proof"],
+                ) as temp:
+                    srcs = {p for p in temp.iterdir() if p.name.startswith("age")}
+                    for src in srcs:
+                        dest = Path(path_binaries, src.name)
+                        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+        case str():
+            ssh_uv_install(
+                ssh,
+                "age",
+                logger=logger,
+                token=token,
+                path_binaries=path_binaries,
+                sudo=sudo,
+                perms=perms,
+                owner=owner,
+                group=group,
+                retry=retry,
+            )
+        case never:
+            assert_never(never)
 
 
 ##
@@ -204,18 +213,22 @@ def setup_bat(
     group: str | int | None = None,
 ) -> None:
     """Set up 'bat'."""
-    log_info(logger, "Setting up 'bat'...")
-    with yield_gzip_asset(
-        "sharkdp",
-        "bat",
-        token=token,
-        match_system=True,
-        match_c_std_lib=True,
-        match_machine=True,
-    ) as temp:
-        src = temp / "bat"
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    try:
+        _ = which("bat")
+        log_info(logger, "'bat' is already set up")
+    except WhichError:
+        log_info(logger, "Setting up 'bat'...")
+        with yield_gzip_asset(
+            "sharkdp",
+            "bat",
+            token=token,
+            match_system=True,
+            match_c_std_lib=True,
+            match_machine=True,
+        ) as temp:
+            src = temp / "bat"
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
 
 ##
@@ -232,19 +245,23 @@ def setup_bottom(
     group: str | int | None = None,
 ) -> None:
     """Set up 'bottom'."""
-    log_info(logger, "Setting up 'bottom'...")
-    with yield_gzip_asset(
-        "ClementTsang",
-        "bottom",
-        token=token,
-        match_system=True,
-        match_c_std_lib=True,
-        match_machine=True,
-        not_matches=[r"\d+\.tar\.gz$"],
-    ) as temp:
-        src = temp / "btm"
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    try:
+        _ = which("btm")
+        log_info(logger, "'bottom' is already set up")
+    except WhichError:
+        log_info(logger, "Setting up 'bottom'...")
+        with yield_gzip_asset(
+            "ClementTsang",
+            "bottom",
+            token=token,
+            match_system=True,
+            match_c_std_lib=True,
+            match_machine=True,
+            not_matches=[r"\d+\.tar\.gz$"],
+        ) as temp:
+            src = temp / "btm"
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
 
 ##
@@ -252,14 +269,13 @@ def setup_bottom(
 
 def setup_curl(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
+    logger: LoggerLike | None = None,
     sudo: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Set up 'curl'."""
-    log_info(logger, "Setting up 'curl'...")
-    setup_apt_package("curl", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
+    setup_apt_package("curl", ssh=ssh, logger=logger, sudo=sudo, retry=retry)
 
 
 ##
@@ -276,18 +292,22 @@ def setup_delta(
     group: str | int | None = None,
 ) -> None:
     """Set up 'delta'."""
-    log_info(logger, "Setting up 'delta'...")
-    with yield_gzip_asset(
-        "dandavison",
-        "delta",
-        token=token,
-        match_system=True,
-        match_c_std_lib=True,
-        match_machine=True,
-    ) as temp:
-        src = temp / "delta"
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    try:
+        _ = which("delta")
+        log_info(logger, "'delta' is already set up")
+    except WhichError:
+        log_info(logger, "Setting up 'delta'...")
+        with yield_gzip_asset(
+            "dandavison",
+            "delta",
+            token=token,
+            match_system=True,
+            match_c_std_lib=True,
+            match_machine=True,
+        ) as temp:
+            src = temp / "delta"
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
 
 ##
@@ -295,8 +315,8 @@ def setup_delta(
 
 def setup_direnv(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
+    logger: LoggerLike | None = None,
     path_binaries: PathLike = PATH_BINARIES,
     token: SecretLike | None = GITHUB_TOKEN,
     sudo: bool = False,
@@ -311,51 +331,59 @@ def setup_direnv(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'direnv'."""
-    log_info(logger, "Setting up 'direnv'...")
-    if ssh is None:
-        dest = Path(path_binaries, "direnv")
-        setup_asset(
-            "direnv",
-            "direnv",
-            dest,
-            token=token,
-            match_system=True,
-            match_machine=True,
-            sudo=sudo,
-            perms=perms_binary,
-            owner=owner,
-            group=group,
-        )
-        setup_shell_config(
-            'eval "$(direnv hook bash)"',
-            'eval "$(direnv hook fish)"',
-            "direnv hook fish | source",
-            etc="direnv" if etc else None,
-            shell=SHELL if shell is None else shell,
-            home=HOME if home is None else home,
-            perms=perms_config,
-            owner=owner,
-            group=group,
-            root=FILE_SYSTEM_ROOT if root is None else root,
-        )
-    else:
-        ssh_uv_install(
-            ssh,
-            "direnv",
-            path_binaries=path_binaries,
-            token=token,
-            sudo=sudo,
-            perms_binary=perms_binary,
-            owner=owner,
-            group=group,
-            etc=etc,
-            shell=shell,
-            home=home,
-            perms_config=perms_config,
-            root=root,
-            retry=retry,
-            logger=logger,
-        )
+    match ssh:
+        case None:
+            try:
+                _ = which("direnv")
+                log_info(logger, "'direnv' is already set up")
+            except WhichError:
+                log_info(logger, "Setting up 'direnv'...")
+                if ssh is None:
+                    dest = Path(path_binaries, "direnv")
+                    setup_asset(
+                        "direnv",
+                        "direnv",
+                        dest,
+                        token=token,
+                        match_system=True,
+                        match_machine=True,
+                        sudo=sudo,
+                        perms=perms_binary,
+                        owner=owner,
+                        group=group,
+                    )
+                    setup_shell_config(
+                        'eval "$(direnv hook bash)"',
+                        'eval "$(direnv hook fish)"',
+                        "direnv hook fish | source",
+                        etc="direnv" if etc else None,
+                        shell=SHELL if shell is None else shell,
+                        home=HOME if home is None else home,
+                        perms=perms_config,
+                        owner=owner,
+                        group=group,
+                        root=FILE_SYSTEM_ROOT if root is None else root,
+                    )
+        case str():
+            ssh_uv_install(
+                ssh,
+                "direnv",
+                logger=logger,
+                path_binaries=path_binaries,
+                token=token,
+                sudo=sudo,
+                perms_binary=perms_binary,
+                owner=owner,
+                group=group,
+                etc=etc,
+                shell=shell,
+                home=home,
+                perms_config=perms_config,
+                root=root,
+                retry=retry,
+            )
+        case never:
+            assert_never(never)
 
 
 ##
@@ -363,80 +391,77 @@ def setup_direnv(
 
 def setup_docker(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
+    logger: LoggerLike | None = None,
     sudo: bool = False,
     user: str | None = None,
     retry: Retry | None = None,
 ) -> None:
-    log_info(logger, "Setting up 'docker'....")
-    if ssh is None:
-        match SYSTEM_NAME:
-            case "Darwin":
-                msg = f"Unsupported system: {SYSTEM_NAME!r}"
-                raise ValueError(msg)
-            case "Linux":
-                try:
-                    _ = which("docker")
-                except WhichError:
-                    apt_remove(
-                        "docker.io",
-                        "docker-doc",
-                        "docker-compose",
-                        "podman-docker",
-                        "containerd",
-                        "runc",
-                        sudo=sudo,
-                    )
-                    apt_update(sudo=sudo)
-                    apt_install("ca-certificates", "curl", sudo=sudo)
-                    docker_asc = Path("/etc/apt/keyrings/docker.asc")
-                    install(
-                        docker_asc.parent,
-                        directory=True,
-                        mode="u=rwx,g=rx,o=rx",
-                        sudo=sudo,
-                    )
-                    curl(
-                        "https://download.docker.com/linux/debian/gpg",
-                        output=docker_asc,
-                        sudo=sudo,
-                    )
-                    chmod(docker_asc, "u=rw,g=r,o=r", sudo=sudo)
-                    release = Path("/etc/os-release").read_text()
-                    pattern = re.compile(r"^VERSION_CODENAME=(\w+)$")
-                    line = one(
-                        line for line in release.splitlines() if pattern.search(line)
-                    )
-                    codename = extract_group(pattern, line)
-                    tee(
-                        "/etc/apt/sources.list.d/docker.sources",
-                        normalize_multi_line_str(f"""
+    match ssh, SYSTEM_NAME:
+        case None, "Darwin":
+            msg = f"Unsupported system: {SYSTEM_NAME!r}"
+            raise ValueError(msg)
+        case None, "Linux":
+            try:
+                _ = which("docker")
+                log_info(logger, "'docker' is already set up")
+            except WhichError:
+                log_info(logger, "Setting up 'docker'....")
+                apt_remove(
+                    "docker.io",
+                    "docker-doc",
+                    "docker-compose",
+                    "podman-docker",
+                    "containerd",
+                    "runc",
+                    sudo=sudo,
+                )
+                apt_update(sudo=sudo)
+                apt_install("ca-certificates", "curl", sudo=sudo)
+                docker_asc = Path("/etc/apt/keyrings/docker.asc")
+                install(
+                    docker_asc.parent, directory=True, mode="u=rwx,g=rx,o=rx", sudo=sudo
+                )
+                curl(
+                    "https://download.docker.com/linux/debian/gpg",
+                    output=docker_asc,
+                    sudo=sudo,
+                )
+                chmod(docker_asc, "u=rw,g=r,o=r", sudo=sudo)
+                release = Path("/etc/os-release").read_text()
+                pattern = re.compile(r"^VERSION_CODENAME=(\w+)$")
+                line = one(
+                    line for line in release.splitlines() if pattern.search(line)
+                )
+                codename = extract_group(pattern, line)
+                tee(
+                    "/etc/apt/sources.list.d/docker.sources",
+                    normalize_multi_line_str(f"""
                             Types: deb
                             URIs: https://download.docker.com/linux/debian
                             Suites: {codename}
                             Components: stable
                             Signed-By: /etc/apt/keyrings/docker.asc
                         """),
-                        sudo=sudo,
-                    )
-                    apt_install(
-                        "docker-ce",
-                        "docker-ce-cli",
-                        "containerd.io",
-                        "docker-buildx-plugin",
-                        "docker-compose-plugin",
-                        update=True,
-                        sudo=sudo,
-                    )
-                if user is not None:
-                    run(*maybe_sudo_cmd("usermod", "-aG", "docker", user, sudo=sudo))
-                if logger is not None:
-                    to_logger(logger).info("Installing 'docker'...")
-            case never:
-                assert_never(never)
-    else:
-        ssh_uv_install(ssh, "docker", sudo=sudo, user=user, retry=retry, logger=logger)
+                    sudo=sudo,
+                )
+                apt_install(
+                    "docker-ce",
+                    "docker-ce-cli",
+                    "containerd.io",
+                    "docker-buildx-plugin",
+                    "docker-compose-plugin",
+                    update=True,
+                    sudo=sudo,
+                )
+            if user is not None:
+                run(*maybe_sudo_cmd("usermod", "-aG", "docker", user, sudo=sudo))
+        case str(), _:
+            ssh_uv_install(
+                ssh, "docker", logger=logger, sudo=sudo, user=user, retry=retry
+            )
+        case never:
+            assert_never(never)
 
 
 ##
@@ -453,25 +478,29 @@ def setup_dust(
     group: str | int | None = None,
 ) -> None:
     """Set up 'dust'."""
-    log_info(logger, "Setting up 'dust'....")
-    match SYSTEM_NAME:
-        case "Darwin":
-            match_machine = False
-        case "Linux":
-            match_machine = True
-        case never:
-            assert_never(never)
-    with yield_gzip_asset(
-        "bootandy",
-        "dust",
-        token=token,
-        match_system=True,
-        match_c_std_lib=True,
-        match_machine=match_machine,
-    ) as temp:
-        src = temp / "dust"
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    try:
+        _ = which("dust")
+        log_info(logger, "'dust' is already set up")
+    except WhichError:
+        log_info(logger, "Setting up 'dust'....")
+        match SYSTEM_NAME:
+            case "Darwin":
+                match_machine = False
+            case "Linux":
+                match_machine = True
+            case never:
+                assert_never(never)
+        with yield_gzip_asset(
+            "bootandy",
+            "dust",
+            token=token,
+            match_system=True,
+            match_c_std_lib=True,
+            match_machine=match_machine,
+        ) as temp:
+            src = temp / "dust"
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
 
 ##
@@ -488,34 +517,38 @@ def setup_eza(
     group: str | int | None = None,
 ) -> None:
     """Set up 'eza'."""
-    log_info(logger, "Setting up 'eza'...")
-    match SYSTEM_NAME:
-        case "Darwin":
-            asset_owner = "cargo-bins"
-            asset_repo = "cargo-quickinstall"
-            tag = "eza"
-            match_c_std_lib = False
-            not_endswith = ["sig"]
-        case "Linux":
-            asset_owner = "eza-community"
-            asset_repo = "eza"
-            tag = None
-            match_c_std_lib = True
-            not_endswith = ["zip"]
-        case never:
-            assert_never(never)
-    with yield_gzip_asset(
-        asset_owner,
-        asset_repo,
-        tag=tag,
-        token=token,
-        match_system=True,
-        match_c_std_lib=match_c_std_lib,
-        match_machine=True,
-        not_endswith=not_endswith,
-    ) as src:
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    try:
+        _ = which("eza")
+        log_info(logger, "'eza' is already set up")
+    except WhichError:
+        log_info(logger, "Setting up 'eza'....")
+        match SYSTEM_NAME:
+            case "Darwin":
+                asset_owner = "cargo-bins"
+                asset_repo = "cargo-quickinstall"
+                tag = "eza"
+                match_c_std_lib = False
+                not_endswith = ["sig"]
+            case "Linux":
+                asset_owner = "eza-community"
+                asset_repo = "eza"
+                tag = None
+                match_c_std_lib = True
+                not_endswith = ["zip"]
+            case never:
+                assert_never(never)
+        with yield_gzip_asset(
+            asset_owner,
+            asset_repo,
+            tag=tag,
+            token=token,
+            match_system=True,
+            match_c_std_lib=match_c_std_lib,
+            match_machine=True,
+            not_endswith=not_endswith,
+        ) as src:
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
 
 ##
@@ -532,18 +565,22 @@ def setup_fd(
     group: str | int | None = None,
 ) -> None:
     """Set up 'fd'."""
-    log_info(logger, "Setting up 'fd'...")
-    with yield_gzip_asset(
-        "sharkdp",
-        "fd",
-        token=token,
-        match_system=True,
-        match_c_std_lib=True,
-        match_machine=True,
-    ) as temp:
-        src = temp / "fd"
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    try:
+        _ = which("fd")
+        log_info(logger, "'fd' is already set up")
+    except WhichError:
+        log_info(logger, "Setting up 'fd'....")
+        with yield_gzip_asset(
+            "sharkdp",
+            "fd",
+            token=token,
+            match_system=True,
+            match_c_std_lib=True,
+            match_machine=True,
+        ) as temp:
+            src = temp / "fd"
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
 
 ##
@@ -551,8 +588,8 @@ def setup_fd(
 
 def setup_fzf(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
+    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -567,43 +604,61 @@ def setup_fzf(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'fzf'."""
-    log_info(logger, "Setting up 'fzf'...")
-    if ssh is None:
-        with yield_gzip_asset(
-            "junegunn", "fzf", token=token, match_system=True, match_machine=True
-        ) as src:
-            dest = Path(path_binaries, src.name)
-            cp(src, dest, sudo=sudo, perms=perms_binary, owner=owner, group=group)
-        setup_shell_config(
-            'eval "$(fzf --bash)"',
-            "source <(fzf --zsh)",
-            "fzf --fish | source",
-            etc="fzf" if etc else None,
-            shell=SHELL if shell is None else shell,
-            home=HOME if home is None else home,
-            perms=perms_config,
-            owner=owner,
-            group=group,
-            root=FILE_SYSTEM_ROOT if root is None else root,
-        )
-    else:
-        ssh_uv_install(
-            ssh,
-            "fzf",
-            token=token,
-            path_binaries=path_binaries,
-            sudo=sudo,
-            perms_binary=perms_binary,
-            owner=owner,
-            group=group,
-            etc=etc,
-            shell=shell,
-            home=home,
-            perms_config=perms_config,
-            root=root,
-            retry=retry,
-            logger=logger,
-        )
+    match ssh:
+        case None:
+            try:
+                _ = which("fzf")
+                log_info(logger, "'fzf' is already set up")
+            except WhichError:
+                log_info(logger, "Setting up 'fzf'...")
+                with yield_gzip_asset(
+                    "junegunn",
+                    "fzf",
+                    token=token,
+                    match_system=True,
+                    match_machine=True,
+                ) as src:
+                    dest = Path(path_binaries, src.name)
+                    cp(
+                        src,
+                        dest,
+                        sudo=sudo,
+                        perms=perms_binary,
+                        owner=owner,
+                        group=group,
+                    )
+                setup_shell_config(
+                    'eval "$(fzf --bash)"',
+                    "source <(fzf --zsh)",
+                    "fzf --fish | source",
+                    etc="fzf" if etc else None,
+                    shell=SHELL if shell is None else shell,
+                    home=HOME if home is None else home,
+                    perms=perms_config,
+                    owner=owner,
+                    group=group,
+                    root=FILE_SYSTEM_ROOT if root is None else root,
+                )
+        case str():
+            ssh_uv_install(
+                ssh,
+                "fzf",
+                logger=logger,
+                token=token,
+                path_binaries=path_binaries,
+                sudo=sudo,
+                perms_binary=perms_binary,
+                owner=owner,
+                group=group,
+                etc=etc,
+                shell=shell,
+                home=home,
+                perms_config=perms_config,
+                root=root,
+                retry=retry,
+            )
+        case never:
+            assert_never(never)
 
 
 ##
@@ -617,7 +672,6 @@ def setup_git(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'git'."""
-    log_info(logger, "Setting up 'git'...")
     setup_apt_package("git", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
 
@@ -626,6 +680,7 @@ def setup_git(
 
 def setup_jq(
     *,
+    force: bool = False,
     logger: LoggerLike | None = None,
     path_binaries: PathLike = PATH_BINARIES,
     token: SecretLike | None = GITHUB_TOKEN,
@@ -635,21 +690,24 @@ def setup_jq(
     group: str | int | None = None,
 ) -> None:
     """Set up 'jq'."""
-    log_info(logger, "Setting up 'jq'...")
-    dest = Path(path_binaries, "jq")
-    setup_asset(
-        "jqlang",
-        "jq",
-        dest,
-        token=token,
-        match_system=True,
-        match_machine=True,
-        not_endswith=["linux64"],
-        sudo=sudo,
-        perms=perms,
-        owner=owner,
-        group=group,
-    )
+    if (shutil.which("jq") is None) and not force:
+        log_info(logger, "'jq' is already set up")
+    else:
+        log_info(logger, "Setting up 'jq'...")
+        dest = Path(path_binaries, "jq")
+        setup_asset(
+            "jqlang",
+            "jq",
+            dest,
+            token=token,
+            match_system=True,
+            match_machine=True,
+            not_endswith=["linux64"],
+            sudo=sudo,
+            perms=perms,
+            owner=owner,
+            group=group,
+        )
 
 
 ##
@@ -657,8 +715,8 @@ def setup_jq(
 
 def setup_just(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
+    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -668,27 +726,39 @@ def setup_just(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'just'."""
-    log_info(logger, "Setting up 'just'...")
-    if ssh is None:
-        with yield_gzip_asset(
-            "casey", "just", token=token, match_system=True, match_machine=True
-        ) as temp:
-            src = temp / "just"
-            dest = Path(path_binaries, src.name)
-            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    else:
-        ssh_uv_install(
-            ssh,
-            "just",
-            token=token,
-            path_binaries=path_binaries,
-            sudo=sudo,
-            perms=perms,
-            owner=owner,
-            group=group,
-            retry=retry,
-            logger=logger,
-        )
+    match ssh:
+        case None:
+            try:
+                _ = which("just")
+                log_info(logger, "'just' is already set up")
+            except WhichError:
+                log_info(logger, "Setting up 'just'...")
+                if ssh is None:
+                    with yield_gzip_asset(
+                        "casey",
+                        "just",
+                        token=token,
+                        match_system=True,
+                        match_machine=True,
+                    ) as temp:
+                        src = temp / "just"
+                        dest = Path(path_binaries, src.name)
+                        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+        case str():
+            ssh_uv_install(
+                ssh,
+                "just",
+                logger=logger,
+                token=token,
+                path_binaries=path_binaries,
+                sudo=sudo,
+                perms=perms,
+                owner=owner,
+                group=group,
+                retry=retry,
+            )
+        case never:
+            assert_never(never)
 
 
 ##
@@ -705,19 +775,23 @@ def setup_neovim(
     group: str | int | None = None,
 ) -> None:
     """Set up 'neovim'."""
-    log_info(logger, "Setting up 'neovim'...")
-    with yield_gzip_asset(
-        "neovim",
-        "neovim",
-        token=token,
-        match_system=True,
-        match_machine=True,
-        not_endswith=["appimage", "zsync"],
-    ) as temp:
-        dest_dir = Path(path_binaries, "nvim-dir")
-        cp(temp, dest_dir, sudo=sudo, perms=perms, owner=owner, group=group)
-        dest_bin = Path(path_binaries, "nvim")
-        symlink(dest_dir / "bin/nvim", dest_bin, sudo=sudo)
+    try:
+        _ = which("nvim")
+        log_info(logger, "'nvim' is already set up")
+    except WhichError:
+        log_info(logger, "Setting up 'neovim'...")
+        with yield_gzip_asset(
+            "neovim",
+            "neovim",
+            token=token,
+            match_system=True,
+            match_machine=True,
+            not_endswith=["appimage", "zsync"],
+        ) as temp:
+            dest_dir = Path(path_binaries, "nvim-dir")
+            cp(temp, dest_dir, sudo=sudo, perms=perms, owner=owner, group=group)
+            dest_bin = Path(path_binaries, "nvim")
+            symlink(dest_dir / "bin/nvim", dest_bin, sudo=sudo)
 
 
 ##
@@ -725,29 +799,28 @@ def setup_neovim(
 
 def setup_pve_fake_subscription(
     *,
+    ssh: str | None = None,
     logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
-    ssh: str | None = None,
     retry: Retry | None = None,
 ) -> None:
     """Set up 'pve-fake-subscription'."""
-    log_info(logger, "Setting up 'pve-fake-subscription'...")
-    if ssh is None:
-        match SYSTEM_NAME:
-            case "Darwin":
-                msg = f"Unsupported system: {SYSTEM_NAME!r}"
-                raise ValueError(msg)
-            case "Linux":
-                with yield_asset(
-                    "Jamesits", "pve-fake-subscription", token=token, endswith="deb"
-                ) as temp:
-                    run("dpkg", "-i", str(temp))
-            case never:
-                assert_never(never)
-    else:
-        ssh_uv_install(
-            ssh, "pve-fake-subscription", token=token, retry=retry, logger=logger
-        )
+    match ssh, SYSTEM_NAME:
+        case None, "Darwin":
+            msg = f"Unsupported system: {SYSTEM_NAME!r}"
+            raise ValueError(msg)
+        case None, "Linux":
+            log_info(logger, "Setting up 'pve-fake-subscription'...")
+            with yield_asset(
+                "Jamesits", "pve-fake-subscription", token=token, endswith="deb"
+            ) as temp:
+                run("dpkg", "-i", str(temp))
+        case str(), _:
+            ssh_uv_install(
+                ssh, "pve-fake-subscription", logger=logger, token=token, retry=retry
+            )
+        case never:
+            assert_never(never)
 
 
 ##
@@ -773,19 +846,19 @@ def setup_restic(
         ) as src:
             dest = Path(path_binaries, "restic")
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    else:
-        ssh_uv_install(
-            ssh,
-            "restic",
-            token=token,
-            path_binaries=path_binaries,
-            sudo=sudo,
-            perms=perms,
-            owner=owner,
-            group=group,
-            retry=retry,
-            logger=logger,
-        )
+        return
+    ssh_uv_install(
+        ssh,
+        "restic",
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
+    )
 
 
 ##
@@ -827,7 +900,6 @@ def setup_rsync(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'rsync'."""
-    log_info(logger, "Setting up 'rsync'...")
     setup_apt_package("rsync", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
 
@@ -978,19 +1050,19 @@ def setup_sops(
             owner=owner,
             group=group,
         )
-    else:
-        ssh_uv_install(
-            ssh,
-            "sops",
-            token=token,
-            path_binaries=path_binaries,
-            sudo=sudo,
-            perms=perms,
-            owner=owner,
-            group=group,
-            retry=retry,
-            logger=logger,
-        )
+        return
+    ssh_uv_install(
+        ssh,
+        "sops",
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
+    )
 
 
 ##
@@ -1057,25 +1129,25 @@ def setup_starship(
                 owner=owner,
                 group=group,
             )
-    else:
-        ssh_uv_install(
-            ssh,
-            "starship",
-            token=token,
-            path_binaries=path_binaries,
-            sudo=sudo,
-            perms_binary=perms_binary,
-            owner=owner,
-            group=group,
-            etc=etc,
-            home=home,
-            shell=shell,
-            starship_toml=starship_toml,
-            perms_config=perms_config,
-            root=root,
-            retry=retry,
-            logger=logger,
-        )
+        return
+    ssh_uv_install(
+        ssh,
+        "starship",
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms_binary=perms_binary,
+        owner=owner,
+        group=group,
+        etc=etc,
+        home=home,
+        shell=shell,
+        starship_toml=starship_toml,
+        perms_config=perms_config,
+        root=root,
+        retry=retry,
+    )
 
 
 ##
@@ -1268,24 +1340,24 @@ def setup_zoxide(
             group=group,
             root=FILE_SYSTEM_ROOT if root is None else root,
         )
-    else:
-        ssh_uv_install(
-            ssh,
-            "zoxide",
-            token=token,
-            path_binaries=path_binaries,
-            sudo=sudo,
-            perms_binary=perms_binary,
-            owner=owner,
-            group=group,
-            etc=etc,
-            shell=shell,
-            home=home,
-            perms_config=perms_config,
-            root=root,
-            retry=retry,
-            logger=logger,
-        )
+        return
+    ssh_uv_install(
+        ssh,
+        "zoxide",
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms_binary=perms_binary,
+        owner=owner,
+        group=group,
+        etc=etc,
+        shell=shell,
+        home=home,
+        perms_config=perms_config,
+        root=root,
+        retry=retry,
+        logger=logger,
+    )
 
 
 __all__ = [

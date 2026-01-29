@@ -9,6 +9,7 @@ from utilities.core import PermissionsLike, is_pytest
 from utilities.logging import basic_config
 
 from installer.apps.click import (
+    force_option,
     group_option,
     owner_option,
     path_binaries_option,
@@ -74,7 +75,7 @@ def apt_package_sub_cmd(
     if is_pytest():
         return
     basic_config(obj=logger)
-    setup_apt_package(package, logger=logger, ssh=ssh, sudo=sudo, retry=retry)
+    setup_apt_package(package, ssh=ssh, logger=logger, sudo=sudo, retry=retry)
 
 
 ##
@@ -105,8 +106,8 @@ def age_sub_cmd(
         return
     basic_config(obj=logger)
     setup_age(
-        logger=logger,
         ssh=ssh,
+        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -198,7 +199,7 @@ def curl_sub_cmd(
     if is_pytest():
         return
     basic_config(obj=logger)
-    setup_curl(logger=logger, ssh=ssh, sudo=sudo, retry=retry)
+    setup_curl(ssh=ssh, logger=logger, sudo=sudo, retry=retry)
 
 
 ##
@@ -273,8 +274,8 @@ def direnv_sub_cmd(
         return
     basic_config(obj=logger)
     setup_direnv(
-        logger=logger,
         ssh=ssh,
+        logger=logger,
         path_binaries=path_binaries,
         token=token,
         sudo=sudo,
@@ -309,7 +310,7 @@ def docker_sub_cmd(
     if is_pytest():
         return
     basic_config(obj=logger)
-    setup_docker(logger=logger, ssh=ssh, sudo=sudo, user=user, retry=retry)
+    setup_docker(ssh=ssh, logger=logger, sudo=sudo, user=user, retry=retry)
 
 
 ##
@@ -452,8 +453,8 @@ def fzf_sub_cmd(
         return
     basic_config(obj=logger)
     setup_fzf(
-        logger=logger,
         ssh=ssh,
+        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -488,6 +489,7 @@ def git_sub_cmd(
 ##
 
 
+@force_option
 @logger_option
 @path_binaries_option
 @token_option
@@ -497,6 +499,7 @@ def git_sub_cmd(
 @group_option
 def jq_sub_cmd(
     *,
+    force: bool,
     logger: LoggerLike | None,
     path_binaries: PathLike,
     token: SecretLike | None,
@@ -509,6 +512,7 @@ def jq_sub_cmd(
         return
     basic_config(obj=logger)
     setup_jq(
+        force=force,
         logger=logger,
         path_binaries=path_binaries,
         token=token,
@@ -547,8 +551,8 @@ def just_sub_cmd(
         return
     basic_config(obj=logger)
     setup_just(
-        logger=logger,
         ssh=ssh,
+        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -597,20 +601,20 @@ def neovim_sub_cmd(
 
 
 @logger_option
-@token_option
 @ssh_option
+@token_option
 @retry_option
 def pve_fake_subscription_sub_cmd(
     *,
     logger: LoggerLike | None,
-    token: SecretLike | None,
     ssh: str | None,
+    token: SecretLike | None,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=logger)
-    setup_pve_fake_subscription(logger=logger, token=token, ssh=ssh, retry=retry)
+    setup_pve_fake_subscription(ssh=ssh, logger=logger, token=token, retry=retry)
 
 
 ##

@@ -10,6 +10,12 @@ from installer.apps.constants import (
     PERMISSIONS_CONFIG,
 )
 
+force_option = option(
+    "--force",
+    is_flag=True,
+    default=False,
+    help="Force the installation even if the command already exists",
+)
 group_option = option("--group", type=Str(), default=None, help="Binary group")
 owner_option = option("--owner", type=Str(), default=None, help="Binary owner")
 path_binaries_option = option(
@@ -31,6 +37,7 @@ token_option = option(
 
 
 __all__ = [
+    "force_option",
     "group_option",
     "owner_option",
     "path_binaries_option",
