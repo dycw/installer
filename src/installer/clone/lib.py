@@ -32,13 +32,25 @@ def git_clone(
     branch: str | None = None,
 ) -> None:
     log_info(logger, "Cloning repository...")
+    _git_clone_prepare(key, logger=logger, home=home, host=host, retry=retry, port=port)
+    stem = Path(key).stem
+    utilities.subprocess.git_clone(f"git@{stem}:{owner}/{repo}", dest, branch=branch)
+
+
+def _git_clone_prepare(
+    key: PathLike,
+    /,
+    *,
+    logger: LoggerLike | None = None,
+    home: PathLike = HOME,
+    host: str = GIT_CLONE_HOST,
+    retry: Retry | None = None,
+    port: int | None = None,
+) -> None:
     key = Path(key)
     setup_ssh_config(logger=logger, home=home)
     _setup_deploy_key(key, home=home, host=host, port=port)
-    ssh_keyscan(host, path=Path(home, ".ssh/known_hosts"), retry=retry, port=port)
-    utilities.subprocess.git_clone(
-        f"git@{key.stem}:{owner}/{repo}", dest, branch=branch
-    )
+    _setup_known_hosts(host=host, home=home, retry=retry, port=port)
 
 
 def _setup_deploy_key(
@@ -96,6 +108,16 @@ def _yield_config_lines_core(
 
 def _get_path_deploy_key(stem: str, /, *, home: PathLike = HOME) -> Path:
     return Path(home, ".ssh/deploy-keys", stem)
+
+
+def _setup_known_hosts(
+    *,
+    host: str = GIT_CLONE_HOST,
+    home: PathLike = HOME,
+    retry: Retry | None = None,
+    port: int | None = None,
+) -> None:
+    ssh_keyscan(host, path=Path(home, ".ssh/known_hosts"), retry=retry, port=port)
 
 
 __all__ = ["git_clone"]

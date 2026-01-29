@@ -3,9 +3,11 @@ from __future__ import annotations
 from re import search
 from typing import TYPE_CHECKING
 
+from utilities.constants import MINUTE
 from utilities.core import normalize_multi_line_str
+from utilities.pytest import throttle_test
 
-from installer.clone.lib import _setup_deploy_key
+from installer.clone.lib import _setup_deploy_key, _setup_known_hosts
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -32,3 +34,12 @@ class TestSetupDeployKey:
         key = tmp_path / ".ssh/deploy-keys/key"
         assert key.is_file()
         assert key.read_text() == "key"
+
+
+class TestSetupKnownHosts:
+    @throttle_test(duration=5 * MINUTE)
+    def test_main(self, *, tmp_path: Path) -> None:
+        _setup_known_hosts(home=tmp_path)
+        path = tmp_path / ".ssh/known_hosts"
+        assert path.is_file()
+        assert search(r"^github.com ssh-ed25519 \w+$", path.read_text())
