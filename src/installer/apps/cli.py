@@ -59,15 +59,15 @@ if TYPE_CHECKING:
 
 
 @argument("package", type=str)
-@ssh_option
 @logger_option
+@ssh_option
 @sudo_option
 @retry_option
 def apt_package_sub_cmd(
     *,
+    logger: LoggerLike | None,
     package: str,
     ssh: str | None,
-    logger: LoggerLike | None,
     sudo: bool,
     retry: Retry | None,
 ) -> None:
@@ -80,8 +80,8 @@ def apt_package_sub_cmd(
 ##
 
 
-@ssh_option
 @logger_option
+@ssh_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -91,8 +91,8 @@ def apt_package_sub_cmd(
 @retry_option
 def age_sub_cmd(
     *,
-    ssh: str | None,
     logger: LoggerLike | None,
+    ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -238,8 +238,8 @@ def delta_sub_cmd(
 ##
 
 
-@ssh_option
 @logger_option
+@ssh_option
 @path_binaries_option
 @token_option
 @sudo_option
@@ -254,8 +254,8 @@ def delta_sub_cmd(
 @retry_option
 def direnv_sub_cmd(
     *,
-    ssh: str | None,
     logger: LoggerLike | None,
+    ssh: str | None,
     path_binaries: PathLike,
     token: SecretLike | None,
     sudo: bool,
@@ -293,15 +293,15 @@ def direnv_sub_cmd(
 ##
 
 
-@ssh_option
 @logger_option
+@ssh_option
 @sudo_option
 @option("--user", type=Str(), default=None, help="User to add to the 'docker' group")
 @retry_option
 def docker_sub_cmd(
     *,
-    ssh: str | None = None,
     logger: LoggerLike | None = None,
+    ssh: str | None = None,
     sudo: bool = False,
     user: str | None = None,
     retry: Retry | None = None,
@@ -417,8 +417,8 @@ def fd_sub_cmd(
 ##
 
 
-@ssh_option
 @logger_option
+@ssh_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -433,8 +433,8 @@ def fd_sub_cmd(
 @retry_option
 def fzf_sub_cmd(
     *,
-    ssh: str | None,
     logger: LoggerLike | None,
+    ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -522,8 +522,8 @@ def jq_sub_cmd(
 ##
 
 
-@ssh_option
 @logger_option
+@ssh_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -533,8 +533,8 @@ def jq_sub_cmd(
 @retry_option
 def just_sub_cmd(
     *,
-    ssh: str | None,
     logger: LoggerLike | None,
+    ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -596,14 +596,14 @@ def neovim_sub_cmd(
 ##
 
 
-@ssh_option
 @logger_option
+@ssh_option
 @token_option
 @retry_option
 def pve_fake_subscription_sub_cmd(
     *,
-    ssh: str | None,
     logger: LoggerLike | None,
+    ssh: str | None,
     token: SecretLike | None,
     retry: Retry | None,
 ) -> None:
