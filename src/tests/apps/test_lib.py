@@ -117,10 +117,7 @@ class TestSetupCurl:
         setup_curl()
         result = run("curl", "--help", return_=True)
         pattern = normalize_multi_line_str("""
-            Uscurl:
-                curl [--encrypt] (-r RECIPIENT | -R PATH)... [--armor] [-o OUTPUT] [INPUT]
-                curl [--encrypt] --passphrase [--armor] [-o OUTPUT] [INPUT]
-                curl --decrypt [-i PATH]... [-o OUTPUT] [INPUT]
+            Usage: curl [options...] <url>
         """)
         assert search(escape(pattern), result) is not None, result
 
@@ -207,10 +204,12 @@ class TestSetupGit:
         setup_git()
         result = run("git", "--help", return_=True)
         pattern = normalize_multi_line_str("""
-            Usgit:
-                git [--encrypt] (-r RECIPIENT | -R PATH)... [--armor] [-o OUTPUT] [INPUT]
-                git [--encrypt] --passphrase [--armor] [-o OUTPUT] [INPUT]
-                git --decrypt [-i PATH]... [-o OUTPUT] [INPUT]
+            usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
+               [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+               [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--no-lazy-fetch]
+               [--no-optional-locks] [--no-advice] [--bare] [--git-dir=<path>]
+               [--work-tree=<path>] [--namespace=<name>] [--config-env=<name>=<envvar>]
+               <command> [<args>]
         """)
         assert search(escape(pattern), result) is not None, result
 
