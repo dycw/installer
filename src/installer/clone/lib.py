@@ -14,7 +14,7 @@ from installer.configs.lib import setup_ssh_config
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from utilities.types import LoggerLike, PathLike, Retry
+    from utilities.types import LoggerLike, PathLike
 
 
 def git_clone(
@@ -25,8 +25,6 @@ def git_clone(
     *,
     logger: LoggerLike | None = None,
     home: PathLike = HOME,
-    ssh: str | None = None,
-    retry: Retry | None = None,
     host: str = GIT_CLONE_HOST,
     port: int | None = None,
     dest: PathLike = PWD,
@@ -34,7 +32,7 @@ def git_clone(
 ) -> None:
     log_info(logger, "Cloning repository...")
     key = Path(key)
-    setup_ssh_config(logger=logger, home=home, ssh=ssh, retry=retry)
+    setup_ssh_config(logger=logger, home=home)
     _setup_deploy_key(key, home=home, host=host, port=port)
     utilities.subprocess.git_clone(
         f"git@{key.stem}:{owner}/{repo}", dest, branch=branch
