@@ -56,9 +56,14 @@ from installer.utilities import split_ssh, ssh_uv_install
 
 if TYPE_CHECKING:
     from utilities.core import PermissionsLike
-    from utilities.pydantic import SecretLike
     from utilities.shellingham import Shell
-    from utilities.types import LoggerLike, MaybeSequenceStr, PathLike, Retry
+    from utilities.types import (
+        LoggerLike,
+        MaybeSequenceStr,
+        PathLike,
+        Retry,
+        SecretLike,
+    )
 
 
 def setup_apt_package(

@@ -53,9 +53,8 @@ from installer.click import logger_option, retry_option, ssh_option, sudo_option
 from installer.configs.click import etc_option, home_option, root_option, shell_option
 
 if TYPE_CHECKING:
-    from utilities.pydantic import SecretLike
     from utilities.shellingham import Shell
-    from utilities.types import LoggerLike, PathLike, Retry
+    from utilities.types import LoggerLike, PathLike, Retry, SecretLike
 
 
 @argument("package", type=str)
