@@ -50,70 +50,64 @@ if TYPE_CHECKING:
 class TestSetupAge:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_age(path_binaries=tmp_path)
 
-        run(str(tmp_path / "age"), "--help", print=True)
-        result1 = capsys.readouterr()
+        result1 = run(str(tmp_path / "age"), "--help", return_=True)
         pattern1 = normalize_multi_line_str("""
             Usage:
                 age [--encrypt] (-r RECIPIENT | -R PATH)... [--armor] [-o OUTPUT] [INPUT]
                 age [--encrypt] --passphrase [--armor] [-o OUTPUT] [INPUT]
                 age --decrypt [-i PATH]... [-o OUTPUT] [INPUT]
         """)
-        assert search(escape(pattern1), result1.err) is not None, result1.err
+        assert search(escape(pattern1), result1) is not None, result1
 
-        run(str(tmp_path / "age-inspect"), "--help", print=True)
-        result2 = capsys.readouterr()
+        result2 = run(str(tmp_path / "age-inspect"), "--help", return_=True)
         pattern2 = normalize_multi_line_str("""
             Usage:
                 age-inspect [--json] [INPUT]
         """)
-        assert search(escape(pattern2), result2.err) is not None, result2.err
+        assert search(escape(pattern2), result2) is not None, result2
 
-        run(str(tmp_path / "age-keygen"), "--help", print=True)
-        result3 = capsys.readouterr()
+        result3 = run(str(tmp_path / "age-keygen"), "--help", return_=True)
         pattern3 = normalize_multi_line_str("""
             Usage:
                 age-keygen [-pq] [-o OUTPUT]
                 age-keygen -y [-o OUTPUT] [INPUT]
         """)
-        assert search(escape(pattern3), result3.err) is not None, result3.err
+        assert search(escape(pattern3), result3) is not None, result3
 
-        run(str(tmp_path / "age-plugin-batchpass"), "--help", print=True)
-        result4 = capsys.readouterr()
+        result4 = run(str(tmp_path / "age-plugin-batchpass"), "--help", return_=True)
         pattern4 = normalize_multi_line_str("""
             age-plugin-batchpass is an age plugin that enables non-interactive
             passphrase-based encryption and decryption using environment variables.
         """)
-        assert search(escape(pattern4), result4.err) is not None, result4.err
+        assert search(escape(pattern4), result4) is not None, result4
 
 
 class TestSetupBottom:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_bottom(path_binaries=tmp_path)
-        run(str(tmp_path / "btm"), "--help", print=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "btm"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: btm [OPTIONS]
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupBat:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_bat(path_binaries=tmp_path)
-        run(str(tmp_path / "bat"), "--help", print=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "bat"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: bat [OPTIONS] [FILE]...
                    bat <COMMAND>
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupCurl:
@@ -121,17 +115,16 @@ class TestSetupCurl:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @skipif_not_linux
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, capsys: CaptureFixture) -> None:
+    def test_main(self) -> None:
         setup_curl()
-        run("curl", "--help", print=True)
-        result = capsys.readouterr()
+        result = run("curl", "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Uscurl:
                 curl [--encrypt] (-r RECIPIENT | -R PATH)... [--armor] [-o OUTPUT] [INPUT]
                 curl [--encrypt] --passphrase [--armor] [-o OUTPUT] [INPUT]
                 curl --decrypt [-i PATH]... [-o OUTPUT] [INPUT]
         """)
-        assert search(escape(pattern), result.err) is not None, result.err
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupDelta:
@@ -139,12 +132,12 @@ class TestSetupDelta:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_delta(path_binaries=tmp_path)
-        run(str(tmp_path / "delta"), "--help", print=True)
+        run(str(tmp_path / "delta"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage: delta [OPTIONS] [MINUS_FILE] [PLUS_FILE]
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupDirenv:
@@ -152,12 +145,12 @@ class TestSetupDirenv:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_direnv(path_binaries=tmp_path, home=tmp_path)
-        run(str(tmp_path / "direnv"), "--help", print=True)
+        run(str(tmp_path / "direnv"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage: direnv COMMAND [...ARGS]
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupDust:
@@ -165,12 +158,12 @@ class TestSetupDust:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_dust(path_binaries=tmp_path)
-        run(str(tmp_path / "dust"), "--help", print=True)
+        run(str(tmp_path / "dust"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage: dust [OPTIONS] [PATH]...
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupEza:
@@ -178,13 +171,13 @@ class TestSetupEza:
     @throttle_test(duration=2 * THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_eza(path_binaries=tmp_path)
-        run(str(tmp_path / "eza"), "--help", print=True)
+        run(str(tmp_path / "eza"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage:
               eza [options] [files...]
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupFd:
@@ -192,12 +185,12 @@ class TestSetupFd:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_fd(path_binaries=tmp_path)
-        run(str(tmp_path / "fd"), "--help", print=True)
+        run(str(tmp_path / "fd"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage: fd [OPTIONS] [pattern] [path]...
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupFzf:
@@ -205,12 +198,12 @@ class TestSetupFzf:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_fzf(path_binaries=tmp_path, home=tmp_path)
-        run(str(tmp_path / "fzf"), "--help", print=True)
+        run(str(tmp_path / "fzf"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage: fzf [options]
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupGit:
@@ -220,7 +213,7 @@ class TestSetupGit:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, capsys: CaptureFixture) -> None:
         setup_git()
-        run("git", "--help", print=True)
+        run("git", "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usgit:
@@ -228,7 +221,7 @@ class TestSetupGit:
                 git [--encrypt] --passphrase [--armor] [-o OUTPUT] [INPUT]
                 git --decrypt [-i PATH]... [-o OUTPUT] [INPUT]
         """)
-        assert search(escape(pattern), result.err) is not None, result.err
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupJq:
@@ -236,14 +229,14 @@ class TestSetupJq:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_jq(path_binaries=tmp_path)
-        run(str(tmp_path / "jq"), "--help", print=True)
+        run(str(tmp_path / "jq"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage:\tjq [options] <jq filter> [file...]
             \tjq [options] --args <jq filter> [strings...]
             \tjq [options] --jsonargs <jq filter> [JSON_TEXTS...]
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupJust:
@@ -251,12 +244,12 @@ class TestSetupJust:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_just(path_binaries=tmp_path)
-        run(str(tmp_path / "just"), "--help", print=True)
+        run(str(tmp_path / "just"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage: just [OPTIONS] [ARGUMENTS]...
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupNeovim:
@@ -264,13 +257,13 @@ class TestSetupNeovim:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_neovim(path_binaries=tmp_path)
-        run(str(tmp_path / "nvim"), "--help", print=True)
+        run(str(tmp_path / "nvim"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage:
               nvim [options] [file ...]
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupRestic:
@@ -278,13 +271,13 @@ class TestSetupRestic:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_restic(path_binaries=tmp_path)
-        run(str(tmp_path / "restic"), "--help", print=True)
+        run(str(tmp_path / "restic"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage:
               restic [command]
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupRipgrep:
@@ -292,7 +285,7 @@ class TestSetupRipgrep:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_ripgrep(path_binaries=tmp_path)
-        run(str(tmp_path / "rg"), "--help", print=True)
+        run(str(tmp_path / "rg"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             USAGE:
@@ -305,7 +298,7 @@ class TestSetupRipgrep:
                 rg [OPTIONS] --help
                 rg [OPTIONS] --version
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupRsync:
@@ -313,17 +306,19 @@ class TestSetupRsync:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @skipif_not_linux
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, capsys: CaptureFixture) -> None:
+    def test_main(self) -> None:
         setup_rsync()
-        run("rsync", "--help", print=True)
-        result = capsys.readouterr()
+        result = run("rsync", "--help", return_=True)
         pattern = normalize_multi_line_str("""
-            Usrsync:
-                rsync [--encrypt] (-r RECIPIENT | -R PATH)... [--armor] [-o OUTPUT] [INPUT]
-                rsync [--encrypt] --passphrase [--armor] [-o OUTPUT] [INPUT]
-                rsync --decrypt [-i PATH]... [-o OUTPUT] [INPUT]
+            Usage: rsync [OPTION]... SRC [SRC]... DEST
+              or   rsync [OPTION]... SRC [SRC]... [USER@]HOST:DEST
+              or   rsync [OPTION]... SRC [SRC]... [USER@]HOST::DEST
+              or   rsync [OPTION]... SRC [SRC]... rsync://[USER@]HOST[:PORT]/DEST
+              or   rsync [OPTION]... [USER@]HOST:SRC [DEST]
+              or   rsync [OPTION]... [USER@]HOST::SRC [DEST]
+              or   rsync [OPTION]... rsync://[USER@]HOST[:PORT]/SRC [DEST]
         """)
-        assert search(escape(pattern), result.err) is not None, result.err
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupRuff:
@@ -331,12 +326,12 @@ class TestSetupRuff:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_ruff(path_binaries=tmp_path)
-        run(str(tmp_path / "ruff"), "--help", print=True)
+        run(str(tmp_path / "ruff"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage: ruff [OPTIONS] <COMMAND>
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupSd:
@@ -344,12 +339,12 @@ class TestSetupSd:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_sd(path_binaries=tmp_path)
-        run(str(tmp_path / "sd"), "--help", print=True)
+        run(str(tmp_path / "sd"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage: sd [OPTIONS] <FIND> <REPLACE_WITH> [FILES]...
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupShellcheck:
@@ -357,12 +352,12 @@ class TestSetupShellcheck:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_shellcheck(path_binaries=tmp_path)
-        run(str(tmp_path / "shellcheck"), "--help", print=True)
+        run(str(tmp_path / "shellcheck"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage: shellcheck [OPTIONS...] FILES...
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupShfmt:
@@ -370,12 +365,12 @@ class TestSetupShfmt:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_shfmt(path_binaries=tmp_path)
-        run(str(tmp_path / "shfmt"), "--help", print=True)
+        run(str(tmp_path / "shfmt"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             usage: shfmt [flags] [path ...]
         """)
-        assert search(escape(pattern), result.err) is not None, result.err
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupSops:
@@ -383,13 +378,13 @@ class TestSetupSops:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_sops(path_binaries=tmp_path)
-        run(str(tmp_path / "sops"), "--help", print=True)
+        run(str(tmp_path / "sops"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             NAME:
                sops - sops - encrypted file editor with AWS KMS, GCP KMS, Azure Key Vault, age, and GPG support
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupStarship:
@@ -397,12 +392,12 @@ class TestSetupStarship:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_starship(path_binaries=tmp_path, home=tmp_path)
-        run(str(tmp_path / "starship"), "--help", print=True)
+        run(str(tmp_path / "starship"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage: starship <COMMAND>
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupTaplo:
@@ -410,12 +405,12 @@ class TestSetupTaplo:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_taplo(path_binaries=tmp_path)
-        run(str(tmp_path / "taplo"), "--help", print=True)
+        run(str(tmp_path / "taplo"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage: taplo [OPTIONS] <COMMAND>
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupUv:
@@ -423,12 +418,12 @@ class TestSetupUv:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_uv(path_binaries=tmp_path)
-        run(str(tmp_path / "uv"), "--help", print=True)
+        run(str(tmp_path / "uv"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage: uv [OPTIONS] <COMMAND>
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupUvCmd:
@@ -465,12 +460,12 @@ class TestSetupWatchexec:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_watchexec(path_binaries=tmp_path)
-        run(str(tmp_path / "watchexec"), "--help", print=True)
+        run(str(tmp_path / "watchexec"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage: watchexec [OPTIONS] [COMMAND]...
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupYq:
@@ -478,14 +473,14 @@ class TestSetupYq:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_yq(path_binaries=tmp_path)
-        run(str(tmp_path / "yq"), "--help", print=True)
+        run(str(tmp_path / "yq"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage:
               yq [flags]
               yq [command]
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
 
 
 class TestSetupZoxide:
@@ -493,10 +488,10 @@ class TestSetupZoxide:
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
         setup_zoxide(path_binaries=tmp_path, home=tmp_path)
-        run(str(tmp_path / "zoxide"), "--help", print=True)
+        run(str(tmp_path / "zoxide"), "--help", return_=True)
         result = capsys.readouterr()
         pattern = normalize_multi_line_str("""
             Usage:
               zoxide <COMMAND>
         """)
-        assert search(escape(pattern), result.out) is not None, result.out
+        assert search(escape(pattern), result) is not None, result
