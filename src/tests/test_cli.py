@@ -94,6 +94,7 @@ class TestCLI:
             param(["just", "--group", "group"]),
             param(["just", "--retry", "1", "1"]),
             param(["neovim"], id="neovim"),
+            param(["pve-fake-subscription"], id="pve-fake-subscription"),
             param(["restic"], id="restic"),
             param(["restic", "--logger", "logger"]),
             param(["restic", "--ssh", "user@hostname"]),
