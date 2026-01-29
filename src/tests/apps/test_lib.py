@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from re import escape, search
+from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
 
 from pytest import mark
-from utilities.core import normalize_multi_line_str
+from utilities.core import normalize_multi_line_str, repr_error
 from utilities.pytest import run_test_frac, skipif_not_linux, throttle_test
 from utilities.subprocess import run
 
@@ -114,7 +115,10 @@ class TestSetupCurl:
     @skipif_not_linux
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self) -> None:
-        setup_curl(sudo=True)
+        try:
+            setup_curl(sudo=True)
+        except CalledProcessError as error:
+            raise RuntimeError(repr_error(error))
         result = run("curl", "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: curl [options...] <url>
@@ -201,7 +205,10 @@ class TestSetupGit:
     @skipif_not_linux
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self) -> None:
-        setup_git(sudo=True)
+        try:
+            setup_git(sudo=True)
+        except CalledProcessError as error:
+            raise RuntimeError(repr_error(error))
         result = run("git", "--help", return_=True)
         pattern = normalize_multi_line_str("""
             usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
@@ -292,7 +299,10 @@ class TestSetupRsync:
     @skipif_not_linux
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self) -> None:
-        setup_rsync(sudo=True)
+        try:
+            setup_rsync(sudo=True)
+        except CalledProcessError as error:
+            raise RuntimeError(repr_error(error))
         result = run("rsync", "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: rsync [OPTION]... SRC [SRC]... DEST
