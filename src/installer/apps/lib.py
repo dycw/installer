@@ -83,8 +83,8 @@ def setup_apt_package(
                 msg = f"Unsupported system: {SYSTEM_NAME!r}"
                 raise ValueError(msg)
             case "Linux":
-                run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
-                run(*maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo))
+                run(*maybe_sudo_cmd("apt-get", "update", "-y", sudo=sudo))
+                run(*maybe_sudo_cmd("apt-get", "install", "-y", package, sudo=sudo))
             case never:
                 assert_never(never)
     else:
