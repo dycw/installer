@@ -774,19 +774,23 @@ def setup_neovim(
     group: str | int | None = None,
 ) -> None:
     """Set up 'neovim'."""
-    log_info(logger, "Setting up 'neovim'...")
-    with yield_gzip_asset(
-        "neovim",
-        "neovim",
-        token=token,
-        match_system=True,
-        match_machine=True,
-        not_endswith=["appimage", "zsync"],
-    ) as temp:
-        dest_dir = Path(path_binaries, "nvim-dir")
-        cp(temp, dest_dir, sudo=sudo, perms=perms, owner=owner, group=group)
-        dest_bin = Path(path_binaries, "nvim")
-        symlink(dest_dir / "bin/nvim", dest_bin, sudo=sudo)
+    try:
+        _ = which("nvim")
+        log_info(logger, "'nvim' is already set up")
+    except WhichError:
+        log_info(logger, "Setting up 'neovim'...")
+        with yield_gzip_asset(
+            "neovim",
+            "neovim",
+            token=token,
+            match_system=True,
+            match_machine=True,
+            not_endswith=["appimage", "zsync"],
+        ) as temp:
+            dest_dir = Path(path_binaries, "nvim-dir")
+            cp(temp, dest_dir, sudo=sudo, perms=perms, owner=owner, group=group)
+            dest_bin = Path(path_binaries, "nvim")
+            symlink(dest_dir / "bin/nvim", dest_bin, sudo=sudo)
 
 
 ##
