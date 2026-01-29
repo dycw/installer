@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from re import search
 from typing import TYPE_CHECKING
 
 from pytest import raises
@@ -19,17 +20,29 @@ if TYPE_CHECKING:
 
 class TestSetupAuthorizedKeys:
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_authorized_keys([], home=tmp_path)
+        setup_authorized_keys(["key1", "key2"], home=tmp_path)
+        path = tmp_path / ".ssh/authorized_keys"
+        assert path.is_file()
+        assert len(path.read_text().splitlines()) == 2
 
 
 class TestSetupSSHConfig:
     def test_main(self, *, tmp_path: Path) -> None:
         setup_ssh_config(home=tmp_path)
+        config = tmp_path / ".ssh/config"
+        assert config.is_file()
+        assert search(r"^Include .*/\*\.conf$", config.read_text())
+        config_d = tmp_path / ".ssh/config.d"
+        assert config_d.is_dir()
+        assert len(list(config_d.iterdir())) == 0
 
 
 class TestSetupSSHDConfig:
     def test_main(self, *, tmp_path: Path) -> None:
         setup_sshd_config(root=tmp_path)
+        path = tmp_path / "etc/ssh/sshd_config.d/default.conf"
+        assert path.is_file()
+        assert path.read_text() == sshd_config()
 
 
 class TestSetupShellConfig:

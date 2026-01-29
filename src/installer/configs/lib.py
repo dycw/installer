@@ -147,7 +147,7 @@ def setup_ssh_config(
     log_info(logger, "Setting up SSH config...")
     config = Path(home, ".ssh/config")
     config_d = Path(home, ".ssh/config.d")
-    text = f"Include {config_d}/*.conf"
+    text = normalize_str(f"Include {config_d}/*.conf")
     if ssh is None:
         tee(config, text, sudo=sudo)
         mkdir(config_d, sudo=sudo)

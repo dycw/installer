@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 
 import utilities.subprocess
 from utilities.constants import HOME, PWD
-from utilities.core import log_info, write_text
-from utilities.subprocess import cp
+from utilities.core import always_iterable, log_info, write_text
+from utilities.subprocess import _HOST_KEY_ALGORITHMS, cp
 
 from installer.clone.constants import GIT_CLONE_HOST
 from installer.configs.lib import setup_ssh_config
@@ -68,15 +68,28 @@ def _yield_config_lines(
     host: str = GIT_CLONE_HOST,
     port: int | None = None,
 ) -> Iterator[str]:
-    path_key = _get_path_deploy_key(stem, home=home)
     yield f"Host {stem}"
-    indent = 4 * " "
-    yield f"{indent}User git"
-    yield f"{indent}HostName {host}"
+    for line in _yield_config_lines_core(stem, home=home, host=host, port=port):
+        yield f"    {line}"
+
+
+def _yield_config_lines_core(
+    stem: str,
+    /,
+    *,
+    home: PathLike = HOME,
+    host: str = GIT_CLONE_HOST,
+    port: int | None = None,
+) -> Iterator[str]:
+    yield "User git"
+    yield f"HostName {host}"
     if port is not None:
-        yield (f"{indent}Port {port}")
-    yield f"{indent}IdentityFile {path_key}"
-    yield f"{indent}IdentitiesOnly yes"
+        yield f"Port {port}"
+    yield f"IdentityFile {_get_path_deploy_key(stem, home=home)}"
+    yield "IdentitiesOnly yes"
+    yield "BatchMode yes"
+    yield f"HostKeyAlgorithms {','.join(always_iterable(_HOST_KEY_ALGORITHMS))}"
+    yield "StrictHostKeyChecking yes"
 
 
 def _get_path_deploy_key(stem: str, /, *, home: PathLike = HOME) -> Path:
