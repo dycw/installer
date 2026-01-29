@@ -52,7 +52,7 @@ from installer.apps.download import (
 )
 from installer.configs.constants import FILE_SYSTEM_ROOT
 from installer.configs.lib import setup_shell_config
-from installer.utilities import split_ssh, ssh_install
+from installer.utilities import split_ssh, ssh_uv_install
 
 if TYPE_CHECKING:
     from utilities.core import PermissionsLike
@@ -83,7 +83,19 @@ def setup_apt_package(
             case never:
                 assert_never(never)
     else:
-        ssh_install(ssh, "apt-package", package, sudo=sudo, retry=retry, logger=logger)
+        user, hostname = split_ssh(ssh)
+        cmds: list[list[str]] = [
+            maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
+            maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo),
+        ]
+        utilities.subprocess.ssh(
+            user,
+            hostname,
+            *BASH_LS,
+            input=normalize_str("\n".join(map(join, cmds))),
+            retry=retry,
+            logger=logger,
+        )
 
 
 ##
@@ -157,7 +169,7 @@ def setup_age(
                     cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
                     downloads.append(dest)
     else:
-        ssh_install(
+        ssh_uv_install(
             ssh,
             "age",
             token=token,
@@ -320,7 +332,7 @@ def setup_direnv(
             root=FILE_SYSTEM_ROOT if root is None else root,
         )
     else:
-        ssh_install(
+        ssh_uv_install(
             ssh,
             "direnv",
             path_binaries=path_binaries,
@@ -417,7 +429,7 @@ def setup_docker(
             case never:
                 assert_never(never)
     else:
-        ssh_install(ssh, "docker", sudo=sudo, user=user, retry=retry, logger=logger)
+        ssh_uv_install(ssh, "docker", sudo=sudo, user=user, retry=retry, logger=logger)
 
 
 ##
@@ -568,7 +580,7 @@ def setup_fzf(
             root=FILE_SYSTEM_ROOT if root is None else root,
         )
     else:
-        ssh_install(
+        ssh_uv_install(
             ssh,
             "fzf",
             token=token,
@@ -658,7 +670,7 @@ def setup_just(
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
     else:
-        ssh_install(
+        ssh_uv_install(
             ssh,
             "just",
             token=token,
@@ -725,7 +737,7 @@ def setup_restic(
             dest = Path(path_binaries, "restic")
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
     else:
-        ssh_install(
+        ssh_uv_install(
             ssh,
             "restic",
             token=token,
@@ -930,7 +942,7 @@ def setup_sops(
             group=group,
         )
     else:
-        ssh_install(
+        ssh_uv_install(
             ssh,
             "sops",
             token=token,
@@ -1009,7 +1021,7 @@ def setup_starship(
                 group=group,
             )
     else:
-        ssh_install(
+        ssh_uv_install(
             ssh,
             "starship",
             token=token,
@@ -1220,7 +1232,7 @@ def setup_zoxide(
             root=FILE_SYSTEM_ROOT if root is None else root,
         )
     else:
-        ssh_install(
+        ssh_uv_install(
             ssh,
             "zoxide",
             token=token,

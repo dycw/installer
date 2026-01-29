@@ -54,7 +54,7 @@ def split_ssh(text: str, /) -> tuple[str, str]:
 ##
 
 
-def ssh_install(
+def ssh_uv_install(
     ssh: str,
     cmd: str,
     /,
@@ -117,4 +117,4 @@ def ssh_install(
     )
 
 
-__all__ = ["ensure_line_or_lines", "split_ssh", "ssh_install"]
+__all__ = ["ensure_line_or_lines", "split_ssh", "ssh_uv_install"]
