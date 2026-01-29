@@ -222,6 +222,7 @@ class TestCLI:
             param([]),
             param(["--logger", "logger"]),
             param(["--host", "host"]),
+            param(["--retry", "1", "1"]),
             param(["--port", "1234"]),
             param(["--dest", "dest"]),
             param(["--branch", "branch"]),
