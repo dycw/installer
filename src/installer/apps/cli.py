@@ -238,8 +238,8 @@ def delta_sub_cmd(
 ##
 
 
-@logger_option
 @ssh_option
+@logger_option
 @path_binaries_option
 @token_option
 @sudo_option
@@ -254,8 +254,8 @@ def delta_sub_cmd(
 @retry_option
 def direnv_sub_cmd(
     *,
-    logger: LoggerLike | None,
     ssh: str | None,
+    logger: LoggerLike | None,
     path_binaries: PathLike,
     token: SecretLike | None,
     sudo: bool,
@@ -273,8 +273,8 @@ def direnv_sub_cmd(
         return
     basic_config(obj=logger)
     setup_direnv(
-        logger=logger,
         ssh=ssh,
+        logger=logger,
         path_binaries=path_binaries,
         token=token,
         sudo=sudo,
@@ -300,8 +300,8 @@ def direnv_sub_cmd(
 @retry_option
 def docker_sub_cmd(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
+    logger: LoggerLike | None = None,
     sudo: bool = False,
     user: str | None = None,
     retry: Retry | None = None,
@@ -417,8 +417,8 @@ def fd_sub_cmd(
 ##
 
 
-@logger_option
 @ssh_option
+@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -433,8 +433,8 @@ def fd_sub_cmd(
 @retry_option
 def fzf_sub_cmd(
     *,
-    logger: LoggerLike | None,
     ssh: str | None,
+    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -452,8 +452,8 @@ def fzf_sub_cmd(
         return
     basic_config(obj=logger)
     setup_fzf(
-        logger=logger,
         ssh=ssh,
+        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -596,21 +596,21 @@ def neovim_sub_cmd(
 ##
 
 
+@ssh_option
 @logger_option
 @token_option
-@ssh_option
 @retry_option
 def pve_fake_subscription_sub_cmd(
     *,
+    ssh: str | None,
     logger: LoggerLike | None,
     token: SecretLike | None,
-    ssh: str | None,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=logger)
-    setup_pve_fake_subscription(logger=logger, token=token, ssh=ssh, retry=retry)
+    setup_pve_fake_subscription(ssh=ssh, logger=logger, token=token, retry=retry)
 
 
 ##
