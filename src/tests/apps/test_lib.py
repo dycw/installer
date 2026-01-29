@@ -114,7 +114,7 @@ class TestSetupCurl:
     @skipif_not_linux
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self) -> None:
-        setup_curl()
+        setup_curl(sudo=True)
         result = run("curl", "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: curl [options...] <url>
@@ -201,7 +201,7 @@ class TestSetupGit:
     @skipif_not_linux
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self) -> None:
-        setup_git()
+        setup_git(sudo=True)
         result = run("git", "--help", return_=True)
         pattern = normalize_multi_line_str("""
             usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
@@ -292,7 +292,7 @@ class TestSetupRsync:
     @skipif_not_linux
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self) -> None:
-        setup_rsync()
+        setup_rsync(sudo=True)
         result = run("rsync", "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: rsync [OPTION]... SRC [SRC]... DEST
