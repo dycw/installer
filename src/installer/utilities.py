@@ -110,7 +110,7 @@ def ssh_uv_install(
         ssh_user,
         ssh_hostname,
         *uv_tool_run_cmd(
-            "cli", cmd, *parts, *args, from_="dycw-installer", latest=True
+            "cli", cmd, *parts, *args, from_="dycw-installer[cli]", latest=True
         ),
         retry=retry,
         logger=logger,
