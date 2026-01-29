@@ -1304,6 +1304,7 @@ def setup_yq(
 def setup_zoxide(
     *,
     logger: LoggerLike | None = None,
+    force: bool = False,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -1319,45 +1320,58 @@ def setup_zoxide(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'zoxide'."""
-    log_info(logger, "Setting up 'zoxide'...")
-    if ssh is None:
-        with yield_gzip_asset(
-            "ajeetdsouza", "zoxide", token=token, match_system=True, match_machine=True
-        ) as temp:
-            src = temp / "zoxide"
-            dest = Path(path_binaries, src.name)
-            cp(src, dest, sudo=sudo, perms=perms_binary, owner=owner, group=group)
-        shell_use = SHELL if shell is None else shell
-        setup_shell_config(
-            'eval "$(zoxide init --cmd j bash)"',
-            'eval "$(zoxide init --cmd j zsh)"',
-            "zoxide init --cmd j fish | source",
-            etc="zoxide" if etc else None,
-            shell=shell_use,
-            home=HOME if home is None else home,
-            perms=perms_config,
-            owner=owner,
-            group=group,
-            root=FILE_SYSTEM_ROOT if root is None else root,
-        )
-        return
-    ssh_uv_install(
-        ssh,
-        "zoxide",
-        token=token,
-        path_binaries=path_binaries,
-        sudo=sudo,
-        perms_binary=perms_binary,
-        owner=owner,
-        group=group,
-        etc=etc,
-        shell=shell,
-        home=home,
-        perms_config=perms_config,
-        root=root,
-        retry=retry,
-        logger=logger,
-    )
+    match ssh:
+        case None:
+            log_info(logger, "Setting up 'zoxide'...")
+            if ssh is None:
+                with yield_gzip_asset(
+                    "ajeetdsouza",
+                    "zoxide",
+                    token=token,
+                    match_system=True,
+                    match_machine=True,
+                ) as temp:
+                    src = temp / "zoxide"
+                    dest = Path(path_binaries, src.name)
+                    cp(
+                        src,
+                        dest,
+                        sudo=sudo,
+                        perms=perms_binary,
+                        owner=owner,
+                        group=group,
+                    )
+                shell_use = SHELL if shell is None else shell
+                setup_shell_config(
+                    'eval "$(zoxide init --cmd j bash)"',
+                    'eval "$(zoxide init --cmd j zsh)"',
+                    "zoxide init --cmd j fish | source",
+                    etc="zoxide" if etc else None,
+                    shell=shell_use,
+                    home=HOME if home is None else home,
+                    perms=perms_config,
+                    owner=owner,
+                    group=group,
+                    root=FILE_SYSTEM_ROOT if root is None else root,
+                )
+                return
+            ssh_uv_install(
+                ssh,
+                "zoxide",
+                token=token,
+                path_binaries=path_binaries,
+                sudo=sudo,
+                perms_binary=perms_binary,
+                owner=owner,
+                group=group,
+                etc=etc,
+                shell=shell,
+                home=home,
+                perms_config=perms_config,
+                root=root,
+                retry=retry,
+                logger=logger,
+            )
 
 
 __all__ = [
