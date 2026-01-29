@@ -385,8 +385,8 @@ def setup_direnv(
 
 def setup_docker(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
+    logger: LoggerLike | None = None,
     sudo: bool = False,
     user: str | None = None,
     retry: Retry | None = None,

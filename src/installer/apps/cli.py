@@ -293,8 +293,8 @@ def direnv_sub_cmd(
 ##
 
 
-@logger_option
 @ssh_option
+@logger_option
 @sudo_option
 @option("--user", type=Str(), default=None, help="User to add to the 'docker' group")
 @retry_option
@@ -309,7 +309,7 @@ def docker_sub_cmd(
     if is_pytest():
         return
     basic_config(obj=logger)
-    setup_docker(logger=logger, ssh=ssh, sudo=sudo, user=user, retry=retry)
+    setup_docker(ssh=ssh, logger=logger, sudo=sudo, user=user, retry=retry)
 
 
 ##
