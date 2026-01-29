@@ -49,46 +49,72 @@ def _git_clone_prepare(
 ) -> None:
     key = Path(key)
     setup_ssh_config(logger=logger, home=home)
-    _setup_deploy_key(key, home=home, host=host, port=port)
-    _setup_known_hosts(host=host, home=home, retry=retry, port=port)
+    _set_up_deploy_key(key, logger=logger, home=home)
+    _set_up_known_hosts(logger=logger, host=host, home=home, retry=retry, port=port)
+    _set_up_ssh_conf(key, logger=logger, home=home, host=host, port=port)
 
 
-def _setup_deploy_key(
+def _set_up_deploy_key(
+    path: PathLike, /, *, logger: LoggerLike | None = None, home: PathLike = HOME
+) -> None:
+    log_info(logger, "Setting up deploy key...")
+    dest = _get_path_deploy_key(path, home=home)
+    cp(path, dest, perms="u=rw,g=,o=")
+
+
+def _get_path_deploy_key(path: PathLike, /, *, home: PathLike = HOME) -> Path:
+    stem = Path(path).stem
+    return Path(home, ".ssh/deploy-keys", stem)
+
+
+def _set_up_known_hosts(
+    *,
+    logger: LoggerLike | None = None,
+    host: str = GIT_CLONE_HOST,
+    home: PathLike = HOME,
+    retry: Retry | None = None,
+    port: int | None = None,
+) -> None:
+    log_info(logger, "Setting up known hosts...")
+    ssh_keyscan(host, path=Path(home, ".ssh/known_hosts"), retry=retry, port=port)
+
+
+def _set_up_ssh_conf(
+    path: PathLike,
+    /,
+    *,
+    logger: LoggerLike | None = None,
+    home: PathLike = HOME,
+    host: str = GIT_CLONE_HOST,
+    port: int | None = None,
+) -> None:
+    log_info(logger, "Setting up ...")
+    config = _get_path_conf(path, home=home)
+    text = "\n".join(_yield_conf_lines(path, home=home, host=host, port=port))
+    write_text(config, text, overwrite=True)
+
+
+def _get_path_conf(path: PathLike, /, *, home: PathLike = HOME) -> Path:
+    stem = Path(path).stem
+    return Path(home, f".ssh/config.d/{stem}.conf")
+
+
+def _yield_conf_lines(
     path: PathLike,
     /,
     *,
     home: PathLike = HOME,
     host: str = GIT_CLONE_HOST,
     port: int | None = None,
-) -> None:
-    path = Path(path)
-    stem = path.stem
-    path_config = _get_path_config(stem, home=home)
-    text = "\n".join(_yield_config_lines(stem, home=home, host=host, port=port))
-    write_text(path_config, text, overwrite=True)
-    dest = _get_path_deploy_key(stem, home=home)
-    cp(path, dest, perms="u=rw,g=,o=")
-
-
-def _get_path_config(stem: str, /, *, home: PathLike = HOME) -> Path:
-    return Path(home, f".ssh/config.d/{stem}.conf")
-
-
-def _yield_config_lines(
-    stem: str,
-    /,
-    *,
-    home: PathLike = HOME,
-    host: str = GIT_CLONE_HOST,
-    port: int | None = None,
 ) -> Iterator[str]:
+    stem = Path(path).stem
     yield f"Host {stem}"
-    for line in _yield_config_lines_core(stem, home=home, host=host, port=port):
+    for line in _yield_conf_lines_core(path, home=home, host=host, port=port):
         yield f"    {line}"
 
 
-def _yield_config_lines_core(
-    stem: str,
+def _yield_conf_lines_core(
+    path: PathLike,
     /,
     *,
     home: PathLike = HOME,
@@ -99,25 +125,11 @@ def _yield_config_lines_core(
     yield f"HostName {host}"
     if port is not None:
         yield f"Port {port}"
-    yield f"IdentityFile {_get_path_deploy_key(stem, home=home)}"
+    yield f"IdentityFile {_get_path_deploy_key(path, home=home)}"
     yield "IdentitiesOnly yes"
     yield "BatchMode yes"
     yield f"HostKeyAlgorithms {','.join(always_iterable(_HOST_KEY_ALGORITHMS))}"
     yield "StrictHostKeyChecking yes"
-
-
-def _get_path_deploy_key(stem: str, /, *, home: PathLike = HOME) -> Path:
-    return Path(home, ".ssh/deploy-keys", stem)
-
-
-def _setup_known_hosts(
-    *,
-    host: str = GIT_CLONE_HOST,
-    home: PathLike = HOME,
-    retry: Retry | None = None,
-    port: int | None = None,
-) -> None:
-    ssh_keyscan(host, path=Path(home, ".ssh/known_hosts"), retry=retry, port=port)
 
 
 __all__ = ["git_clone"]
