@@ -312,20 +312,9 @@ wheels = [
 
 [[package]]
 name = "dycw-installer"
-version = "0.5.22"
+version = "0.5.23"
 source = { editable = "." }
 dependencies = [
-    { name = "click" },
-    { name = "coloredlogs" },
-    { name = "dycw-utilities" },
-    { name = "inflect" },
-    { name = "pydantic" },
-    { name = "pygithub" },
-    { name = "shellingham" },
-]
-
-[package.optional-dependencies]
-cli = [
     { name = "click" },
     { name = "coloredlogs" },
     { name = "dycw-utilities" },
@@ -345,25 +334,18 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.3.1" },
-    { name = "click", marker = "extra == 'cli'", specifier = "==8.3.1" },
     { name = "coloredlogs", specifier = ">=15.0.1" },
-    { name = "coloredlogs", marker = "extra == 'cli'", specifier = "==15.0.1" },
-    { name = "dycw-utilities", specifier = ">=0.187.0" },
-    { name = "dycw-utilities", marker = "extra == 'cli'", specifier = "==0.187.0" },
+    { name = "dycw-utilities", specifier = ">=0.187.1" },
     { name = "inflect", specifier = ">=7.5.0" },
-    { name = "inflect", marker = "extra == 'cli'", specifier = "==7.5.0" },
     { name = "pydantic", specifier = ">=2.12.5" },
-    { name = "pydantic", marker = "extra == 'cli'", specifier = "==2.12.5" },
     { name = "pygithub", specifier = ">=2.8.1" },
-    { name = "pygithub", marker = "extra == 'cli'", specifier = "==2.8.1" },
     { name = "shellingham", specifier = ">=1.5.4" },
-    { name = "shellingham", marker = "extra == 'cli'", specifier = "==1.5.4" },
 ]
 provides-extras = ["cli"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "dycw-utilities", extras = ["test"], specifier = ">=0.187.0" },
+    { name = "dycw-utilities", extras = ["test"], specifier = ">=0.187.1" },
     { name = "orjson", specifier = ">=3.11.5" },
     { name = "pyright", specifier = ">=1.1.408" },
 ]
@@ -382,7 +364,7 @@ wheels = [
 
 [[package]]
 name = "dycw-utilities"
-version = "0.187.0"
+version = "0.187.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "rich" },
@@ -392,7 +374,7 @@ dependencies = [
     { name = "whenever" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/60/e9/a3b772c293973cb5f4deabc6b7cdfd0aacf6b0bb8216d042f632aa74cb89/dycw_utilities-0.187.0-py3-none-any.whl", hash = "sha256:641e420e9eee44b33dc0764e53a3896f32aaf4967285708efc828fa9fbc06d04", size = 209876, upload-time = "2026-01-28T06:49:03.543Z" },
+    { url = "https://files.pythonhosted.org/packages/41/0b/69e3169ce1addb566bfb673c3b4c66125389ab4fd0c50046e0b2dbf2fb3e/dycw_utilities-0.187.1-py3-none-any.whl", hash = "sha256:58ed6ee7d6c01ad2a1b369ee3b92950dade8e79c2b5153c0291574162f04c09c", size = 209878, upload-time = "2026-01-29T02:37:32.633Z" },
 ]
 
 [package.optional-dependencies]
@@ -437,14 +419,14 @@ wheels = [
 
 [[package]]
 name = "hypothesis"
-version = "6.151.3"
+version = "6.151.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "sortedcontainers" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e9/aa/0e1aff2de954a1b11acf643519599c3da97d461cf62e312cab266aa9f855/hypothesis-6.151.3.tar.gz", hash = "sha256:31bcd884b0be8f478aa2e52f0f73be03e8f6a9a2c66706fb93410ebaa5c27bcc", size = 475822, upload-time = "2026-01-28T05:37:32.494Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/47/03/9fd03d5db09029250e69745c1600edab16fe90947636f77a12ba92d79939/hypothesis-6.151.4.tar.gz", hash = "sha256:658a62da1c3ccb36746ac2f7dc4bb1a6e76bd314e0dc54c4e1aaba2503d5545c", size = 475706, upload-time = "2026-01-29T01:30:14.985Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b4/9a/e39da18745c889c7959e0ef4b53b71522062cc94714f99ac9d5b86cb222e/hypothesis-6.151.3-py3-none-any.whl", hash = "sha256:879a4b3dec37678fd1bd3a060aaaf3eedc2aab5543d9a85e5f2a04a6445683c6", size = 543275, upload-time = "2026-01-28T05:37:30.312Z" },
+    { url = "https://files.pythonhosted.org/packages/9b/6d/01ad1b6c3b8cb2bb47eeaa9765dabc27cbe68e3b59f6cff83d5668f57780/hypothesis-6.151.4-py3-none-any.whl", hash = "sha256:a1cf7e0fdaa296d697a68ff3c0b3912c0050f07aa37e7d2ff33a966749d1d9b4", size = 543146, upload-time = "2026-01-29T01:30:12.805Z" },
 ]
 
 [[package]]
