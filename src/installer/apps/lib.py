@@ -730,7 +730,7 @@ def setup_pve_fake_subscription(
     ssh: str | None = None,
     retry: Retry | None = None,
 ) -> None:
-    """Set up 'pve-fake-subscription."""
+    """Set up 'pve-fake-subscription'."""
     log_info(logger, "Setting up 'pve-fake-subscription'...")
     if ssh is None:
         match SYSTEM_NAME:
