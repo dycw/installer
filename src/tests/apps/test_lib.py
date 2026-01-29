@@ -3,25 +3,29 @@ from __future__ import annotations
 from re import escape, search
 from typing import TYPE_CHECKING
 
+from pytest import mark
 from utilities.core import normalize_multi_line_str
-from utilities.pytest import run_test_frac, throttle_test
+from utilities.pytest import run_test_frac, skipif_not_linux, throttle_test
 from utilities.subprocess import run
 
 from installer.apps.lib import (
     setup_age,
     setup_bat,
     setup_bottom,
+    setup_curl,
     setup_delta,
     setup_direnv,
     setup_dust,
     setup_eza,
     setup_fd,
     setup_fzf,
+    setup_git,
     setup_jq,
     setup_just,
     setup_neovim,
     setup_restic,
     setup_ripgrep,
+    setup_rsync,
     setup_ruff,
     setup_sd,
     setup_shellcheck,
@@ -57,7 +61,7 @@ class TestSetupAge:
                 age [--encrypt] --passphrase [--armor] [-o OUTPUT] [INPUT]
                 age --decrypt [-i PATH]... [-o OUTPUT] [INPUT]
         """)
-        assert search(escape(pattern1), result1.err)
+        assert search(escape(pattern1), result1.err) is not None, result1.err
 
         run(str(tmp_path / "age-inspect"), "--help", print=True)
         result2 = capsys.readouterr()
@@ -65,7 +69,7 @@ class TestSetupAge:
             Usage:
                 age-inspect [--json] [INPUT]
         """)
-        assert search(escape(pattern2), result2.err)
+        assert search(escape(pattern2), result2.err) is not None, result2.err
 
         run(str(tmp_path / "age-keygen"), "--help", print=True)
         result3 = capsys.readouterr()
@@ -74,7 +78,7 @@ class TestSetupAge:
                 age-keygen [-pq] [-o OUTPUT]
                 age-keygen -y [-o OUTPUT] [INPUT]
         """)
-        assert search(escape(pattern3), result3.err)
+        assert search(escape(pattern3), result3.err) is not None, result3.err
 
         run(str(tmp_path / "age-plugin-batchpass"), "--help", print=True)
         result4 = capsys.readouterr()
@@ -82,7 +86,7 @@ class TestSetupAge:
             age-plugin-batchpass is an age plugin that enables non-interactive
             passphrase-based encryption and decryption using environment variables.
         """)
-        assert search(escape(pattern4), result4.err)
+        assert search(escape(pattern4), result4.err) is not None, result4.err
 
 
 class TestSetupBottom:
@@ -95,7 +99,7 @@ class TestSetupBottom:
         pattern = normalize_multi_line_str("""
             Usage: btm [OPTIONS]
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupBat:
@@ -109,7 +113,25 @@ class TestSetupBat:
             Usage: bat [OPTIONS] [FILE]...
                    bat <COMMAND>
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
+
+
+class TestSetupCurl:
+    @mark.only
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @skipif_not_linux
+    @throttle_test(duration=THROTTLE_DURATION)
+    def test_main(self, *, capsys: CaptureFixture) -> None:
+        setup_curl()
+        run("curl", "--help", print=True)
+        result = capsys.readouterr()
+        pattern = normalize_multi_line_str("""
+            Uscurl:
+                curl [--encrypt] (-r RECIPIENT | -R PATH)... [--armor] [-o OUTPUT] [INPUT]
+                curl [--encrypt] --passphrase [--armor] [-o OUTPUT] [INPUT]
+                curl --decrypt [-i PATH]... [-o OUTPUT] [INPUT]
+        """)
+        assert search(escape(pattern), result.err) is not None, result.err
 
 
 class TestSetupDelta:
@@ -122,7 +144,7 @@ class TestSetupDelta:
         pattern = normalize_multi_line_str("""
             Usage: delta [OPTIONS] [MINUS_FILE] [PLUS_FILE]
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupDirenv:
@@ -135,7 +157,7 @@ class TestSetupDirenv:
         pattern = normalize_multi_line_str("""
             Usage: direnv COMMAND [...ARGS]
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupDust:
@@ -148,7 +170,7 @@ class TestSetupDust:
         pattern = normalize_multi_line_str("""
             Usage: dust [OPTIONS] [PATH]...
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupEza:
@@ -162,7 +184,7 @@ class TestSetupEza:
             Usage:
               eza [options] [files...]
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupFd:
@@ -175,7 +197,7 @@ class TestSetupFd:
         pattern = normalize_multi_line_str("""
             Usage: fd [OPTIONS] [pattern] [path]...
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupFzf:
@@ -188,7 +210,25 @@ class TestSetupFzf:
         pattern = normalize_multi_line_str("""
             Usage: fzf [options]
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
+
+
+class TestSetupGit:
+    @mark.only
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @skipif_not_linux
+    @throttle_test(duration=THROTTLE_DURATION)
+    def test_main(self, *, capsys: CaptureFixture) -> None:
+        setup_git()
+        run("git", "--help", print=True)
+        result = capsys.readouterr()
+        pattern = normalize_multi_line_str("""
+            Usgit:
+                git [--encrypt] (-r RECIPIENT | -R PATH)... [--armor] [-o OUTPUT] [INPUT]
+                git [--encrypt] --passphrase [--armor] [-o OUTPUT] [INPUT]
+                git --decrypt [-i PATH]... [-o OUTPUT] [INPUT]
+        """)
+        assert search(escape(pattern), result.err) is not None, result.err
 
 
 class TestSetupJq:
@@ -203,7 +243,7 @@ class TestSetupJq:
             \tjq [options] --args <jq filter> [strings...]
             \tjq [options] --jsonargs <jq filter> [JSON_TEXTS...]
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupJust:
@@ -216,7 +256,7 @@ class TestSetupJust:
         pattern = normalize_multi_line_str("""
             Usage: just [OPTIONS] [ARGUMENTS]...
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupNeovim:
@@ -230,7 +270,7 @@ class TestSetupNeovim:
             Usage:
               nvim [options] [file ...]
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupRestic:
@@ -244,7 +284,7 @@ class TestSetupRestic:
             Usage:
               restic [command]
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupRipgrep:
@@ -265,7 +305,25 @@ class TestSetupRipgrep:
                 rg [OPTIONS] --help
                 rg [OPTIONS] --version
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
+
+
+class TestSetupRsync:
+    @mark.only
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @skipif_not_linux
+    @throttle_test(duration=THROTTLE_DURATION)
+    def test_main(self, *, capsys: CaptureFixture) -> None:
+        setup_rsync()
+        run("rsync", "--help", print=True)
+        result = capsys.readouterr()
+        pattern = normalize_multi_line_str("""
+            Usrsync:
+                rsync [--encrypt] (-r RECIPIENT | -R PATH)... [--armor] [-o OUTPUT] [INPUT]
+                rsync [--encrypt] --passphrase [--armor] [-o OUTPUT] [INPUT]
+                rsync --decrypt [-i PATH]... [-o OUTPUT] [INPUT]
+        """)
+        assert search(escape(pattern), result.err) is not None, result.err
 
 
 class TestSetupRuff:
@@ -278,7 +336,7 @@ class TestSetupRuff:
         pattern = normalize_multi_line_str("""
             Usage: ruff [OPTIONS] <COMMAND>
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupSd:
@@ -291,7 +349,7 @@ class TestSetupSd:
         pattern = normalize_multi_line_str("""
             Usage: sd [OPTIONS] <FIND> <REPLACE_WITH> [FILES]...
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupShellcheck:
@@ -304,7 +362,7 @@ class TestSetupShellcheck:
         pattern = normalize_multi_line_str("""
             Usage: shellcheck [OPTIONS...] FILES...
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupShfmt:
@@ -317,7 +375,7 @@ class TestSetupShfmt:
         pattern = normalize_multi_line_str("""
             usage: shfmt [flags] [path ...]
         """)
-        assert search(escape(pattern), result.err)
+        assert search(escape(pattern), result.err) is not None, result.err
 
 
 class TestSetupSops:
@@ -331,7 +389,7 @@ class TestSetupSops:
             NAME:
                sops - sops - encrypted file editor with AWS KMS, GCP KMS, Azure Key Vault, age, and GPG support
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupStarship:
@@ -344,7 +402,7 @@ class TestSetupStarship:
         pattern = normalize_multi_line_str("""
             Usage: starship <COMMAND>
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupTaplo:
@@ -357,7 +415,7 @@ class TestSetupTaplo:
         pattern = normalize_multi_line_str("""
             Usage: taplo [OPTIONS] <COMMAND>
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupUv:
@@ -370,7 +428,7 @@ class TestSetupUv:
         pattern = normalize_multi_line_str("""
             Usage: uv [OPTIONS] <COMMAND>
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupUvCmd:
@@ -412,7 +470,7 @@ class TestSetupWatchexec:
         pattern = normalize_multi_line_str("""
             Usage: watchexec [OPTIONS] [COMMAND]...
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupYq:
@@ -427,7 +485,7 @@ class TestSetupYq:
               yq [flags]
               yq [command]
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out
 
 
 class TestSetupZoxide:
@@ -441,4 +499,4 @@ class TestSetupZoxide:
             Usage:
               zoxide <COMMAND>
         """)
-        assert search(escape(pattern), result.out)
+        assert search(escape(pattern), result.out) is not None, result.out

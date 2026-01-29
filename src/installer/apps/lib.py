@@ -156,7 +156,7 @@ def setup_age(
     group: str | int | None = None,
     retry: Retry | None = None,
 ) -> None:
-    """Setup 'age'."""
+    """Set up 'age'."""
     log_info(logger, "Setting up 'age'...")
     if ssh is None:
         with yield_gzip_asset(
@@ -201,7 +201,7 @@ def setup_bat(
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    """Setup 'bat'."""
+    """Set up 'bat'."""
     log_info(logger, "Setting up 'bat'...")
     with yield_gzip_asset(
         "sharkdp",
@@ -229,7 +229,7 @@ def setup_bottom(
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    """Setup 'bottom'."""
+    """Set up 'bottom'."""
     log_info(logger, "Setting up 'bottom'...")
     with yield_gzip_asset(
         "ClementTsang",
@@ -255,7 +255,7 @@ def setup_curl(
     sudo: bool = False,
     retry: Retry | None = None,
 ) -> None:
-    """Setup 'curl'."""
+    """Set up 'curl'."""
     log_info(logger, "Setting up 'curl'...")
     setup_apt_package("curl", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
@@ -273,7 +273,7 @@ def setup_delta(
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    """Setup 'delta'."""
+    """Set up 'delta'."""
     log_info(logger, "Setting up 'delta'...")
     with yield_gzip_asset(
         "dandavison",
@@ -308,7 +308,7 @@ def setup_direnv(
     root: PathLike | None = None,
     retry: Retry | None = None,
 ) -> None:
-    """Setup 'direnv'."""
+    """Set up 'direnv'."""
     log_info(logger, "Setting up 'direnv'...")
     if ssh is None:
         dest = Path(path_binaries, "direnv")
@@ -450,7 +450,7 @@ def setup_dust(
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    """Setup 'dust'."""
+    """Set up 'dust'."""
     log_info(logger, "Setting up 'dust'....")
     match SYSTEM_NAME:
         case "Darwin":
@@ -485,7 +485,7 @@ def setup_eza(
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    """Setup 'eza'."""
+    """Set up 'eza'."""
     log_info(logger, "Setting up 'eza'...")
     match SYSTEM_NAME:
         case "Darwin":
@@ -529,7 +529,7 @@ def setup_fd(
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    """Setup 'fd'."""
+    """Set up 'fd'."""
     log_info(logger, "Setting up 'fd'...")
     with yield_gzip_asset(
         "sharkdp",
@@ -564,7 +564,7 @@ def setup_fzf(
     root: PathLike | None = None,
     retry: Retry | None = None,
 ) -> None:
-    """Setup 'fzf'."""
+    """Set up 'fzf'."""
     log_info(logger, "Setting up 'fzf'...")
     if ssh is None:
         with yield_gzip_asset(
@@ -614,7 +614,7 @@ def setup_git(
     sudo: bool = False,
     retry: Retry | None = None,
 ) -> None:
-    """Setup 'git'."""
+    """Set up 'git'."""
     log_info(logger, "Setting up 'git'...")
     setup_apt_package("git", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
@@ -632,7 +632,7 @@ def setup_jq(
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    """Setup 'jq'."""
+    """Set up 'jq'."""
     log_info(logger, "Setting up 'jq'...")
     dest = Path(path_binaries, "jq")
     setup_asset(
@@ -665,7 +665,7 @@ def setup_just(
     group: str | int | None = None,
     retry: Retry | None = None,
 ) -> None:
-    """Setup 'just'."""
+    """Set up 'just'."""
     log_info(logger, "Setting up 'just'...")
     if ssh is None:
         with yield_gzip_asset(
@@ -702,7 +702,7 @@ def setup_neovim(
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    """Setup 'neovim'."""
+    """Set up 'neovim'."""
     log_info(logger, "Setting up 'neovim'...")
     with yield_gzip_asset(
         "neovim",
@@ -721,6 +721,44 @@ def setup_neovim(
 ##
 
 
+def setup_pve_fake_subscription(
+    *,
+    logger: LoggerLike | None = None,
+    token: SecretLike | None = GITHUB_TOKEN,
+    ssh: str | None = None,
+    retry: Retry | None = None,
+) -> None:
+    """Set up 'pve-fake-subscription."""
+    log_info(logger, "Setting up 'restic'...")
+    if ssh is None:
+        match SYSTEM_NAME:
+            case "Darwin":
+                msg = f"Unsupported system: {SYSTEM_NAME!r}"
+                raise ValueError(msg)
+            case "Linux":
+                with yield_asset("Jamesits", "pve-fake-subscription", token=token):
+                    breakpoint()
+            case never:
+                assert_never(never)
+    else:
+        user, hostname = split_ssh(ssh)
+        cmds: list[list[str]] = [
+            maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
+            maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo),
+        ]
+        utilities.subprocess.ssh(
+            user,
+            hostname,
+            *BASH_LS,
+            input=normalize_str("\n".join(map(join, cmds))),
+            retry=retry,
+            logger=logger,
+        )
+
+
+##
+
+
 def setup_restic(
     *,
     logger: LoggerLike | None = None,
@@ -733,7 +771,7 @@ def setup_restic(
     group: str | int | None = None,
     retry: Retry | None = None,
 ) -> None:
-    """Setup 'restic'."""
+    """Set up 'restic'."""
     log_info(logger, "Setting up 'restic'...")
     if ssh is None:
         with yield_bz2_asset(
@@ -769,7 +807,7 @@ def setup_ripgrep(
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    """Setup 'ripgrep'."""
+    """Set up 'ripgrep'."""
     log_info(logger, "Setting up 'ripgrep'...")
     with yield_gzip_asset(
         "burntsushi",
@@ -794,7 +832,7 @@ def setup_rsync(
     sudo: bool = False,
     retry: Retry | None = None,
 ) -> None:
-    """Setup 'rsync'."""
+    """Set up 'rsync'."""
     log_info(logger, "Setting up 'rsync'...")
     setup_apt_package("rsync", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
@@ -812,7 +850,7 @@ def setup_ruff(
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    """Setup 'ruff'."""
+    """Set up 'ruff'."""
     log_info(logger, "Setting up 'ruff'...")
     with yield_gzip_asset(
         "astral-sh",
@@ -841,7 +879,7 @@ def setup_sd(
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    """Setup 'sd'."""
+    """Set up 'sd'."""
     log_info(logger, "Setting up 'sd'...")
     with yield_gzip_asset(
         "chmln",
@@ -869,7 +907,7 @@ def setup_shellcheck(
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    """Setup 'shellcheck'."""
+    """Set up 'shellcheck'."""
     log_info(logger, "Setting up 'shellcheck'...")
     with yield_gzip_asset(
         "koalaman",
@@ -897,7 +935,7 @@ def setup_shfmt(
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    """Setup 'shfmt'."""
+    """Set up 'shfmt'."""
     log_info(logger, "Setting up 'shfmt'...")
     dest = Path(path_binaries, "shfmt")
     setup_asset(
@@ -929,7 +967,7 @@ def setup_sops(
     group: str | int | None = None,
     retry: Retry | None = None,
 ) -> None:
-    """Setup 'sops'."""
+    """Set up 'sops'."""
     log_info(logger, "Setting up 'sops'...")
     if ssh is None:
         dest = Path(path_binaries, "sops")
@@ -982,7 +1020,7 @@ def setup_starship(
     root: PathLike | None = None,
     retry: Retry | None = None,
 ) -> None:
-    """Setup 'starship'."""
+    """Set up 'starship'."""
     log_info(logger, "Setting up 'starship'...")
     if ssh is None:
         with yield_gzip_asset(
@@ -1059,7 +1097,7 @@ def setup_taplo(
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    """Setup 'taplo'."""
+    """Set up 'taplo'."""
     log_info(logger, "Setting up 'taplo'...")
     with yield_gzip_asset(
         "tamasfe", "taplo", token=token, match_system=True, match_machine=True
@@ -1083,7 +1121,7 @@ def setup_uv(
     group: str | int | None = None,
     retry: Retry | None = None,
 ) -> None:
-    """Setup 'uv'."""
+    """Set up 'uv'."""
     log_info(logger, "Setting up 'uv'...")
     if ssh is None:
         with yield_gzip_asset(
@@ -1147,7 +1185,7 @@ def setup_watchexec(
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    """Setup 'watchexec'."""
+    """Set up 'watchexec'."""
     log_info(logger, "Setting up 'watchexec'...")
     with yield_lzma_asset(
         "watchexec",
@@ -1176,7 +1214,7 @@ def setup_yq(
     owner: str | int | None = None,
     group: str | int | None = None,
 ) -> None:
-    """Setup 'yq'."""
+    """Set up 'yq'."""
     log_info(logger, "Setting up 'yq'...")
     dest = Path(path_binaries, "yq")
     setup_asset(
@@ -1214,7 +1252,7 @@ def setup_zoxide(
     root: PathLike | None = None,
     retry: Retry | None = None,
 ) -> None:
-    """Setup 'zoxide'."""
+    """Set up 'zoxide'."""
     log_info(logger, "Setting up 'zoxide'...")
     if ssh is None:
         with yield_gzip_asset(
@@ -1274,6 +1312,7 @@ __all__ = [
     "setup_jq",
     "setup_just",
     "setup_neovim",
+    "setup_pve_fake_subscription",
     "setup_restic",
     "setup_ripgrep",
     "setup_rsync",
