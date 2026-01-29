@@ -80,8 +80,8 @@ def apt_package_sub_cmd(
 ##
 
 
-@logger_option
 @ssh_option
+@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -91,8 +91,8 @@ def apt_package_sub_cmd(
 @retry_option
 def age_sub_cmd(
     *,
-    logger: LoggerLike | None,
     ssh: str | None,
+    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -105,8 +105,8 @@ def age_sub_cmd(
         return
     basic_config(obj=logger)
     setup_age(
-        logger=logger,
         ssh=ssh,
+        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -198,7 +198,7 @@ def curl_sub_cmd(
     if is_pytest():
         return
     basic_config(obj=logger)
-    setup_curl(logger=logger, ssh=ssh, sudo=sudo, retry=retry)
+    setup_curl(ssh=ssh, logger=logger, sudo=sudo, retry=retry)
 
 
 ##

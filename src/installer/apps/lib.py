@@ -268,13 +268,13 @@ def setup_bottom(
 
 def setup_curl(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
+    logger: LoggerLike | None = None,
     sudo: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Set up 'curl'."""
-    setup_apt_package("curl", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
+    setup_apt_package("curl", ssh=ssh, logger=logger, sudo=sudo, retry=retry)
 
 
 ##
