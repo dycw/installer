@@ -1,32 +1,27 @@
 from __future__ import annotations
 
 from re import escape, search
-from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
 
-from pytest import mark
-from utilities.core import normalize_multi_line_str, repr_error
-from utilities.pytest import run_test_frac, skipif_not_linux, throttle_test
+from utilities.core import normalize_multi_line_str
+from utilities.pytest import run_test_frac, throttle_test
 from utilities.subprocess import run
 
 from installer.apps.lib import (
     setup_age,
     setup_bat,
     setup_bottom,
-    setup_curl,
     setup_delta,
     setup_direnv,
     setup_dust,
     setup_eza,
     setup_fd,
     setup_fzf,
-    setup_git,
     setup_jq,
     setup_just,
     setup_neovim,
     setup_restic,
     setup_ripgrep,
-    setup_rsync,
     setup_ruff,
     setup_sd,
     setup_shellcheck,
