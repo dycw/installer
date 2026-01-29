@@ -44,8 +44,6 @@ from tests.conftest import RUN_TEST_FRAC, THROTTLE_DURATION
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import CaptureFixture
-
 
 class TestSetupAge:
     @run_test_frac(frac=RUN_TEST_FRAC)
@@ -130,10 +128,9 @@ class TestSetupCurl:
 class TestSetupDelta:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_delta(path_binaries=tmp_path)
-        run(str(tmp_path / "delta"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "delta"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: delta [OPTIONS] [MINUS_FILE] [PLUS_FILE]
         """)
@@ -143,10 +140,9 @@ class TestSetupDelta:
 class TestSetupDirenv:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_direnv(path_binaries=tmp_path, home=tmp_path)
-        run(str(tmp_path / "direnv"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "direnv"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: direnv COMMAND [...ARGS]
         """)
@@ -156,10 +152,9 @@ class TestSetupDirenv:
 class TestSetupDust:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_dust(path_binaries=tmp_path)
-        run(str(tmp_path / "dust"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "dust"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: dust [OPTIONS] [PATH]...
         """)
@@ -169,10 +164,9 @@ class TestSetupDust:
 class TestSetupEza:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=2 * THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_eza(path_binaries=tmp_path)
-        run(str(tmp_path / "eza"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "eza"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage:
               eza [options] [files...]
@@ -183,10 +177,9 @@ class TestSetupEza:
 class TestSetupFd:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_fd(path_binaries=tmp_path)
-        run(str(tmp_path / "fd"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "fd"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: fd [OPTIONS] [pattern] [path]...
         """)
@@ -196,10 +189,9 @@ class TestSetupFd:
 class TestSetupFzf:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_fzf(path_binaries=tmp_path, home=tmp_path)
-        run(str(tmp_path / "fzf"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "fzf"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: fzf [options]
         """)
@@ -211,10 +203,9 @@ class TestSetupGit:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @skipif_not_linux
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, capsys: CaptureFixture) -> None:
+    def test_main(self) -> None:
         setup_git()
-        run("git", "--help", return_=True)
-        result = capsys.readouterr()
+        result = run("git", "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usgit:
                 git [--encrypt] (-r RECIPIENT | -R PATH)... [--armor] [-o OUTPUT] [INPUT]
@@ -227,10 +218,9 @@ class TestSetupGit:
 class TestSetupJq:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_jq(path_binaries=tmp_path)
-        run(str(tmp_path / "jq"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "jq"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage:\tjq [options] <jq filter> [file...]
             \tjq [options] --args <jq filter> [strings...]
@@ -242,10 +232,9 @@ class TestSetupJq:
 class TestSetupJust:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_just(path_binaries=tmp_path)
-        run(str(tmp_path / "just"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "just"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: just [OPTIONS] [ARGUMENTS]...
         """)
@@ -255,10 +244,9 @@ class TestSetupJust:
 class TestSetupNeovim:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_neovim(path_binaries=tmp_path)
-        run(str(tmp_path / "nvim"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "nvim"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage:
               nvim [options] [file ...]
@@ -269,10 +257,9 @@ class TestSetupNeovim:
 class TestSetupRestic:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_restic(path_binaries=tmp_path)
-        run(str(tmp_path / "restic"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "restic"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage:
               restic [command]
@@ -283,10 +270,9 @@ class TestSetupRestic:
 class TestSetupRipgrep:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_ripgrep(path_binaries=tmp_path)
-        run(str(tmp_path / "rg"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "rg"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             USAGE:
                 rg [OPTIONS] PATTERN [PATH ...]
@@ -324,10 +310,9 @@ class TestSetupRsync:
 class TestSetupRuff:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_ruff(path_binaries=tmp_path)
-        run(str(tmp_path / "ruff"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "ruff"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: ruff [OPTIONS] <COMMAND>
         """)
@@ -337,10 +322,9 @@ class TestSetupRuff:
 class TestSetupSd:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_sd(path_binaries=tmp_path)
-        run(str(tmp_path / "sd"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "sd"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: sd [OPTIONS] <FIND> <REPLACE_WITH> [FILES]...
         """)
@@ -350,10 +334,9 @@ class TestSetupSd:
 class TestSetupShellcheck:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_shellcheck(path_binaries=tmp_path)
-        run(str(tmp_path / "shellcheck"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "shellcheck"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: shellcheck [OPTIONS...] FILES...
         """)
@@ -363,10 +346,9 @@ class TestSetupShellcheck:
 class TestSetupShfmt:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_shfmt(path_binaries=tmp_path)
-        run(str(tmp_path / "shfmt"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "shfmt"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             usage: shfmt [flags] [path ...]
         """)
@@ -376,10 +358,9 @@ class TestSetupShfmt:
 class TestSetupSops:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_sops(path_binaries=tmp_path)
-        run(str(tmp_path / "sops"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "sops"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             NAME:
                sops - sops - encrypted file editor with AWS KMS, GCP KMS, Azure Key Vault, age, and GPG support
@@ -390,10 +371,9 @@ class TestSetupSops:
 class TestSetupStarship:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_starship(path_binaries=tmp_path, home=tmp_path)
-        run(str(tmp_path / "starship"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "starship"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: starship <COMMAND>
         """)
@@ -403,10 +383,9 @@ class TestSetupStarship:
 class TestSetupTaplo:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_taplo(path_binaries=tmp_path)
-        run(str(tmp_path / "taplo"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "taplo"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: taplo [OPTIONS] <COMMAND>
         """)
@@ -416,10 +395,9 @@ class TestSetupTaplo:
 class TestSetupUv:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_uv(path_binaries=tmp_path)
-        run(str(tmp_path / "uv"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "uv"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: uv [OPTIONS] <COMMAND>
         """)
@@ -458,10 +436,9 @@ class TestSetupUvCmd:
 class TestSetupWatchexec:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_watchexec(path_binaries=tmp_path)
-        run(str(tmp_path / "watchexec"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "watchexec"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: watchexec [OPTIONS] [COMMAND]...
         """)
@@ -471,10 +448,9 @@ class TestSetupWatchexec:
 class TestSetupYq:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_yq(path_binaries=tmp_path)
-        run(str(tmp_path / "yq"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "yq"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage:
               yq [flags]
@@ -486,10 +462,9 @@ class TestSetupYq:
 class TestSetupZoxide:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path, capsys: CaptureFixture) -> None:
+    def test_main(self, *, tmp_path: Path) -> None:
         setup_zoxide(path_binaries=tmp_path, home=tmp_path)
-        run(str(tmp_path / "zoxide"), "--help", return_=True)
-        result = capsys.readouterr()
+        result = run(str(tmp_path / "zoxide"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage:
               zoxide <COMMAND>
