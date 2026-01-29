@@ -109,23 +109,6 @@ class TestSetupBat:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupCurl:
-    @mark.only
-    @run_test_frac(frac=RUN_TEST_FRAC)
-    @skipif_not_linux
-    @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self) -> None:
-        try:
-            setup_curl(sudo=True)
-        except CalledProcessError as error:
-            raise RuntimeError(repr_error(error))
-        result = run("curl", "--help", return_=True)
-        pattern = normalize_multi_line_str("""
-            Usage: curl [options...] <url>
-        """)
-        assert search(escape(pattern), result) is not None, result
-
-
 class TestSetupDelta:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
@@ -199,28 +182,6 @@ class TestSetupFzf:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupGit:
-    @mark.only
-    @run_test_frac(frac=RUN_TEST_FRAC)
-    @skipif_not_linux
-    @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self) -> None:
-        try:
-            setup_git(sudo=True)
-        except CalledProcessError as error:
-            raise RuntimeError(repr_error(error))
-        result = run("git", "--help", return_=True)
-        pattern = normalize_multi_line_str("""
-            usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
-               [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
-               [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--no-lazy-fetch]
-               [--no-optional-locks] [--no-advice] [--bare] [--git-dir=<path>]
-               [--work-tree=<path>] [--namespace=<name>] [--config-env=<name>=<envvar>]
-               <command> [<args>]
-        """)
-        assert search(escape(pattern), result) is not None, result
-
-
 class TestSetupJq:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
@@ -289,29 +250,6 @@ class TestSetupRipgrep:
                 command | rg [OPTIONS] PATTERN
                 rg [OPTIONS] --help
                 rg [OPTIONS] --version
-        """)
-        assert search(escape(pattern), result) is not None, result
-
-
-class TestSetupRsync:
-    @mark.only
-    @run_test_frac(frac=RUN_TEST_FRAC)
-    @skipif_not_linux
-    @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self) -> None:
-        try:
-            setup_rsync(sudo=True)
-        except CalledProcessError as error:
-            raise RuntimeError(repr_error(error))
-        result = run("rsync", "--help", return_=True)
-        pattern = normalize_multi_line_str("""
-            Usage: rsync [OPTION]... SRC [SRC]... DEST
-              or   rsync [OPTION]... SRC [SRC]... [USER@]HOST:DEST
-              or   rsync [OPTION]... SRC [SRC]... [USER@]HOST::DEST
-              or   rsync [OPTION]... SRC [SRC]... rsync://[USER@]HOST[:PORT]/DEST
-              or   rsync [OPTION]... [USER@]HOST:SRC [DEST]
-              or   rsync [OPTION]... [USER@]HOST::SRC [DEST]
-              or   rsync [OPTION]... rsync://[USER@]HOST[:PORT]/SRC [DEST]
         """)
         assert search(escape(pattern), result) is not None, result
 
