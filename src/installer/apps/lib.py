@@ -16,7 +16,6 @@ from utilities.core import (
     one,
     which,
 )
-from utilities.logging import to_logger
 from utilities.subprocess import (
     APT_UPDATE,
     BASH_LS,
@@ -165,35 +164,37 @@ def setup_age(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'age'."""
-    log_info(logger, "Setting up 'age'...")
     if ssh is None:
-        with yield_gzip_asset(
-            "FiloSottile",
-            "age",
-            token=token,
-            match_system=True,
-            match_machine=True,
-            not_endswith=["proof"],
-        ) as temp:
-            downloads: list[Path] = []
-            for src in temp.iterdir():
-                if src.name.startswith("age"):
-                    dest = Path(path_binaries, src.name)
-                    cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-                    downloads.append(dest)
-    else:
-        ssh_uv_install(
-            ssh,
-            "age",
-            token=token,
-            path_binaries=path_binaries,
-            sudo=sudo,
-            perms=perms,
-            owner=owner,
-            group=group,
-            retry=retry,
-            logger=logger,
-        )
+        try:
+            _ = which("age")
+            log_info(logger, "'age' is already set up")
+        except WhichError:
+            log_info(logger, "Setting up 'age'...")
+            with yield_gzip_asset(
+                "FiloSottile",
+                "age",
+                token=token,
+                match_system=True,
+                match_machine=True,
+                not_endswith=["proof"],
+            ) as temp:
+                for src in temp.iterdir():
+                    if src.name.startswith("age"):
+                        dest = Path(path_binaries, src.name)
+                        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+        return
+    ssh_uv_install(
+        ssh,
+        "age",
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
+    )
 
 
 ##
@@ -344,24 +345,24 @@ def setup_direnv(
             group=group,
             root=FILE_SYSTEM_ROOT if root is None else root,
         )
-    else:
-        ssh_uv_install(
-            ssh,
-            "direnv",
-            path_binaries=path_binaries,
-            token=token,
-            sudo=sudo,
-            perms_binary=perms_binary,
-            owner=owner,
-            group=group,
-            etc=etc,
-            shell=shell,
-            home=home,
-            perms_config=perms_config,
-            root=root,
-            retry=retry,
-            logger=logger,
-        )
+        return
+    ssh_uv_install(
+        ssh,
+        "direnv",
+        logger=logger,
+        path_binaries=path_binaries,
+        token=token,
+        sudo=sudo,
+        perms_binary=perms_binary,
+        owner=owner,
+        group=group,
+        etc=etc,
+        shell=shell,
+        home=home,
+        perms_config=perms_config,
+        root=root,
+        retry=retry,
+    )
 
 
 ##
@@ -375,7 +376,6 @@ def setup_docker(
     user: str | None = None,
     retry: Retry | None = None,
 ) -> None:
-    log_info(logger, "Setting up 'docker'....")
     if ssh is None:
         match SYSTEM_NAME:
             case "Darwin":
@@ -384,7 +384,9 @@ def setup_docker(
             case "Linux":
                 try:
                     _ = which("docker")
+                    log_info(logger, "'docker' is already set up")
                 except WhichError:
+                    log_info(logger, "Setting up 'docker'....")
                     apt_remove(
                         "docker.io",
                         "docker-doc",
@@ -437,12 +439,10 @@ def setup_docker(
                     )
                 if user is not None:
                     run(*maybe_sudo_cmd("usermod", "-aG", "docker", user, sudo=sudo))
-                if logger is not None:
-                    to_logger(logger).info("Installing 'docker'...")
+                return
             case never:
                 assert_never(never)
-    else:
-        ssh_uv_install(ssh, "docker", sudo=sudo, user=user, retry=retry, logger=logger)
+    ssh_uv_install(ssh, "docker", logger=logger, sudo=sudo, user=user, retry=retry)
 
 
 ##
@@ -592,24 +592,24 @@ def setup_fzf(
             group=group,
             root=FILE_SYSTEM_ROOT if root is None else root,
         )
-    else:
-        ssh_uv_install(
-            ssh,
-            "fzf",
-            token=token,
-            path_binaries=path_binaries,
-            sudo=sudo,
-            perms_binary=perms_binary,
-            owner=owner,
-            group=group,
-            etc=etc,
-            shell=shell,
-            home=home,
-            perms_config=perms_config,
-            root=root,
-            retry=retry,
-            logger=logger,
-        )
+        return
+    ssh_uv_install(
+        ssh,
+        "fzf",
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms_binary=perms_binary,
+        owner=owner,
+        group=group,
+        etc=etc,
+        shell=shell,
+        home=home,
+        perms_config=perms_config,
+        root=root,
+        retry=retry,
+    )
 
 
 ##
@@ -682,19 +682,19 @@ def setup_just(
             src = temp / "just"
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    else:
-        ssh_uv_install(
-            ssh,
-            "just",
-            token=token,
-            path_binaries=path_binaries,
-            sudo=sudo,
-            perms=perms,
-            owner=owner,
-            group=group,
-            retry=retry,
-            logger=logger,
-        )
+        return
+    ssh_uv_install(
+        ssh,
+        "just",
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
+    )
 
 
 ##
@@ -748,12 +748,12 @@ def setup_pve_fake_subscription(
                     "Jamesits", "pve-fake-subscription", token=token, endswith="deb"
                 ) as temp:
                     run("dpkg", "-i", str(temp))
+                return
             case never:
                 assert_never(never)
-    else:
-        ssh_uv_install(
-            ssh, "pve-fake-subscription", token=token, retry=retry, logger=logger
-        )
+    ssh_uv_install(
+        ssh, "pve-fake-subscription", logger=logger, token=token, retry=retry
+    )
 
 
 ##
@@ -779,19 +779,19 @@ def setup_restic(
         ) as src:
             dest = Path(path_binaries, "restic")
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    else:
-        ssh_uv_install(
-            ssh,
-            "restic",
-            token=token,
-            path_binaries=path_binaries,
-            sudo=sudo,
-            perms=perms,
-            owner=owner,
-            group=group,
-            retry=retry,
-            logger=logger,
-        )
+        return
+    ssh_uv_install(
+        ssh,
+        "restic",
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
+    )
 
 
 ##
@@ -984,19 +984,19 @@ def setup_sops(
             owner=owner,
             group=group,
         )
-    else:
-        ssh_uv_install(
-            ssh,
-            "sops",
-            token=token,
-            path_binaries=path_binaries,
-            sudo=sudo,
-            perms=perms,
-            owner=owner,
-            group=group,
-            retry=retry,
-            logger=logger,
-        )
+        return
+    ssh_uv_install(
+        ssh,
+        "sops",
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
+    )
 
 
 ##
@@ -1063,25 +1063,25 @@ def setup_starship(
                 owner=owner,
                 group=group,
             )
-    else:
-        ssh_uv_install(
-            ssh,
-            "starship",
-            token=token,
-            path_binaries=path_binaries,
-            sudo=sudo,
-            perms_binary=perms_binary,
-            owner=owner,
-            group=group,
-            etc=etc,
-            home=home,
-            shell=shell,
-            starship_toml=starship_toml,
-            perms_config=perms_config,
-            root=root,
-            retry=retry,
-            logger=logger,
-        )
+        return
+    ssh_uv_install(
+        ssh,
+        "starship",
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms_binary=perms_binary,
+        owner=owner,
+        group=group,
+        etc=etc,
+        home=home,
+        shell=shell,
+        starship_toml=starship_toml,
+        perms_config=perms_config,
+        root=root,
+        retry=retry,
+    )
 
 
 ##
@@ -1274,24 +1274,24 @@ def setup_zoxide(
             group=group,
             root=FILE_SYSTEM_ROOT if root is None else root,
         )
-    else:
-        ssh_uv_install(
-            ssh,
-            "zoxide",
-            token=token,
-            path_binaries=path_binaries,
-            sudo=sudo,
-            perms_binary=perms_binary,
-            owner=owner,
-            group=group,
-            etc=etc,
-            shell=shell,
-            home=home,
-            perms_config=perms_config,
-            root=root,
-            retry=retry,
-            logger=logger,
-        )
+        return
+    ssh_uv_install(
+        ssh,
+        "zoxide",
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms_binary=perms_binary,
+        owner=owner,
+        group=group,
+        etc=etc,
+        shell=shell,
+        home=home,
+        perms_config=perms_config,
+        root=root,
+        retry=retry,
+        logger=logger,
+    )
 
 
 __all__ = [

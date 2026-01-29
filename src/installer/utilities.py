@@ -10,6 +10,7 @@ from utilities.core import (
     ReadTextError,
     always_iterable,
     extract_groups,
+    log_info,
     normalize_str,
     read_text,
     write_text,
@@ -64,6 +65,7 @@ def ssh_uv_install(
     cmd: str,
     /,
     *args: str,
+    logger: LoggerLike | None = None,
     etc: bool = False,
     group: str | int | None = None,
     home: PathLike | None = None,
@@ -79,9 +81,9 @@ def ssh_uv_install(
     token: SecretLike | None = None,
     user: str | None = None,
     retry: Retry | None = None,
-    logger: LoggerLike | None = None,
 ) -> None:
     ssh_user, ssh_hostname = split_ssh(ssh)
+    log_info(logger, "Setting up %r on %r...", cmd, ssh_hostname)
     parts: list[str] = []
     if etc:
         parts.append("--etc")
