@@ -48,6 +48,7 @@ def yield_asset(
     match_c_std_lib: bool = False,
     match_machine: bool = False,
     not_matches: MaybeSequenceStr | None = None,
+    endswith: MaybeSequenceStr | None = None,
     not_endswith: MaybeSequenceStr | None = None,
 ) -> Iterator[Path]:
     """Yield a GitHub asset."""
@@ -83,7 +84,7 @@ def yield_asset(
         ]
         log_info(
             logger,
-            "Post C standard library group %s, got %s: %s",
+            "Post 'match_c_std_lib' %s, got %s: %s",
             C_STD_LIB_GROUP,
             counted_noun(assets, "asset"),
             [a.name for a in assets],
@@ -96,7 +97,7 @@ def yield_asset(
         ]
         log_info(
             logger,
-            "Post machine type group %s, got %s: %s",
+            "Post 'match_machine' %s, got %s: %s",
             MACHINE_TYPE_GROUP,
             counted_noun(assets, "asset"),
             [a.name for a in assets],
@@ -107,7 +108,15 @@ def yield_asset(
         ]
         log_info(
             logger,
-            "Post asset name patterns, got %s: %s",
+            "Post 'not_matches', got %s: %s",
+            counted_noun(assets, "asset"),
+            [a.name for a in assets],
+        )
+    if endswith is not None:
+        assets = [a for a in assets if any(a.name.endswith(e) for e in endswith)]
+        log_info(
+            logger,
+            "Post 'endswith', got %s: %s",
             counted_noun(assets, "asset"),
             [a.name for a in assets],
         )
@@ -117,7 +126,7 @@ def yield_asset(
         ]
         log_info(
             logger,
-            "Post asset name endings, got %s: %s",
+            "Post 'not_endswith', got %s: %s",
             counted_noun(assets, "asset"),
             [a.name for a in assets],
         )
@@ -197,6 +206,7 @@ def yield_gzip_asset(
     match_c_std_lib: bool = False,
     match_machine: bool = False,
     not_matches: MaybeSequenceStr | None = None,
+    endswith: MaybeSequenceStr | None = None,
     not_endswith: MaybeSequenceStr | None = None,
 ) -> Iterator[Path]:
     log_info(logger, "Yielding Gzip asset...")
@@ -211,6 +221,7 @@ def yield_gzip_asset(
             match_c_std_lib=match_c_std_lib,
             match_machine=match_machine,
             not_matches=not_matches,
+            endswith=endswith,
             not_endswith=not_endswith,
         ) as temp1,
         yield_gzip(temp1) as temp2,
@@ -234,6 +245,7 @@ def yield_lzma_asset(
     match_c_std_lib: bool = False,
     match_machine: bool = False,
     not_matches: MaybeSequenceStr | None = None,
+    endswith: MaybeSequenceStr | None = None,
     not_endswith: MaybeSequenceStr | None = None,
 ) -> Iterator[Path]:
     log_info(logger, "Yielding LZMA asset...")
@@ -248,6 +260,7 @@ def yield_lzma_asset(
             match_c_std_lib=match_c_std_lib,
             match_machine=match_machine,
             not_matches=not_matches,
+            endswith=endswith,
             not_endswith=not_endswith,
         ) as temp1,
         yield_lzma(temp1) as temp2,

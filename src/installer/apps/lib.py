@@ -119,6 +119,7 @@ def setup_asset(
     match_c_std_lib: bool = False,
     match_machine: bool = False,
     not_matches: MaybeSequenceStr | None = None,
+    endswith: MaybeSequenceStr | None = None,
     not_endswith: MaybeSequenceStr | None = None,
     sudo: bool = False,
     perms: PermissionsLike = PERMISSIONS_BINARY,
@@ -136,6 +137,7 @@ def setup_asset(
         match_c_std_lib=match_c_std_lib,
         match_machine=match_machine,
         not_matches=not_matches,
+        endswith=endswith,
         not_endswith=not_endswith,
     ) as src:
         cp(src, path, sudo=sudo, perms=perms, owner=owner, group=group)
@@ -729,30 +731,22 @@ def setup_pve_fake_subscription(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'pve-fake-subscription."""
-    log_info(logger, "Setting up 'restic'...")
+    log_info(logger, "Setting up 'pve-fake-subscription'...")
     if ssh is None:
         match SYSTEM_NAME:
-            case "Darwinnn":
+            case "Darwin":
                 msg = f"Unsupported system: {SYSTEM_NAME!r}"
                 raise ValueError(msg)
             case "Linux":
-                with yield_asset("Jamesits", "pve-fake-subscription", token=token):
-                    breakpoint()
+                with yield_asset(
+                    "Jamesits", "pve-fake-subscription", token=token, endswith="deb"
+                ) as path:
+                    run("dpkg", "-i", str(path))
             case never:
                 assert_never(never)
     else:
-        user, hostname = split_ssh(ssh)
-        cmds: list[list[str]] = [
-            maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
-            maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo),
-        ]
-        utilities.subprocess.ssh(
-            user,
-            hostname,
-            *BASH_LS,
-            input=normalize_str("\n".join(map(join, cmds))),
-            retry=retry,
-            logger=logger,
+        ssh_uv_install(
+            ssh, "pve-fake-subscription", token=token, retry=retry, logger=logger
         )
 
 
