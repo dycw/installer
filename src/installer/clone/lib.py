@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import utilities.subprocess
 from utilities.constants import HOME, PWD
 from utilities.core import always_iterable, log_info, write_text
-from utilities.subprocess import _HOST_KEY_ALGORITHMS, cp
+from utilities.subprocess import _HOST_KEY_ALGORITHMS, cp, ssh_keyscan
 
 from installer.clone.constants import GIT_CLONE_HOST
 from installer.configs.lib import setup_ssh_config
@@ -14,7 +14,7 @@ from installer.configs.lib import setup_ssh_config
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from utilities.types import LoggerLike, PathLike
+    from utilities.types import LoggerLike, PathLike, Retry
 
 
 def git_clone(
@@ -26,6 +26,7 @@ def git_clone(
     logger: LoggerLike | None = None,
     home: PathLike = HOME,
     host: str = GIT_CLONE_HOST,
+    retry: Retry | None = None,
     port: int | None = None,
     dest: PathLike = PWD,
     branch: str | None = None,
@@ -34,6 +35,7 @@ def git_clone(
     key = Path(key)
     setup_ssh_config(logger=logger, home=home)
     _setup_deploy_key(key, home=home, host=host, port=port)
+    ssh_keyscan(host, path=Path(home, ".ssh/known_hosts"), retry=retry, port=port)
     utilities.subprocess.git_clone(
         f"git@{key.stem}:{owner}/{repo}", dest, branch=branch
     )
