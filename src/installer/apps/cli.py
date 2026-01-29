@@ -1152,6 +1152,7 @@ __all__ = [
     "jq_sub_cmd",
     "just_sub_cmd",
     "neovim_sub_cmd",
+    "pve_fake_subscription_sub_cmd",
     "restic_sub_cmd",
     "ripgrep_sub_cmd",
     "rsync_sub_cmd",
