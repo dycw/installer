@@ -740,8 +740,8 @@ def setup_pve_fake_subscription(
             case "Linux":
                 with yield_asset(
                     "Jamesits", "pve-fake-subscription", token=token, endswith="deb"
-                ) as path:
-                    run("dpkg", "-i", str(path))
+                ) as temp:
+                    run("dpkg", "-i", str(temp))
             case never:
                 assert_never(never)
     else:
