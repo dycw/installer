@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from utilities.constants import MINUTE
 from utilities.core import normalize_multi_line_str
-from utilities.pytest import throttle_test
+from utilities.pytest import skipif_ci, throttle_test
 
 from installer.clone.lib import (
     _set_up_deploy_key,
@@ -28,6 +28,7 @@ class TestSetUpDeployKey:
 
 
 class TestSetUpKnownHosts:
+    @skipif_ci
     @throttle_test(duration=5 * MINUTE)
     def test_main(self, *, tmp_path: Path) -> None:
         _set_up_known_hosts(home=tmp_path)
