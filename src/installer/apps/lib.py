@@ -75,37 +75,36 @@ def setup_apt_package(
     retry: Retry | None = None,
 ) -> None:
     """Setup an 'apt' package."""
-    if ssh is None:
-        match SYSTEM_NAME:
-            case "Darwin":
-                msg = f"Unsupported system: {SYSTEM_NAME!r}"
-                raise ValueError(msg)
-            case "Linux":
-                try:
-                    _ = which(package)
-                except WhichError:
-                    log_info(logger, "Setting up 'apt' package %r...", package)
-                    run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
-                    run(*maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo))
-                else:
-                    log_info(logger, "'apt' package %r is already installed", package)
-            case never:
-                assert_never(never)
-    else:
-        log_info(logger, "Setting up 'apt' package on %r...", ssh)
-        user, hostname = split_ssh(ssh)
-        cmds: list[list[str]] = [
-            maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
-            maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo),
-        ]
-        utilities.subprocess.ssh(
-            user,
-            hostname,
-            *BASH_LS,
-            input=normalize_str("\n".join(map(join, cmds))),
-            retry=retry,
-            logger=logger,
-        )
+    match ssh, SYSTEM_NAME:
+        case None, "Darwin":
+            msg = f"Unsupported system: {SYSTEM_NAME!r}"
+            raise ValueError(msg)
+        case None, "Linux":
+            try:
+                _ = which(package)
+            except WhichError:
+                log_info(logger, "Setting up 'apt' package %r...", package)
+                run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
+                run(*maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo))
+            else:
+                log_info(logger, "'apt' package %r is already installed", package)
+        case str(), _:
+            user, hostname = split_ssh(ssh)
+            log_info(logger, "Setting up 'apt' package %r on %r...", package, hostname)
+            cmds: list[list[str]] = [
+                maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
+                maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo),
+            ]
+            utilities.subprocess.ssh(
+                user,
+                hostname,
+                *BASH_LS,
+                input=normalize_str("\n".join(map(join, cmds))),
+                retry=retry,
+                logger=logger,
+            )
+        case never:
+            assert_never(never)
 
 
 ##
@@ -211,18 +210,22 @@ def setup_bat(
     group: str | int | None = None,
 ) -> None:
     """Set up 'bat'."""
-    log_info(logger, "Setting up 'bat'...")
-    with yield_gzip_asset(
-        "sharkdp",
-        "bat",
-        token=token,
-        match_system=True,
-        match_c_std_lib=True,
-        match_machine=True,
-    ) as temp:
-        src = temp / "bat"
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    try:
+        _ = which("bat")
+        log_info(logger, "'bat' is already set up")
+    except WhichError:
+        log_info(logger, "Setting up 'bat'...")
+        with yield_gzip_asset(
+            "sharkdp",
+            "bat",
+            token=token,
+            match_system=True,
+            match_c_std_lib=True,
+            match_machine=True,
+        ) as temp:
+            src = temp / "bat"
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
 
 ##
@@ -239,19 +242,23 @@ def setup_bottom(
     group: str | int | None = None,
 ) -> None:
     """Set up 'bottom'."""
-    log_info(logger, "Setting up 'bottom'...")
-    with yield_gzip_asset(
-        "ClementTsang",
-        "bottom",
-        token=token,
-        match_system=True,
-        match_c_std_lib=True,
-        match_machine=True,
-        not_matches=[r"\d+\.tar\.gz$"],
-    ) as temp:
-        src = temp / "btm"
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    try:
+        _ = which("btm")
+        log_info(logger, "'bottom' is already set up")
+    except WhichError:
+        log_info(logger, "Setting up 'bottom'...")
+        with yield_gzip_asset(
+            "ClementTsang",
+            "bottom",
+            token=token,
+            match_system=True,
+            match_c_std_lib=True,
+            match_machine=True,
+            not_matches=[r"\d+\.tar\.gz$"],
+        ) as temp:
+            src = temp / "btm"
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
 
 ##
@@ -265,7 +272,6 @@ def setup_curl(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'curl'."""
-    log_info(logger, "Setting up 'curl'...")
     setup_apt_package("curl", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
 
@@ -283,18 +289,22 @@ def setup_delta(
     group: str | int | None = None,
 ) -> None:
     """Set up 'delta'."""
-    log_info(logger, "Setting up 'delta'...")
-    with yield_gzip_asset(
-        "dandavison",
-        "delta",
-        token=token,
-        match_system=True,
-        match_c_std_lib=True,
-        match_machine=True,
-    ) as temp:
-        src = temp / "delta"
-        dest = Path(path_binaries, src.name)
-        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+    try:
+        _ = which("delta")
+        log_info(logger, "'delta' is already set up")
+    except WhichError:
+        log_info(logger, "Setting up 'delta'...")
+        with yield_gzip_asset(
+            "dandavison",
+            "delta",
+            token=token,
+            match_system=True,
+            match_c_std_lib=True,
+            match_machine=True,
+        ) as temp:
+            src = temp / "delta"
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
 
 ##
@@ -318,33 +328,38 @@ def setup_direnv(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'direnv'."""
-    log_info(logger, "Setting up 'direnv'...")
     if ssh is None:
-        dest = Path(path_binaries, "direnv")
-        setup_asset(
-            "direnv",
-            "direnv",
-            dest,
-            token=token,
-            match_system=True,
-            match_machine=True,
-            sudo=sudo,
-            perms=perms_binary,
-            owner=owner,
-            group=group,
-        )
-        setup_shell_config(
-            'eval "$(direnv hook bash)"',
-            'eval "$(direnv hook fish)"',
-            "direnv hook fish | source",
-            etc="direnv" if etc else None,
-            shell=SHELL if shell is None else shell,
-            home=HOME if home is None else home,
-            perms=perms_config,
-            owner=owner,
-            group=group,
-            root=FILE_SYSTEM_ROOT if root is None else root,
-        )
+        try:
+            _ = which("direnv")
+            log_info(logger, "'direnv' is already set up")
+        except WhichError:
+            log_info(logger, "Setting up 'direnv'...")
+            if ssh is None:
+                dest = Path(path_binaries, "direnv")
+                setup_asset(
+                    "direnv",
+                    "direnv",
+                    dest,
+                    token=token,
+                    match_system=True,
+                    match_machine=True,
+                    sudo=sudo,
+                    perms=perms_binary,
+                    owner=owner,
+                    group=group,
+                )
+                setup_shell_config(
+                    'eval "$(direnv hook bash)"',
+                    'eval "$(direnv hook fish)"',
+                    "direnv hook fish | source",
+                    etc="direnv" if etc else None,
+                    shell=SHELL if shell is None else shell,
+                    home=HOME if home is None else home,
+                    perms=perms_config,
+                    owner=owner,
+                    group=group,
+                    root=FILE_SYSTEM_ROOT if root is None else root,
+                )
         return
     ssh_uv_install(
         ssh,
@@ -623,7 +638,6 @@ def setup_git(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'git'."""
-    log_info(logger, "Setting up 'git'...")
     setup_apt_package("git", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
 
@@ -833,7 +847,6 @@ def setup_rsync(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'rsync'."""
-    log_info(logger, "Setting up 'rsync'...")
     setup_apt_package("rsync", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
 
 
