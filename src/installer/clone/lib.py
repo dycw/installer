@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import utilities.subprocess
 from utilities.constants import HOME, PWD
 from utilities.core import always_iterable, log_info, write_text
-from utilities.subprocess import _HOST_KEY_ALGORITHMS, cp, ssh_keyscan
+from utilities.subprocess import HOST_KEY_ALGORITHMS, cp, ssh_keyscan
 
 from installer.clone.constants import GIT_CLONE_HOST
 from installer.configs.lib import setup_ssh_config
@@ -128,7 +128,7 @@ def _yield_conf_lines_core(
     yield f"IdentityFile {_get_path_deploy_key(path, home=home)}"
     yield "IdentitiesOnly yes"
     yield "BatchMode yes"
-    yield f"HostKeyAlgorithms {','.join(always_iterable(_HOST_KEY_ALGORITHMS))}"
+    yield f"HostKeyAlgorithms {','.join(always_iterable(HOST_KEY_ALGORITHMS))}"
     yield "StrictHostKeyChecking yes"
 
 
