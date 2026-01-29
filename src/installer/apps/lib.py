@@ -688,21 +688,25 @@ def setup_jq(
     group: str | int | None = None,
 ) -> None:
     """Set up 'jq'."""
-    log_info(logger, "Setting up 'jq'...")
-    dest = Path(path_binaries, "jq")
-    setup_asset(
-        "jqlang",
-        "jq",
-        dest,
-        token=token,
-        match_system=True,
-        match_machine=True,
-        not_endswith=["linux64"],
-        sudo=sudo,
-        perms=perms,
-        owner=owner,
-        group=group,
-    )
+    try:
+        _ = which("jq")
+        log_info(logger, "'jq' is already set up")
+    except WhichError:
+        log_info(logger, "Setting up 'jq'...")
+        dest = Path(path_binaries, "jq")
+        setup_asset(
+            "jqlang",
+            "jq",
+            dest,
+            token=token,
+            match_system=True,
+            match_machine=True,
+            not_endswith=["linux64"],
+            sudo=sudo,
+            perms=perms,
+            owner=owner,
+            group=group,
+        )
 
 
 ##
@@ -710,8 +714,8 @@ def setup_jq(
 
 def setup_just(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
+    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -721,27 +725,39 @@ def setup_just(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'just'."""
-    log_info(logger, "Setting up 'just'...")
-    if ssh is None:
-        with yield_gzip_asset(
-            "casey", "just", token=token, match_system=True, match_machine=True
-        ) as temp:
-            src = temp / "just"
-            dest = Path(path_binaries, src.name)
-            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        return
-    ssh_uv_install(
-        ssh,
-        "just",
-        logger=logger,
-        token=token,
-        path_binaries=path_binaries,
-        sudo=sudo,
-        perms=perms,
-        owner=owner,
-        group=group,
-        retry=retry,
-    )
+    match ssh:
+        case None:
+            try:
+                _ = which("just")
+                log_info(logger, "'just' is already set up")
+            except WhichError:
+                log_info(logger, "Setting up 'just'...")
+                if ssh is None:
+                    with yield_gzip_asset(
+                        "casey",
+                        "just",
+                        token=token,
+                        match_system=True,
+                        match_machine=True,
+                    ) as temp:
+                        src = temp / "just"
+                        dest = Path(path_binaries, src.name)
+                        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+        case str():
+            ssh_uv_install(
+                ssh,
+                "just",
+                logger=logger,
+                token=token,
+                path_binaries=path_binaries,
+                sudo=sudo,
+                perms=perms,
+                owner=owner,
+                group=group,
+                retry=retry,
+            )
+        case never:
+            assert_never(never)
 
 
 ##

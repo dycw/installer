@@ -522,8 +522,8 @@ def jq_sub_cmd(
 ##
 
 
-@logger_option
 @ssh_option
+@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -533,8 +533,8 @@ def jq_sub_cmd(
 @retry_option
 def just_sub_cmd(
     *,
-    logger: LoggerLike | None,
     ssh: str | None,
+    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -547,8 +547,8 @@ def just_sub_cmd(
         return
     basic_config(obj=logger)
     setup_just(
-        logger=logger,
         ssh=ssh,
+        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
