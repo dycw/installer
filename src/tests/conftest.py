@@ -13,4 +13,5 @@ setup_hypothesis_profiles()
 
 
 RUN_TEST_FRAC: float = 0.1
+RUN_TEST_FRAC: float = 1.0
 THROTTLE_DURATION: Duration = HOUR
