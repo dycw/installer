@@ -316,7 +316,6 @@ version = "0.6.8"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
-    { name = "coloredlogs" },
     { name = "dycw-utilities" },
     { name = "inflect" },
     { name = "pydantic" },
@@ -334,7 +333,6 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.3.1" },
-    { name = "coloredlogs", specifier = ">=15.0.1" },
     { name = "dycw-utilities", specifier = ">=0.188.0" },
     { name = "inflect", specifier = ">=7.5.0" },
     { name = "pydantic", specifier = ">=2.12.5" },
