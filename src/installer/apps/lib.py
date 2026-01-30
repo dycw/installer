@@ -57,13 +57,7 @@ from installer.utilities import setup_local_or_remote, split_ssh, ssh_uv_install
 if TYPE_CHECKING:
     from utilities.core import PermissionsLike
     from utilities.shellingham import Shell
-    from utilities.types import (
-        LoggerLike,
-        MaybeSequenceStr,
-        PathLike,
-        Retry,
-        SecretLike,
-    )
+    from utilities.types import MaybeSequenceStr, PathLike, Retry, SecretLike
 
 
 _LOGGER = to_logger(__name__)
@@ -74,7 +68,6 @@ def setup_apt_package(
     /,
     *,
     ssh: str | None = None,
-    logger: LoggerLike | None = None,
     sudo: bool = False,
     retry: Retry | None = None,
 ) -> None:
@@ -104,7 +97,7 @@ def setup_apt_package(
                 *BASH_LS,
                 input=normalize_str("\n".join(map(join, cmds))),
                 retry=retry,
-                logger=logger,
+                logger=_LOGGER,
             )
         case never:
             assert_never(never)
@@ -119,7 +112,6 @@ def setup_asset(
     path: PathLike,
     /,
     *,
-    logger: LoggerLike | None = None,
     tag: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     match_system: bool = False,
@@ -162,7 +154,6 @@ def set_up_age(
     owner: str | int | None = None,
     group: str | int | None = None,
     ssh: str | None = None,
-    logger: LoggerLike | None = None,
     force: bool = False,
     retry: Retry | None = None,
 ) -> None:
@@ -187,7 +178,6 @@ def set_up_age(
         setup_local,
         ssh=ssh,
         force=force,
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -203,7 +193,6 @@ def set_up_age(
 
 def setup_bat(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -235,7 +224,6 @@ def setup_bat(
 
 def setup_bottom(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -267,14 +255,10 @@ def setup_bottom(
 
 
 def setup_curl(
-    *,
-    ssh: str | None = None,
-    logger: LoggerLike | None = None,
-    sudo: bool = False,
-    retry: Retry | None = None,
+    *, ssh: str | None = None, sudo: bool = False, retry: Retry | None = None
 ) -> None:
     """Set up 'curl'."""
-    setup_apt_package("curl", ssh=ssh, logger=logger, sudo=sudo, retry=retry)
+    setup_apt_package("curl", ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -282,7 +266,6 @@ def setup_curl(
 
 def setup_delta(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -315,7 +298,6 @@ def setup_delta(
 def setup_direnv(
     *,
     ssh: str | None = None,
-    logger: LoggerLike | None = None,
     path_binaries: PathLike = PATH_BINARIES,
     token: SecretLike | None = GITHUB_TOKEN,
     sudo: bool = False,
@@ -367,7 +349,6 @@ def setup_direnv(
             ssh_uv_install(
                 ssh,
                 "direnv",
-                logger=logger,
                 path_binaries=path_binaries,
                 token=token,
                 sudo=sudo,
@@ -391,7 +372,6 @@ def setup_direnv(
 def setup_docker(
     *,
     ssh: str | None = None,
-    logger: LoggerLike | None = None,
     sudo: bool = False,
     user: str | None = None,
     retry: Retry | None = None,
@@ -456,9 +436,7 @@ def setup_docker(
             if user is not None:
                 run(*maybe_sudo_cmd("usermod", "-aG", "docker", user, sudo=sudo))
         case str(), _:
-            ssh_uv_install(
-                ssh, "docker", logger=logger, sudo=sudo, user=user, retry=retry
-            )
+            ssh_uv_install(ssh, "docker", sudo=sudo, user=user, retry=retry)
         case never:
             assert_never(never)
 
@@ -468,7 +446,6 @@ def setup_docker(
 
 def setup_dust(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -507,7 +484,6 @@ def setup_dust(
 
 def setup_eza(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -555,7 +531,6 @@ def setup_eza(
 
 def setup_fd(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -588,7 +563,6 @@ def setup_fd(
 def setup_fzf(
     *,
     ssh: str | None = None,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -642,7 +616,6 @@ def setup_fzf(
             ssh_uv_install(
                 ssh,
                 "fzf",
-                logger=logger,
                 token=token,
                 path_binaries=path_binaries,
                 sudo=sudo,
@@ -664,14 +637,10 @@ def setup_fzf(
 
 
 def setup_git(
-    *,
-    logger: LoggerLike | None = None,
-    ssh: str | None = None,
-    sudo: bool = False,
-    retry: Retry | None = None,
+    *, ssh: str | None = None, sudo: bool = False, retry: Retry | None = None
 ) -> None:
     """Set up 'git'."""
-    setup_apt_package("git", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
+    setup_apt_package("git", ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -680,7 +649,6 @@ def setup_git(
 def setup_jq(
     *,
     force: bool = False,
-    logger: LoggerLike | None = None,
     path_binaries: PathLike = PATH_BINARIES,
     token: SecretLike | None = GITHUB_TOKEN,
     sudo: bool = False,
@@ -715,7 +683,6 @@ def setup_jq(
 def setup_just(
     *,
     ssh: str | None = None,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -747,7 +714,6 @@ def setup_just(
             ssh_uv_install(
                 ssh,
                 "just",
-                logger=logger,
                 token=token,
                 path_binaries=path_binaries,
                 sudo=sudo,
@@ -765,7 +731,6 @@ def setup_just(
 
 def setup_neovim(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -799,7 +764,6 @@ def setup_neovim(
 def setup_pve_fake_subscription(
     *,
     ssh: str | None = None,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     retry: Retry | None = None,
 ) -> None:
@@ -815,9 +779,7 @@ def setup_pve_fake_subscription(
             ) as temp:
                 run("dpkg", "-i", str(temp))
         case str(), _:
-            ssh_uv_install(
-                ssh, "pve-fake-subscription", logger=logger, token=token, retry=retry
-            )
+            ssh_uv_install(ssh, "pve-fake-subscription", token=token, retry=retry)
         case never:
             assert_never(never)
 
@@ -827,7 +789,6 @@ def setup_pve_fake_subscription(
 
 def setup_restic(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -849,7 +810,6 @@ def setup_restic(
     ssh_uv_install(
         ssh,
         "restic",
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -865,7 +825,6 @@ def setup_restic(
 
 def setup_ripgrep(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -892,14 +851,10 @@ def setup_ripgrep(
 
 
 def setup_rsync(
-    *,
-    logger: LoggerLike | None = None,
-    ssh: str | None = None,
-    sudo: bool = False,
-    retry: Retry | None = None,
+    *, ssh: str | None = None, sudo: bool = False, retry: Retry | None = None
 ) -> None:
     """Set up 'rsync'."""
-    setup_apt_package("rsync", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
+    setup_apt_package("rsync", ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -907,7 +862,6 @@ def setup_rsync(
 
 def setup_ruff(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -936,7 +890,6 @@ def setup_ruff(
 
 def setup_sd(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -964,7 +917,6 @@ def setup_sd(
 
 def setup_shellcheck(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -992,7 +944,6 @@ def setup_shellcheck(
 
 def setup_shfmt(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -1022,7 +973,6 @@ def setup_shfmt(
 
 def setup_sops(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -1053,7 +1003,6 @@ def setup_sops(
     ssh_uv_install(
         ssh,
         "sops",
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -1069,7 +1018,6 @@ def setup_sops(
 
 def setup_starship(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -1132,7 +1080,6 @@ def setup_starship(
     ssh_uv_install(
         ssh,
         "starship",
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -1154,7 +1101,6 @@ def setup_starship(
 
 def setup_taplo(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -1176,7 +1122,6 @@ def setup_taplo(
 
 def setup_uv(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -1203,14 +1148,14 @@ def setup_uv(
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
     else:
         user, hostname = split_ssh(ssh)
-        with yield_ssh_temp_dir(user, hostname, retry=retry, logger=logger) as temp:
+        with yield_ssh_temp_dir(user, hostname, retry=retry, logger=_LOGGER) as temp:
             utilities.subprocess.ssh(
                 user,
                 hostname,
                 *BASH_LS,
                 input=setup_uv_cmd(temp, path_binaries=path_binaries, sudo=sudo),
                 retry=retry,
-                logger=logger,
+                logger=_LOGGER,
             )
 
 
@@ -1242,7 +1187,6 @@ def setup_uv_cmd(
 
 def setup_watchexec(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -1271,7 +1215,6 @@ def setup_watchexec(
 
 def setup_yq(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -1304,7 +1247,6 @@ def setup_zoxide(
     *,
     ssh: str | None = None,
     force: bool = False,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -1371,7 +1313,6 @@ def setup_zoxide(
                 perms_config=perms_config,
                 root=root,
                 retry=retry,
-                logger=logger,
             )
         case never:
             assert_never(never)
