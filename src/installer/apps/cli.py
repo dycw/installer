@@ -19,7 +19,7 @@ from installer.apps.click import (
     token_option,
 )
 from installer.apps.lib import (
-    setup_age,
+    set_up_age,
     setup_apt_package,
     setup_bat,
     setup_bottom,
@@ -107,7 +107,7 @@ def age_sub_cmd(
     if is_pytest():
         return
     basic_config(obj=logger)
-    setup_age(
+    set_up_age(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,

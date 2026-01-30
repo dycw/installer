@@ -150,7 +150,7 @@ def setup_asset(
 ##
 
 
-def setup_age(
+def set_up_age(
     *,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -1375,7 +1375,7 @@ def setup_zoxide(
 
 
 __all__ = [
-    "setup_age",
+    "set_up_age",
     "setup_apt_package",
     "setup_asset",
     "setup_bat",
