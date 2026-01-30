@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, assert_never
 
 import utilities.subprocess
 from utilities.core import (
@@ -19,6 +20,8 @@ from utilities.pydantic import extract_secret
 from utilities.subprocess import uv_tool_run_cmd
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from utilities.shellingham import Shell
     from utilities.types import (
         LoggerLike,
@@ -47,6 +50,87 @@ def ensure_line_or_lines(
     if text not in contents:
         with Path(path).open(mode="a") as fh:
             _ = fh.write(f"\n\n{text}")
+
+
+##
+
+
+def setup_local_or_remote(
+    cmd: str,
+    setup_local: Callable[[], None],
+    /,
+    *,
+    ssh: str | None = None,
+    force: bool = False,
+    logger: LoggerLike | None = None,
+    etc: bool = False,
+    group: str | int | None = None,
+    home: PathLike | None = None,
+    owner: str | int | None = None,
+    path_binaries: PathLike | None = None,
+    perms: PermissionsLike | None = None,
+    perms_binary: PermissionsLike | None = None,
+    perms_config: PermissionsLike | None = None,
+    root: PathLike | None = None,
+    shell: Shell | None = None,
+    starship_toml: PathLike | None = None,
+    sudo: bool = False,
+    token: SecretLike | None = None,
+    user: str | None = None,
+    retry: Retry | None = None,
+) -> None:
+    match ssh:
+        case None:
+            if (shutil.which(cmd) is None) or force:
+                log_info(logger, "Setting up %r...", cmd)
+                setup_local()
+            else:
+                log_info(logger, "%r is already set up", cmd)
+        case str():
+            ssh_user, ssh_hostname = split_ssh(ssh)
+            log_info(logger, "Setting up %r on %r...", cmd, ssh_hostname)
+            args: list[str] = []
+            if etc:
+                args.append("--etc")
+            if force:
+                args.append("--force")
+            if group is not None:
+                args.extend(["--group", str(group)])
+            if home is not None:
+                args.extend(["--home", str(home)])
+            if owner is not None:
+                args.extend(["--owner", str(owner)])
+            if path_binaries is not None:
+                args.extend(["--path-binaries", str(path_binaries)])
+            if perms is not None:
+                args.extend(["--perms", str(Permissions.new(perms))])
+            if perms_binary is not None:
+                args.extend(["--perms-binary", str(Permissions.new(perms_binary))])
+            if perms_config is not None:
+                args.extend(["--perms-config", str(Permissions.new(perms_config))])
+            if root is not None:
+                args.extend(["--root", str(root)])
+            if shell is not None:
+                args.extend(["--shell", shell])
+            if starship_toml is not None:
+                args.extend(["--starship-toml", str(starship_toml)])
+            if sudo:
+                args.append("--sudo")
+            if token is not None:
+                args.extend(["--token", extract_secret(token)])
+            if user is not None:
+                args.extend(["--user", user])
+            utilities.subprocess.ssh(
+                ssh_user,
+                ssh_hostname,
+                *uv_tool_run_cmd(
+                    "cli", cmd, *args, from_="dycw-installer[cli]", latest=True
+                ),
+                retry=retry,
+                logger=logger,
+            )
+        case never:
+            assert_never(never)
 
 
 ##

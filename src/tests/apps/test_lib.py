@@ -8,7 +8,7 @@ from utilities.pytest import run_test_frac, throttle_test
 from utilities.subprocess import run
 
 from installer.apps.lib import (
-    setup_age,
+    set_up_age,
     setup_bat,
     setup_bottom,
     setup_delta,
@@ -41,11 +41,11 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-class TestSetupAge:
+class TestSetUpAge:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_age(path_binaries=tmp_path)
+        set_up_age(path_binaries=tmp_path, force=True)
 
         result1 = run(str(tmp_path / "age"), "--help", return_=True)
         pattern1 = normalize_multi_line_str("""
