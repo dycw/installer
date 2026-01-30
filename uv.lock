@@ -312,7 +312,7 @@ wheels = [
 
 [[package]]
 name = "dycw-installer"
-version = "0.7.0"
+version = "0.7.1"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
@@ -333,7 +333,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.3.1" },
-    { name = "dycw-utilities", specifier = ">=0.188.2" },
+    { name = "dycw-utilities", specifier = ">=0.188.4" },
     { name = "inflect", specifier = ">=7.5.0" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pygithub", specifier = ">=2.8.1" },
@@ -343,7 +343,7 @@ provides-extras = ["cli"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "dycw-utilities", extras = ["test"], specifier = ">=0.188.2" },
+    { name = "dycw-utilities", extras = ["test"], specifier = ">=0.188.4" },
     { name = "orjson", specifier = ">=3.11.6" },
     { name = "pyright", specifier = ">=1.1.408" },
 ]
@@ -362,7 +362,7 @@ wheels = [
 
 [[package]]
 name = "dycw-utilities"
-version = "0.188.2"
+version = "0.188.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "coloredlogs" },
@@ -373,7 +373,7 @@ dependencies = [
     { name = "whenever" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c6/91/18bba7a1ffe926ee42d5eb7697ee542e561b8885d05182094af067a45c7c/dycw_utilities-0.188.2-py3-none-any.whl", hash = "sha256:734216d0c294d04d63abaa74ad693f943d16ad89ff448416c5f19b5c0d0e77bb", size = 207825, upload-time = "2026-01-30T11:28:41.95Z" },
+    { url = "https://files.pythonhosted.org/packages/cf/98/70c87cb7d9cafff23f8c1d1af3314aad32b9c4fa3c779b8b560432612bc3/dycw_utilities-0.188.4-py3-none-any.whl", hash = "sha256:8cfdbd64821d3b387975bceb25186acb0ce4a953bd11cdcc396653655521e586", size = 208173, upload-time = "2026-01-30T16:09:49.278Z" },
 ]
 
 [package.optional-dependencies]
@@ -752,11 +752,11 @@ wheels = [
 
 [[package]]
 name = "pyjwt"
-version = "2.10.1"
+version = "2.11.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/e7/46/bd74733ff231675599650d3e47f361794b22ef3e3770998dda30d3b63726/pyjwt-2.10.1.tar.gz", hash = "sha256:3cc5772eb20009233caf06e9d8a0577824723b44e6648ee0a2aedb6cf9381953", size = 87785, upload-time = "2024-11-28T03:43:29.933Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5c/5a/b46fa56bf322901eee5b0454a34343cdbdae202cd421775a8ee4e42fd519/pyjwt-2.11.0.tar.gz", hash = "sha256:35f95c1f0fbe5d5ba6e43f00271c275f7a1a4db1dab27bf708073b75318ea623", size = 98019, upload-time = "2026-01-30T19:59:55.694Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/61/ad/689f02752eeec26aed679477e80e632ef1b682313be70793d798c1d5fc8f/PyJWT-2.10.1-py3-none-any.whl", hash = "sha256:dcdd193e30abefd5debf142f9adfcdd2b58004e644f25406ffaebd50bd98dacb", size = 22997, upload-time = "2024-11-28T03:43:27.893Z" },
+    { url = "https://files.pythonhosted.org/packages/6f/01/c26ce75ba460d5cd503da9e13b21a33804d38c2165dec7b716d06b13010c/pyjwt-2.11.0-py3-none-any.whl", hash = "sha256:94a6bde30eb5c8e04fee991062b534071fd1439ef58d2adc9ccb823e7bcd0469", size = 28224, upload-time = "2026-01-30T19:59:54.539Z" },
 ]
 
 [package.optional-dependencies]
