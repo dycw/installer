@@ -55,7 +55,7 @@ from installer.configs.click import etc_option, home_option, root_option, shell_
 
 if TYPE_CHECKING:
     from utilities.shellingham import Shell
-    from utilities.types import LoggerLike, PathLike, Retry, SecretLike
+    from utilities.types import PathLike, Retry, SecretLike
 
 
 @argument("package", type=str)
@@ -278,7 +278,6 @@ def direnv_sub_cmd(
 @retry_option
 def docker_sub_cmd(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
     sudo: bool = False,
     user: str | None = None,
