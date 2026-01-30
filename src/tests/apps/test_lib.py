@@ -41,11 +41,11 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-class TestSetupAge:
+class TestSetUpAge:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_age(path_binaries=tmp_path)
+        setup_age(path_binaries=tmp_path, force=True)
 
         result1 = run(str(tmp_path / "age"), "--help", return_=True)
         pattern1 = normalize_multi_line_str("""

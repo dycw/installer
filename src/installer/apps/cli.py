@@ -82,38 +82,41 @@ def apt_package_sub_cmd(
 
 
 @logger_option
-@ssh_option
 @token_option
 @path_binaries_option
 @sudo_option
 @perms_option
 @owner_option
 @group_option
+@ssh_option
+@force_option
 @retry_option
 def age_sub_cmd(
     *,
     logger: LoggerLike | None,
-    ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
     perms: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
+    ssh: str | None,
+    force: bool,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     basic_config(obj=logger)
     setup_age(
-        ssh=ssh,
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
         perms=perms,
         owner=owner,
         group=group,
+        ssh=ssh,
+        logger=logger,
+        force=force,
         retry=retry,
     )
 

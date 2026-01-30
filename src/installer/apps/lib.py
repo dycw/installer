@@ -52,7 +52,7 @@ from installer.apps.download import (
 )
 from installer.configs.constants import FILE_SYSTEM_ROOT
 from installer.configs.lib import setup_shell_config
-from installer.utilities import split_ssh, ssh_uv_install
+from installer.utilities import setup_local_or_remote, split_ssh, ssh_uv_install
 
 if TYPE_CHECKING:
     from utilities.core import PermissionsLike
@@ -152,51 +152,47 @@ def setup_asset(
 
 def setup_age(
     *,
-    logger: LoggerLike | None = None,
-    ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
     group: str | int | None = None,
+    ssh: str | None = None,
+    logger: LoggerLike | None = None,
+    force: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Set up 'age'."""
-    match ssh:
-        case None:
-            try:
-                _ = which("age")
-                log_info(logger, "'age' is already set up")
-            except WhichError:
-                log_info(logger, "Setting up 'age'...")
-                with yield_gzip_asset(
-                    "FiloSottile",
-                    "age",
-                    token=token,
-                    match_system=True,
-                    match_machine=True,
-                    not_endswith=["proof"],
-                ) as temp:
-                    srcs = {p for p in temp.iterdir() if p.name.startswith("age")}
-                    for src in srcs:
-                        dest = Path(path_binaries, src.name)
-                        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        case str():
-            ssh_uv_install(
-                ssh,
-                "age",
-                logger=logger,
-                token=token,
-                path_binaries=path_binaries,
-                sudo=sudo,
-                perms=perms,
-                owner=owner,
-                group=group,
-                retry=retry,
-            )
-        case never:
-            assert_never(never)
+
+    def setup_local() -> None:
+        with yield_gzip_asset(
+            "FiloSottile",
+            "age",
+            token=token,
+            match_system=True,
+            match_machine=True,
+            not_endswith=["proof"],
+        ) as temp:
+            srcs = {p for p in temp.iterdir() if p.name.startswith("age")}
+            for src in srcs:
+                dest = Path(path_binaries, src.name)
+                cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+
+    setup_local_or_remote(
+        "age",
+        setup_local,
+        ssh=ssh,
+        force=force,
+        logger=logger,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
+    )
 
 
 ##
