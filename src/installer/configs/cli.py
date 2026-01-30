@@ -4,10 +4,9 @@ from typing import TYPE_CHECKING
 
 from click import argument, option
 from utilities.click import Str
-from utilities.core import is_pytest
-from utilities.logging import basic_config
+from utilities.core import is_pytest, set_up_logging
 
-from installer.click import logger_option, retry_option, ssh_option, sudo_option
+from installer.click import retry_option, ssh_option, sudo_option
 from installer.configs.click import home_option, permit_root_login_option, root_option
 from installer.configs.lib import (
     setup_authorized_keys,
@@ -16,11 +15,10 @@ from installer.configs.lib import (
 )
 
 if TYPE_CHECKING:
-    from utilities.types import LoggerLike, PathLike, Retry
+    from utilities.types import PathLike, Retry
 
 
 @argument("keys", type=Str(), nargs=-1)
-@logger_option
 @home_option
 @ssh_option
 @sudo_option
@@ -29,7 +27,6 @@ if TYPE_CHECKING:
 def setup_authorized_keys_sub_cmd(
     *,
     keys: tuple[str, ...],
-    logger: LoggerLike,
     home: PathLike,
     ssh: str | None,
     sudo: bool,
@@ -38,38 +35,25 @@ def setup_authorized_keys_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_authorized_keys(
-        list(keys),
-        logger=logger,
-        home=home,
-        ssh=ssh,
-        sudo=sudo,
-        batch_mode=batch_mode,
-        retry=retry,
+        list(keys), home=home, ssh=ssh, sudo=sudo, batch_mode=batch_mode, retry=retry
     )
 
 
-@logger_option
 @home_option
 @ssh_option
 @sudo_option
 @retry_option
 def setup_ssh_config_sub_cmd(
-    *,
-    logger: LoggerLike,
-    home: PathLike,
-    ssh: str | None,
-    sudo: bool,
-    retry: Retry | None,
+    *, home: PathLike, ssh: str | None, sudo: bool, retry: Retry | None
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
-    setup_ssh_config(logger=logger, home=home, ssh=ssh, sudo=sudo, retry=retry)
+    set_up_logging(__name__, root=True)
+    setup_ssh_config(home=home, ssh=ssh, sudo=sudo, retry=retry)
 
 
-@logger_option
 @permit_root_login_option
 @root_option
 @ssh_option
@@ -77,7 +61,6 @@ def setup_ssh_config_sub_cmd(
 @retry_option
 def setup_sshd_sub_cmd(
     *,
-    logger: LoggerLike,
     permit_root_login: bool,
     root: PathLike,
     ssh: str | None,
@@ -86,14 +69,9 @@ def setup_sshd_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_sshd_config(
-        logger=logger,
-        permit_root_login=permit_root_login,
-        root=root,
-        ssh=ssh,
-        sudo=sudo,
-        retry=retry,
+        permit_root_login=permit_root_login, root=root, ssh=ssh, sudo=sudo, retry=retry
     )
 
 

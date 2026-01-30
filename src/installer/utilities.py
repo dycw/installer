@@ -11,9 +11,9 @@ from utilities.core import (
     ReadTextError,
     always_iterable,
     extract_groups,
-    log_info,
     normalize_str,
     read_text,
+    to_logger,
     write_text,
 )
 from utilities.pydantic import extract_secret
@@ -23,13 +23,13 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from utilities.shellingham import Shell
-    from utilities.types import (
-        LoggerLike,
-        MaybeSequenceStr,
-        PathLike,
-        Retry,
-        SecretLike,
-    )
+    from utilities.types import MaybeSequenceStr, PathLike, Retry, SecretLike
+
+
+_LOGGER = to_logger(__name__)
+
+
+##
 
 
 def ensure_line_or_lines(
@@ -62,7 +62,6 @@ def setup_local_or_remote(
     *,
     ssh: str | None = None,
     force: bool = False,
-    logger: LoggerLike | None = None,
     etc: bool = False,
     group: str | int | None = None,
     home: PathLike | None = None,
@@ -82,13 +81,13 @@ def setup_local_or_remote(
     match ssh:
         case None:
             if (shutil.which(cmd) is None) or force:
-                log_info(logger, "Setting up %r...", cmd)
+                _LOGGER.info("Setting up %r...", cmd)
                 setup_local()
             else:
-                log_info(logger, "%r is already set up", cmd)
+                _LOGGER.info("%r is already set up", cmd)
         case str():
             ssh_user, ssh_hostname = split_ssh(ssh)
-            log_info(logger, "Setting up %r on %r...", cmd, ssh_hostname)
+            _LOGGER.info("Setting up %r on %r...", cmd, ssh_hostname)
             args: list[str] = []
             if etc:
                 args.append("--etc")
@@ -127,7 +126,7 @@ def setup_local_or_remote(
                     "cli", cmd, *args, from_="dycw-installer[cli]", latest=True
                 ),
                 retry=retry,
-                logger=logger,
+                logger=_LOGGER,
             )
         case never:
             assert_never(never)
@@ -149,7 +148,6 @@ def ssh_uv_install(
     cmd: str,
     /,
     *args: str,
-    logger: LoggerLike | None = None,
     etc: bool = False,
     group: str | int | None = None,
     home: PathLike | None = None,
@@ -167,7 +165,7 @@ def ssh_uv_install(
     retry: Retry | None = None,
 ) -> None:
     ssh_user, ssh_hostname = split_ssh(ssh)
-    log_info(logger, "Setting up %r on %r...", cmd, ssh_hostname)
+    _LOGGER.info("Setting up %r on %r...", cmd, ssh_hostname)
     parts: list[str] = []
     if etc:
         parts.append("--etc")
@@ -204,7 +202,7 @@ def ssh_uv_install(
             "cli", cmd, *parts, *args, from_="dycw-installer[cli]", latest=True
         ),
         retry=retry,
-        logger=logger,
+        logger=_LOGGER,
     )
 
 

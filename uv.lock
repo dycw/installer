@@ -312,11 +312,10 @@ wheels = [
 
 [[package]]
 name = "dycw-installer"
-version = "0.6.7"
+version = "0.7.0"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
-    { name = "coloredlogs" },
     { name = "dycw-utilities" },
     { name = "inflect" },
     { name = "pydantic" },
@@ -334,8 +333,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.3.1" },
-    { name = "coloredlogs", specifier = ">=15.0.1" },
-    { name = "dycw-utilities", specifier = ">=0.187.5" },
+    { name = "dycw-utilities", specifier = ">=0.188.2" },
     { name = "inflect", specifier = ">=7.5.0" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pygithub", specifier = ">=2.8.1" },
@@ -345,7 +343,7 @@ provides-extras = ["cli"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "dycw-utilities", extras = ["test"], specifier = ">=0.187.5" },
+    { name = "dycw-utilities", extras = ["test"], specifier = ">=0.188.2" },
     { name = "orjson", specifier = ">=3.11.6" },
     { name = "pyright", specifier = ">=1.1.408" },
 ]
@@ -364,9 +362,10 @@ wheels = [
 
 [[package]]
 name = "dycw-utilities"
-version = "0.187.5"
+version = "0.188.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "coloredlogs" },
     { name = "rich" },
     { name = "typing-extensions" },
     { name = "tzdata" },
@@ -374,7 +373,7 @@ dependencies = [
     { name = "whenever" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d3/04/fcd7d9d758e70df6f98c46016298f1cecbbc4aba2a271f2794bf43fe333a/dycw_utilities-0.187.5-py3-none-any.whl", hash = "sha256:8164d4517dfd69c6798e907c5b3244c887b3f7bc2b703a58773780fecdce65e9", size = 210022, upload-time = "2026-01-30T00:06:52.442Z" },
+    { url = "https://files.pythonhosted.org/packages/c6/91/18bba7a1ffe926ee42d5eb7697ee542e561b8885d05182094af067a45c7c/dycw_utilities-0.188.2-py3-none-any.whl", hash = "sha256:734216d0c294d04d63abaa74ad693f943d16ad89ff448416c5f19b5c0d0e77bb", size = 207825, upload-time = "2026-01-30T11:28:41.95Z" },
 ]
 
 [package.optional-dependencies]

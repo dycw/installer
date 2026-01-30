@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING
 import utilities.click
 from click import argument, option
 from utilities.click import Str
-from utilities.core import PermissionsLike, is_pytest
-from utilities.logging import basic_config
+from utilities.core import PermissionsLike, is_pytest, set_up_logging
 
 from installer.apps.click import (
     force_option,
@@ -51,37 +50,30 @@ from installer.apps.lib import (
     setup_yq,
     setup_zoxide,
 )
-from installer.click import logger_option, retry_option, ssh_option, sudo_option
+from installer.click import retry_option, ssh_option, sudo_option
 from installer.configs.click import etc_option, home_option, root_option, shell_option
 
 if TYPE_CHECKING:
     from utilities.shellingham import Shell
-    from utilities.types import LoggerLike, PathLike, Retry, SecretLike
+    from utilities.types import PathLike, Retry, SecretLike
 
 
 @argument("package", type=str)
-@logger_option
 @ssh_option
 @sudo_option
 @retry_option
 def apt_package_sub_cmd(
-    *,
-    package: str,
-    logger: LoggerLike | None,
-    ssh: str | None,
-    sudo: bool,
-    retry: Retry | None,
+    *, package: str, ssh: str | None, sudo: bool, retry: Retry | None
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
-    setup_apt_package(package, ssh=ssh, logger=logger, sudo=sudo, retry=retry)
+    set_up_logging(__name__, root=True)
+    setup_apt_package(package, ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
 
 
-@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -93,7 +85,6 @@ def apt_package_sub_cmd(
 @retry_option
 def age_sub_cmd(
     *,
-    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -106,7 +97,7 @@ def age_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     set_up_age(
         token=token,
         path_binaries=path_binaries,
@@ -115,7 +106,6 @@ def age_sub_cmd(
         owner=owner,
         group=group,
         ssh=ssh,
-        logger=logger,
         force=force,
         retry=retry,
     )
@@ -124,7 +114,6 @@ def age_sub_cmd(
 ##
 
 
-@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -133,7 +122,6 @@ def age_sub_cmd(
 @group_option
 def bat_sub_cmd(
     *,
-    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -143,9 +131,8 @@ def bat_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_bat(
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -158,7 +145,6 @@ def bat_sub_cmd(
 ##
 
 
-@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -167,7 +153,6 @@ def bat_sub_cmd(
 @group_option
 def bottom_sub_cmd(
     *,
-    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -177,9 +162,8 @@ def bottom_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_bottom(
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -192,23 +176,19 @@ def bottom_sub_cmd(
 ##
 
 
-@logger_option
 @ssh_option
 @sudo_option
 @retry_option
-def curl_sub_cmd(
-    *, logger: LoggerLike | None, ssh: str | None, sudo: bool, retry: Retry | None
-) -> None:
+def curl_sub_cmd(*, ssh: str | None, sudo: bool, retry: Retry | None) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
-    setup_curl(ssh=ssh, logger=logger, sudo=sudo, retry=retry)
+    set_up_logging(__name__, root=True)
+    setup_curl(ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
 
 
-@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -217,7 +197,6 @@ def curl_sub_cmd(
 @group_option
 def delta_sub_cmd(
     *,
-    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -227,9 +206,8 @@ def delta_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_delta(
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -242,7 +220,6 @@ def delta_sub_cmd(
 ##
 
 
-@logger_option
 @ssh_option
 @path_binaries_option
 @token_option
@@ -258,7 +235,6 @@ def delta_sub_cmd(
 @retry_option
 def direnv_sub_cmd(
     *,
-    logger: LoggerLike | None,
     ssh: str | None,
     path_binaries: PathLike,
     token: SecretLike | None,
@@ -275,10 +251,9 @@ def direnv_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_direnv(
         ssh=ssh,
-        logger=logger,
         path_binaries=path_binaries,
         token=token,
         sudo=sudo,
@@ -297,14 +272,12 @@ def direnv_sub_cmd(
 ##
 
 
-@logger_option
 @ssh_option
 @sudo_option
 @option("--user", type=Str(), default=None, help="User to add to the 'docker' group")
 @retry_option
 def docker_sub_cmd(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
     sudo: bool = False,
     user: str | None = None,
@@ -312,14 +285,13 @@ def docker_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
-    setup_docker(ssh=ssh, logger=logger, sudo=sudo, user=user, retry=retry)
+    set_up_logging(__name__, root=True)
+    setup_docker(ssh=ssh, sudo=sudo, user=user, retry=retry)
 
 
 ##
 
 
-@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -328,7 +300,6 @@ def docker_sub_cmd(
 @group_option
 def dust_sub_cmd(
     *,
-    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -338,9 +309,8 @@ def dust_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_dust(
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -353,7 +323,6 @@ def dust_sub_cmd(
 ##
 
 
-@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -362,7 +331,6 @@ def dust_sub_cmd(
 @group_option
 def eza_sub_cmd(
     *,
-    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -372,9 +340,8 @@ def eza_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_eza(
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -387,7 +354,6 @@ def eza_sub_cmd(
 ##
 
 
-@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -396,7 +362,6 @@ def eza_sub_cmd(
 @group_option
 def fd_sub_cmd(
     *,
-    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -406,9 +371,8 @@ def fd_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_fd(
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -421,7 +385,6 @@ def fd_sub_cmd(
 ##
 
 
-@logger_option
 @ssh_option
 @token_option
 @path_binaries_option
@@ -437,7 +400,6 @@ def fd_sub_cmd(
 @retry_option
 def fzf_sub_cmd(
     *,
-    logger: LoggerLike | None,
     ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
@@ -454,10 +416,9 @@ def fzf_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_fzf(
         ssh=ssh,
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -476,24 +437,20 @@ def fzf_sub_cmd(
 ##
 
 
-@logger_option
 @ssh_option
 @sudo_option
 @retry_option
-def git_sub_cmd(
-    *, logger: LoggerLike | None, ssh: str | None, sudo: bool, retry: Retry | None
-) -> None:
+def git_sub_cmd(*, ssh: str | None, sudo: bool, retry: Retry | None) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
-    setup_git(logger=logger, ssh=ssh, sudo=sudo, retry=retry)
+    set_up_logging(__name__, root=True)
+    setup_git(ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
 
 
 @force_option
-@logger_option
 @path_binaries_option
 @token_option
 @sudo_option
@@ -503,7 +460,6 @@ def git_sub_cmd(
 def jq_sub_cmd(
     *,
     force: bool,
-    logger: LoggerLike | None,
     path_binaries: PathLike,
     token: SecretLike | None,
     sudo: bool,
@@ -513,10 +469,9 @@ def jq_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_jq(
         force=force,
-        logger=logger,
         path_binaries=path_binaries,
         token=token,
         sudo=sudo,
@@ -529,7 +484,6 @@ def jq_sub_cmd(
 ##
 
 
-@logger_option
 @ssh_option
 @token_option
 @path_binaries_option
@@ -540,7 +494,6 @@ def jq_sub_cmd(
 @retry_option
 def just_sub_cmd(
     *,
-    logger: LoggerLike | None,
     ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
@@ -552,10 +505,9 @@ def just_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_just(
         ssh=ssh,
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -569,7 +521,6 @@ def just_sub_cmd(
 ##
 
 
-@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -578,7 +529,6 @@ def just_sub_cmd(
 @group_option
 def neovim_sub_cmd(
     *,
-    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -588,9 +538,8 @@ def neovim_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_neovim(
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -603,27 +552,21 @@ def neovim_sub_cmd(
 ##
 
 
-@logger_option
 @ssh_option
 @token_option
 @retry_option
 def pve_fake_subscription_sub_cmd(
-    *,
-    logger: LoggerLike | None,
-    ssh: str | None,
-    token: SecretLike | None,
-    retry: Retry | None,
+    *, ssh: str | None, token: SecretLike | None, retry: Retry | None
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
-    setup_pve_fake_subscription(ssh=ssh, logger=logger, token=token, retry=retry)
+    set_up_logging(__name__, root=True)
+    setup_pve_fake_subscription(ssh=ssh, token=token, retry=retry)
 
 
 ##
 
 
-@logger_option
 @ssh_option
 @token_option
 @path_binaries_option
@@ -634,7 +577,6 @@ def pve_fake_subscription_sub_cmd(
 @retry_option
 def restic_sub_cmd(
     *,
-    logger: LoggerLike | None,
     ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
@@ -646,9 +588,8 @@ def restic_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_restic(
-        logger=logger,
         ssh=ssh,
         token=token,
         path_binaries=path_binaries,
@@ -663,7 +604,6 @@ def restic_sub_cmd(
 ##
 
 
-@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -672,7 +612,6 @@ def restic_sub_cmd(
 @group_option
 def ripgrep_sub_cmd(
     *,
-    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -682,9 +621,8 @@ def ripgrep_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_ripgrep(
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -697,23 +635,19 @@ def ripgrep_sub_cmd(
 ##
 
 
-@logger_option
 @ssh_option
 @sudo_option
 @retry_option
-def rsync_sub_cmd(
-    *, logger: LoggerLike | None, ssh: str | None, sudo: bool, retry: Retry | None
-) -> None:
+def rsync_sub_cmd(*, ssh: str | None, sudo: bool, retry: Retry | None) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
-    setup_rsync(logger=logger, ssh=ssh, sudo=sudo, retry=retry)
+    set_up_logging(__name__, root=True)
+    setup_rsync(ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
 
 
-@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -722,7 +656,6 @@ def rsync_sub_cmd(
 @group_option
 def ruff_sub_cmd(
     *,
-    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -732,9 +665,8 @@ def ruff_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_ruff(
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -747,7 +679,6 @@ def ruff_sub_cmd(
 ##
 
 
-@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -756,7 +687,6 @@ def ruff_sub_cmd(
 @group_option
 def sd_sub_cmd(
     *,
-    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -766,9 +696,8 @@ def sd_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_sd(
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -781,7 +710,6 @@ def sd_sub_cmd(
 ##
 
 
-@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -790,7 +718,6 @@ def sd_sub_cmd(
 @group_option
 def shellcheck_sub_cmd(
     *,
-    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -800,9 +727,8 @@ def shellcheck_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_shellcheck(
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -815,7 +741,6 @@ def shellcheck_sub_cmd(
 ##
 
 
-@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -824,7 +749,6 @@ def shellcheck_sub_cmd(
 @group_option
 def shfmt_sub_cmd(
     *,
-    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -834,9 +758,8 @@ def shfmt_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_shfmt(
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -849,7 +772,6 @@ def shfmt_sub_cmd(
 ##
 
 
-@logger_option
 @ssh_option
 @token_option
 @path_binaries_option
@@ -860,7 +782,6 @@ def shfmt_sub_cmd(
 @retry_option
 def sops_sub_cmd(
     *,
-    logger: LoggerLike | None,
     ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
@@ -872,9 +793,8 @@ def sops_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_sops(
-        logger=logger,
         ssh=ssh,
         token=token,
         path_binaries=path_binaries,
@@ -889,7 +809,6 @@ def sops_sub_cmd(
 ##
 
 
-@logger_option
 @ssh_option
 @token_option
 @path_binaries_option
@@ -908,7 +827,6 @@ def sops_sub_cmd(
 @retry_option
 def starship_sub_cmd(
     *,
-    logger: LoggerLike | None,
     ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
@@ -926,9 +844,8 @@ def starship_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_starship(
-        logger=logger,
         ssh=ssh,
         token=token,
         path_binaries=path_binaries,
@@ -949,7 +866,6 @@ def starship_sub_cmd(
 ##
 
 
-@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -958,7 +874,6 @@ def starship_sub_cmd(
 @group_option
 def taplo_sub_cmd(
     *,
-    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -968,9 +883,8 @@ def taplo_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_taplo(
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -983,7 +897,6 @@ def taplo_sub_cmd(
 ##
 
 
-@logger_option
 @ssh_option
 @token_option
 @path_binaries_option
@@ -994,7 +907,6 @@ def taplo_sub_cmd(
 @retry_option
 def uv_sub_cmd(
     *,
-    logger: LoggerLike | None,
     ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
@@ -1006,9 +918,8 @@ def uv_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_uv(
-        logger=logger,
         ssh=ssh,
         token=token,
         path_binaries=path_binaries,
@@ -1023,7 +934,6 @@ def uv_sub_cmd(
 ##
 
 
-@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -1032,7 +942,6 @@ def uv_sub_cmd(
 @group_option
 def watchexec_sub_cmd(
     *,
-    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -1042,9 +951,8 @@ def watchexec_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_watchexec(
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -1057,7 +965,6 @@ def watchexec_sub_cmd(
 ##
 
 
-@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -1066,7 +973,6 @@ def watchexec_sub_cmd(
 @group_option
 def yq_sub_cmd(
     *,
-    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -1076,9 +982,8 @@ def yq_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_yq(
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -1093,7 +998,6 @@ def yq_sub_cmd(
 
 @ssh_option
 @force_option
-@logger_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -1110,7 +1014,6 @@ def zoxide_sub_cmd(
     *,
     ssh: str | None,
     force: bool,
-    logger: LoggerLike | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -1126,11 +1029,10 @@ def zoxide_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_zoxide(
         ssh=ssh,
         force=force,
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,

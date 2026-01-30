@@ -9,10 +9,10 @@ from utilities.constants import HOME
 from utilities.core import (
     PermissionsLike,
     always_iterable,
-    log_info,
     normalize_multi_line_str,
     normalize_str,
     repr_str,
+    to_logger,
     write_text,
 )
 from utilities.shellingham import SHELL, Shell
@@ -33,14 +33,19 @@ from installer.configs.constants import FILE_SYSTEM_ROOT
 from installer.utilities import ensure_line_or_lines, split_ssh
 
 if TYPE_CHECKING:
-    from utilities.types import LoggerLike, MaybeSequenceStr, PathLike, Retry
+    from utilities.types import MaybeSequenceStr, PathLike, Retry
+
+
+_LOGGER = to_logger(__name__)
+
+
+##
 
 
 def setup_authorized_keys(
     keys: list[str],
     /,
     *,
-    logger: LoggerLike | None = None,
     home: PathLike = HOME,
     ssh: str | None = None,
     sudo: bool = False,
@@ -51,7 +56,7 @@ def setup_authorized_keys(
     retry: Retry | None = None,
 ) -> None:
     """Set up the SSH authorized keys."""
-    log_info(logger, "Setting up authorized keys...")
+    _LOGGER.info("Setting up authorized keys...")
     path = Path(home, ".ssh/authorized_keys")
     text = normalize_str("\n".join(keys))
     if ssh is None:
@@ -69,7 +74,7 @@ def setup_authorized_keys(
             batch_mode=batch_mode,
             input=text,
             retry=retry,
-            logger=logger,
+            logger=_LOGGER,
         )
         if perms is not None:
             utilities.subprocess.ssh(
@@ -77,7 +82,7 @@ def setup_authorized_keys(
                 hostname,
                 *maybe_sudo_cmd(*chmod_cmd(path, perms, recursive=True), sudo=sudo),
                 retry=retry,
-                logger=logger,
+                logger=_LOGGER,
             )
         if (owner is not None) or (group is not None):
             utilities.subprocess.ssh(
@@ -87,7 +92,7 @@ def setup_authorized_keys(
                     *chown_cmd(path, recursive=True, user=owner, group=group), sudo=sudo
                 ),
                 retry=retry,
-                logger=logger,
+                logger=_LOGGER,
             )
 
 
@@ -137,14 +142,13 @@ def setup_shell_config(
 
 def setup_ssh_config(
     *,
-    logger: LoggerLike | None = None,
     home: PathLike = HOME,
     ssh: str | None = None,
     sudo: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Set up the SSH config."""
-    log_info(logger, "Setting up SSH config...")
+    _LOGGER.info("Setting up SSH config...")
     config = Path(home, ".ssh/config")
     config_d = Path(home, ".ssh/config.d")
     text = normalize_str(f"Include {config_d}/*.conf")
@@ -160,10 +164,10 @@ def setup_ssh_config(
             *BASH_LS,
             input="\n".join(map(join, cmds)),
             retry=retry,
-            logger=logger,
+            logger=_LOGGER,
         )
         utilities.subprocess.ssh(
-            user, hostname, *tee_cmd(config), input=text, retry=retry, logger=logger
+            user, hostname, *tee_cmd(config), input=text, retry=retry, logger=_LOGGER
         )
 
 
@@ -172,14 +176,13 @@ def setup_ssh_config(
 
 def setup_sshd_config(
     *,
-    logger: LoggerLike | None = None,
     permit_root_login: bool = False,
     root: PathLike = FILE_SYSTEM_ROOT,
     ssh: str | None = None,
     sudo: bool = False,
     retry: Retry | None = None,
 ) -> None:
-    log_info(logger, "Setting up SSHD config...")
+    _LOGGER.info("Setting up SSHD config...")
     path = Path(root, "etc/ssh/sshd_config.d/default.conf")
     text = sshd_config(permit_root_login=permit_root_login)
     if ssh is None:
@@ -193,7 +196,7 @@ def setup_sshd_config(
             *maybe_sudo_cmd(*tee_cmd(path), sudo=sudo),
             input=text,
             retry=retry,
-            logger=logger,
+            logger=_LOGGER,
         )
 
 

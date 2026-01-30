@@ -11,10 +11,10 @@ from utilities.constants import HOME
 from utilities.core import (
     WhichError,
     extract_group,
-    log_info,
     normalize_multi_line_str,
     normalize_str,
     one,
+    to_logger,
     which,
 )
 from utilities.subprocess import (
@@ -57,13 +57,10 @@ from installer.utilities import setup_local_or_remote, split_ssh, ssh_uv_install
 if TYPE_CHECKING:
     from utilities.core import PermissionsLike
     from utilities.shellingham import Shell
-    from utilities.types import (
-        LoggerLike,
-        MaybeSequenceStr,
-        PathLike,
-        Retry,
-        SecretLike,
-    )
+    from utilities.types import MaybeSequenceStr, PathLike, Retry, SecretLike
+
+
+_LOGGER = to_logger(__name__)
 
 
 def setup_apt_package(
@@ -71,7 +68,6 @@ def setup_apt_package(
     /,
     *,
     ssh: str | None = None,
-    logger: LoggerLike | None = None,
     sudo: bool = False,
     retry: Retry | None = None,
 ) -> None:
@@ -83,14 +79,14 @@ def setup_apt_package(
         case None, "Linux":
             try:
                 _ = which(package)
-                log_info(logger, "'apt' package %r is already set up", package)
+                _LOGGER.info("'apt' package %r is already set up", package)
             except WhichError:
-                log_info(logger, "Setting up 'apt' package %r...", package)
+                _LOGGER.info("Setting up 'apt' package %r...", package)
                 run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
                 run(*maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo))
         case str(), _:
             user, hostname = split_ssh(ssh)
-            log_info(logger, "Setting up 'apt' package %r on %r...", package, hostname)
+            _LOGGER.info("Setting up 'apt' package %r on %r...", package, hostname)
             cmds: list[list[str]] = [
                 maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
                 maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo),
@@ -101,7 +97,7 @@ def setup_apt_package(
                 *BASH_LS,
                 input=normalize_str("\n".join(map(join, cmds))),
                 retry=retry,
-                logger=logger,
+                logger=_LOGGER,
             )
         case never:
             assert_never(never)
@@ -116,7 +112,6 @@ def setup_asset(
     path: PathLike,
     /,
     *,
-    logger: LoggerLike | None = None,
     tag: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     match_system: bool = False,
@@ -131,7 +126,7 @@ def setup_asset(
     group: str | int | None = None,
 ) -> None:
     """Setup a GitHub asset."""
-    log_info(logger, "Setting up GitHub asset...")
+    _LOGGER.info("Setting up GitHub asset...")
     with yield_asset(
         asset_owner,
         asset_repo,
@@ -159,7 +154,6 @@ def set_up_age(
     owner: str | int | None = None,
     group: str | int | None = None,
     ssh: str | None = None,
-    logger: LoggerLike | None = None,
     force: bool = False,
     retry: Retry | None = None,
 ) -> None:
@@ -184,7 +178,6 @@ def set_up_age(
         setup_local,
         ssh=ssh,
         force=force,
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -200,7 +193,6 @@ def set_up_age(
 
 def setup_bat(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -211,9 +203,9 @@ def setup_bat(
     """Set up 'bat'."""
     try:
         _ = which("bat")
-        log_info(logger, "'bat' is already set up")
+        _LOGGER.info("'bat' is already set up")
     except WhichError:
-        log_info(logger, "Setting up 'bat'...")
+        _LOGGER.info("Setting up 'bat'...")
         with yield_gzip_asset(
             "sharkdp",
             "bat",
@@ -232,7 +224,6 @@ def setup_bat(
 
 def setup_bottom(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -243,9 +234,9 @@ def setup_bottom(
     """Set up 'bottom'."""
     try:
         _ = which("btm")
-        log_info(logger, "'bottom' is already set up")
+        _LOGGER.info("'bottom' is already set up")
     except WhichError:
-        log_info(logger, "Setting up 'bottom'...")
+        _LOGGER.info("Setting up 'bottom'...")
         with yield_gzip_asset(
             "ClementTsang",
             "bottom",
@@ -264,14 +255,10 @@ def setup_bottom(
 
 
 def setup_curl(
-    *,
-    ssh: str | None = None,
-    logger: LoggerLike | None = None,
-    sudo: bool = False,
-    retry: Retry | None = None,
+    *, ssh: str | None = None, sudo: bool = False, retry: Retry | None = None
 ) -> None:
     """Set up 'curl'."""
-    setup_apt_package("curl", ssh=ssh, logger=logger, sudo=sudo, retry=retry)
+    setup_apt_package("curl", ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -279,7 +266,6 @@ def setup_curl(
 
 def setup_delta(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -290,9 +276,9 @@ def setup_delta(
     """Set up 'delta'."""
     try:
         _ = which("delta")
-        log_info(logger, "'delta' is already set up")
+        _LOGGER.info("'delta' is already set up")
     except WhichError:
-        log_info(logger, "Setting up 'delta'...")
+        _LOGGER.info("Setting up 'delta'...")
         with yield_gzip_asset(
             "dandavison",
             "delta",
@@ -312,7 +298,6 @@ def setup_delta(
 def setup_direnv(
     *,
     ssh: str | None = None,
-    logger: LoggerLike | None = None,
     path_binaries: PathLike = PATH_BINARIES,
     token: SecretLike | None = GITHUB_TOKEN,
     sudo: bool = False,
@@ -331,9 +316,9 @@ def setup_direnv(
         case None:
             try:
                 _ = which("direnv")
-                log_info(logger, "'direnv' is already set up")
+                _LOGGER.info("'direnv' is already set up")
             except WhichError:
-                log_info(logger, "Setting up 'direnv'...")
+                _LOGGER.info("Setting up 'direnv'...")
                 if ssh is None:
                     dest = Path(path_binaries, "direnv")
                     setup_asset(
@@ -364,7 +349,6 @@ def setup_direnv(
             ssh_uv_install(
                 ssh,
                 "direnv",
-                logger=logger,
                 path_binaries=path_binaries,
                 token=token,
                 sudo=sudo,
@@ -388,7 +372,6 @@ def setup_direnv(
 def setup_docker(
     *,
     ssh: str | None = None,
-    logger: LoggerLike | None = None,
     sudo: bool = False,
     user: str | None = None,
     retry: Retry | None = None,
@@ -400,9 +383,9 @@ def setup_docker(
         case None, "Linux":
             try:
                 _ = which("docker")
-                log_info(logger, "'docker' is already set up")
+                _LOGGER.info("'docker' is already set up")
             except WhichError:
-                log_info(logger, "Setting up 'docker'....")
+                _LOGGER.info("Setting up 'docker'....")
                 apt_remove(
                     "docker.io",
                     "docker-doc",
@@ -453,9 +436,7 @@ def setup_docker(
             if user is not None:
                 run(*maybe_sudo_cmd("usermod", "-aG", "docker", user, sudo=sudo))
         case str(), _:
-            ssh_uv_install(
-                ssh, "docker", logger=logger, sudo=sudo, user=user, retry=retry
-            )
+            ssh_uv_install(ssh, "docker", sudo=sudo, user=user, retry=retry)
         case never:
             assert_never(never)
 
@@ -465,7 +446,6 @@ def setup_docker(
 
 def setup_dust(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -476,9 +456,9 @@ def setup_dust(
     """Set up 'dust'."""
     try:
         _ = which("dust")
-        log_info(logger, "'dust' is already set up")
+        _LOGGER.info("'dust' is already set up")
     except WhichError:
-        log_info(logger, "Setting up 'dust'....")
+        _LOGGER.info("Setting up 'dust'....")
         match SYSTEM_NAME:
             case "Darwin":
                 match_machine = False
@@ -504,7 +484,6 @@ def setup_dust(
 
 def setup_eza(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -515,9 +494,9 @@ def setup_eza(
     """Set up 'eza'."""
     try:
         _ = which("eza")
-        log_info(logger, "'eza' is already set up")
+        _LOGGER.info("'eza' is already set up")
     except WhichError:
-        log_info(logger, "Setting up 'eza'....")
+        _LOGGER.info("Setting up 'eza'....")
         match SYSTEM_NAME:
             case "Darwin":
                 asset_owner = "cargo-bins"
@@ -552,7 +531,6 @@ def setup_eza(
 
 def setup_fd(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -563,9 +541,9 @@ def setup_fd(
     """Set up 'fd'."""
     try:
         _ = which("fd")
-        log_info(logger, "'fd' is already set up")
+        _LOGGER.info("'fd' is already set up")
     except WhichError:
-        log_info(logger, "Setting up 'fd'....")
+        _LOGGER.info("Setting up 'fd'....")
         with yield_gzip_asset(
             "sharkdp",
             "fd",
@@ -585,7 +563,6 @@ def setup_fd(
 def setup_fzf(
     *,
     ssh: str | None = None,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -604,9 +581,9 @@ def setup_fzf(
         case None:
             try:
                 _ = which("fzf")
-                log_info(logger, "'fzf' is already set up")
+                _LOGGER.info("'fzf' is already set up")
             except WhichError:
-                log_info(logger, "Setting up 'fzf'...")
+                _LOGGER.info("Setting up 'fzf'...")
                 with yield_gzip_asset(
                     "junegunn",
                     "fzf",
@@ -639,7 +616,6 @@ def setup_fzf(
             ssh_uv_install(
                 ssh,
                 "fzf",
-                logger=logger,
                 token=token,
                 path_binaries=path_binaries,
                 sudo=sudo,
@@ -661,14 +637,10 @@ def setup_fzf(
 
 
 def setup_git(
-    *,
-    logger: LoggerLike | None = None,
-    ssh: str | None = None,
-    sudo: bool = False,
-    retry: Retry | None = None,
+    *, ssh: str | None = None, sudo: bool = False, retry: Retry | None = None
 ) -> None:
     """Set up 'git'."""
-    setup_apt_package("git", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
+    setup_apt_package("git", ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -677,7 +649,6 @@ def setup_git(
 def setup_jq(
     *,
     force: bool = False,
-    logger: LoggerLike | None = None,
     path_binaries: PathLike = PATH_BINARIES,
     token: SecretLike | None = GITHUB_TOKEN,
     sudo: bool = False,
@@ -687,7 +658,7 @@ def setup_jq(
 ) -> None:
     """Set up 'jq'."""
     if (shutil.which("jq") is None) or force:
-        log_info(logger, "Setting up 'jq'...")
+        _LOGGER.info("Setting up 'jq'...")
         dest = Path(path_binaries, "jq")
         setup_asset(
             "jqlang",
@@ -703,7 +674,7 @@ def setup_jq(
             group=group,
         )
     else:
-        log_info(logger, "'jq' is already set up")
+        _LOGGER.info("'jq' is already set up")
 
 
 ##
@@ -712,7 +683,6 @@ def setup_jq(
 def setup_just(
     *,
     ssh: str | None = None,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -726,9 +696,9 @@ def setup_just(
         case None:
             try:
                 _ = which("just")
-                log_info(logger, "'just' is already set up")
+                _LOGGER.info("'just' is already set up")
             except WhichError:
-                log_info(logger, "Setting up 'just'...")
+                _LOGGER.info("Setting up 'just'...")
                 if ssh is None:
                     with yield_gzip_asset(
                         "casey",
@@ -744,7 +714,6 @@ def setup_just(
             ssh_uv_install(
                 ssh,
                 "just",
-                logger=logger,
                 token=token,
                 path_binaries=path_binaries,
                 sudo=sudo,
@@ -762,7 +731,6 @@ def setup_just(
 
 def setup_neovim(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -773,9 +741,9 @@ def setup_neovim(
     """Set up 'neovim'."""
     try:
         _ = which("nvim")
-        log_info(logger, "'nvim' is already set up")
+        _LOGGER.info("'nvim' is already set up")
     except WhichError:
-        log_info(logger, "Setting up 'neovim'...")
+        _LOGGER.info("Setting up 'neovim'...")
         with yield_gzip_asset(
             "neovim",
             "neovim",
@@ -796,7 +764,6 @@ def setup_neovim(
 def setup_pve_fake_subscription(
     *,
     ssh: str | None = None,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     retry: Retry | None = None,
 ) -> None:
@@ -806,15 +773,13 @@ def setup_pve_fake_subscription(
             msg = f"Unsupported system: {SYSTEM_NAME!r}"
             raise ValueError(msg)
         case None, "Linux":
-            log_info(logger, "Setting up 'pve-fake-subscription'...")
+            _LOGGER.info("Setting up 'pve-fake-subscription'...")
             with yield_asset(
                 "Jamesits", "pve-fake-subscription", token=token, endswith="deb"
             ) as temp:
                 run("dpkg", "-i", str(temp))
         case str(), _:
-            ssh_uv_install(
-                ssh, "pve-fake-subscription", logger=logger, token=token, retry=retry
-            )
+            ssh_uv_install(ssh, "pve-fake-subscription", token=token, retry=retry)
         case never:
             assert_never(never)
 
@@ -824,7 +789,6 @@ def setup_pve_fake_subscription(
 
 def setup_restic(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -835,7 +799,7 @@ def setup_restic(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'restic'."""
-    log_info(logger, "Setting up 'restic'...")
+    _LOGGER.info("Setting up 'restic'...")
     if ssh is None:
         with yield_bz2_asset(
             "restic", "restic", token=token, match_system=True, match_machine=True
@@ -846,7 +810,6 @@ def setup_restic(
     ssh_uv_install(
         ssh,
         "restic",
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -862,7 +825,6 @@ def setup_restic(
 
 def setup_ripgrep(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -871,7 +833,7 @@ def setup_ripgrep(
     group: str | int | None = None,
 ) -> None:
     """Set up 'ripgrep'."""
-    log_info(logger, "Setting up 'ripgrep'...")
+    _LOGGER.info("Setting up 'ripgrep'...")
     with yield_gzip_asset(
         "burntsushi",
         "ripgrep",
@@ -889,14 +851,10 @@ def setup_ripgrep(
 
 
 def setup_rsync(
-    *,
-    logger: LoggerLike | None = None,
-    ssh: str | None = None,
-    sudo: bool = False,
-    retry: Retry | None = None,
+    *, ssh: str | None = None, sudo: bool = False, retry: Retry | None = None
 ) -> None:
     """Set up 'rsync'."""
-    setup_apt_package("rsync", logger=logger, ssh=ssh, sudo=sudo, retry=retry)
+    setup_apt_package("rsync", ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -904,7 +862,6 @@ def setup_rsync(
 
 def setup_ruff(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -913,7 +870,7 @@ def setup_ruff(
     group: str | int | None = None,
 ) -> None:
     """Set up 'ruff'."""
-    log_info(logger, "Setting up 'ruff'...")
+    _LOGGER.info("Setting up 'ruff'...")
     with yield_gzip_asset(
         "astral-sh",
         "ruff",
@@ -933,7 +890,6 @@ def setup_ruff(
 
 def setup_sd(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -942,7 +898,7 @@ def setup_sd(
     group: str | int | None = None,
 ) -> None:
     """Set up 'sd'."""
-    log_info(logger, "Setting up 'sd'...")
+    _LOGGER.info("Setting up 'sd'...")
     with yield_gzip_asset(
         "chmln",
         "sd",
@@ -961,7 +917,6 @@ def setup_sd(
 
 def setup_shellcheck(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -970,7 +925,7 @@ def setup_shellcheck(
     group: str | int | None = None,
 ) -> None:
     """Set up 'shellcheck'."""
-    log_info(logger, "Setting up 'shellcheck'...")
+    _LOGGER.info("Setting up 'shellcheck'...")
     with yield_gzip_asset(
         "koalaman",
         "shellcheck",
@@ -989,7 +944,6 @@ def setup_shellcheck(
 
 def setup_shfmt(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -998,7 +952,7 @@ def setup_shfmt(
     group: str | int | None = None,
 ) -> None:
     """Set up 'shfmt'."""
-    log_info(logger, "Setting up 'shfmt'...")
+    _LOGGER.info("Setting up 'shfmt'...")
     dest = Path(path_binaries, "shfmt")
     setup_asset(
         "mvdan",
@@ -1019,7 +973,6 @@ def setup_shfmt(
 
 def setup_sops(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -1030,7 +983,7 @@ def setup_sops(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'sops'."""
-    log_info(logger, "Setting up 'sops'...")
+    _LOGGER.info("Setting up 'sops'...")
     if ssh is None:
         dest = Path(path_binaries, "sops")
         setup_asset(
@@ -1050,7 +1003,6 @@ def setup_sops(
     ssh_uv_install(
         ssh,
         "sops",
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -1066,7 +1018,6 @@ def setup_sops(
 
 def setup_starship(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -1083,7 +1034,7 @@ def setup_starship(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'starship'."""
-    log_info(logger, "Setting up 'starship'...")
+    _LOGGER.info("Setting up 'starship'...")
     if ssh is None:
         with yield_gzip_asset(
             "starship",
@@ -1129,7 +1080,6 @@ def setup_starship(
     ssh_uv_install(
         ssh,
         "starship",
-        logger=logger,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -1151,7 +1101,6 @@ def setup_starship(
 
 def setup_taplo(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -1160,7 +1109,7 @@ def setup_taplo(
     group: str | int | None = None,
 ) -> None:
     """Set up 'taplo'."""
-    log_info(logger, "Setting up 'taplo'...")
+    _LOGGER.info("Setting up 'taplo'...")
     with yield_gzip_asset(
         "tamasfe", "taplo", token=token, match_system=True, match_machine=True
     ) as src:
@@ -1173,7 +1122,6 @@ def setup_taplo(
 
 def setup_uv(
     *,
-    logger: LoggerLike | None = None,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -1184,7 +1132,7 @@ def setup_uv(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'uv'."""
-    log_info(logger, "Setting up 'uv'...")
+    _LOGGER.info("Setting up 'uv'...")
     if ssh is None:
         with yield_gzip_asset(
             "astral-sh",
@@ -1200,14 +1148,14 @@ def setup_uv(
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
     else:
         user, hostname = split_ssh(ssh)
-        with yield_ssh_temp_dir(user, hostname, retry=retry, logger=logger) as temp:
+        with yield_ssh_temp_dir(user, hostname, retry=retry, logger=_LOGGER) as temp:
             utilities.subprocess.ssh(
                 user,
                 hostname,
                 *BASH_LS,
                 input=setup_uv_cmd(temp, path_binaries=path_binaries, sudo=sudo),
                 retry=retry,
-                logger=logger,
+                logger=_LOGGER,
             )
 
 
@@ -1239,7 +1187,6 @@ def setup_uv_cmd(
 
 def setup_watchexec(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -1248,7 +1195,7 @@ def setup_watchexec(
     group: str | int | None = None,
 ) -> None:
     """Set up 'watchexec'."""
-    log_info(logger, "Setting up 'watchexec'...")
+    _LOGGER.info("Setting up 'watchexec'...")
     with yield_lzma_asset(
         "watchexec",
         "watchexec",
@@ -1268,7 +1215,6 @@ def setup_watchexec(
 
 def setup_yq(
     *,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -1277,7 +1223,7 @@ def setup_yq(
     group: str | int | None = None,
 ) -> None:
     """Set up 'yq'."""
-    log_info(logger, "Setting up 'yq'...")
+    _LOGGER.info("Setting up 'yq'...")
     dest = Path(path_binaries, "yq")
     setup_asset(
         "mikefarah",
@@ -1301,7 +1247,6 @@ def setup_zoxide(
     *,
     ssh: str | None = None,
     force: bool = False,
-    logger: LoggerLike | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -1319,7 +1264,7 @@ def setup_zoxide(
     match ssh:
         case None:
             if (shutil.which("zoxide") is None) or force:
-                log_info(logger, "Setting up 'zoxide'...")
+                _LOGGER.info("Setting up 'zoxide'...")
                 with yield_gzip_asset(
                     "ajeetdsouza",
                     "zoxide",
@@ -1351,7 +1296,7 @@ def setup_zoxide(
                     root=FILE_SYSTEM_ROOT if root is None else root,
                 )
             else:
-                log_info(logger, "'zoxide' is already set up")
+                _LOGGER.info("'zoxide' is already set up")
         case str():
             ssh_uv_install(
                 ssh,
@@ -1368,7 +1313,6 @@ def setup_zoxide(
                 perms_config=perms_config,
                 root=root,
                 retry=retry,
-                logger=logger,
             )
         case never:
             assert_never(never)
