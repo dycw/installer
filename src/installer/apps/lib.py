@@ -11,10 +11,10 @@ from utilities.constants import HOME
 from utilities.core import (
     WhichError,
     extract_group,
-    log_info,
     normalize_multi_line_str,
     normalize_str,
     one,
+    to_logger,
     which,
 )
 from utilities.subprocess import (
@@ -66,6 +66,9 @@ if TYPE_CHECKING:
     )
 
 
+_LOGGER = to_logger(__name__)
+
+
 def setup_apt_package(
     package: str,
     /,
@@ -83,14 +86,14 @@ def setup_apt_package(
         case None, "Linux":
             try:
                 _ = which(package)
-                log_info(logger, "'apt' package %r is already set up", package)
+                _LOGGER.info("'apt' package %r is already set up", package)
             except WhichError:
-                log_info(logger, "Setting up 'apt' package %r...", package)
+                _LOGGER.info("Setting up 'apt' package %r...", package)
                 run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
                 run(*maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo))
         case str(), _:
             user, hostname = split_ssh(ssh)
-            log_info(logger, "Setting up 'apt' package %r on %r...", package, hostname)
+            _LOGGER.info("Setting up 'apt' package %r on %r...", package, hostname)
             cmds: list[list[str]] = [
                 maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
                 maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo),
@@ -131,7 +134,7 @@ def setup_asset(
     group: str | int | None = None,
 ) -> None:
     """Setup a GitHub asset."""
-    log_info(logger, "Setting up GitHub asset...")
+    _LOGGER.info("Setting up GitHub asset...")
     with yield_asset(
         asset_owner,
         asset_repo,
@@ -211,9 +214,9 @@ def setup_bat(
     """Set up 'bat'."""
     try:
         _ = which("bat")
-        log_info(logger, "'bat' is already set up")
+        _LOGGER.info("'bat' is already set up")
     except WhichError:
-        log_info(logger, "Setting up 'bat'...")
+        _LOGGER.info("Setting up 'bat'...")
         with yield_gzip_asset(
             "sharkdp",
             "bat",
@@ -243,9 +246,9 @@ def setup_bottom(
     """Set up 'bottom'."""
     try:
         _ = which("btm")
-        log_info(logger, "'bottom' is already set up")
+        _LOGGER.info("'bottom' is already set up")
     except WhichError:
-        log_info(logger, "Setting up 'bottom'...")
+        _LOGGER.info("Setting up 'bottom'...")
         with yield_gzip_asset(
             "ClementTsang",
             "bottom",
@@ -290,9 +293,9 @@ def setup_delta(
     """Set up 'delta'."""
     try:
         _ = which("delta")
-        log_info(logger, "'delta' is already set up")
+        _LOGGER.info("'delta' is already set up")
     except WhichError:
-        log_info(logger, "Setting up 'delta'...")
+        _LOGGER.info("Setting up 'delta'...")
         with yield_gzip_asset(
             "dandavison",
             "delta",
@@ -331,9 +334,9 @@ def setup_direnv(
         case None:
             try:
                 _ = which("direnv")
-                log_info(logger, "'direnv' is already set up")
+                _LOGGER.info("'direnv' is already set up")
             except WhichError:
-                log_info(logger, "Setting up 'direnv'...")
+                _LOGGER.info("Setting up 'direnv'...")
                 if ssh is None:
                     dest = Path(path_binaries, "direnv")
                     setup_asset(
@@ -400,9 +403,9 @@ def setup_docker(
         case None, "Linux":
             try:
                 _ = which("docker")
-                log_info(logger, "'docker' is already set up")
+                _LOGGER.info("'docker' is already set up")
             except WhichError:
-                log_info(logger, "Setting up 'docker'....")
+                _LOGGER.info("Setting up 'docker'....")
                 apt_remove(
                     "docker.io",
                     "docker-doc",
@@ -476,9 +479,9 @@ def setup_dust(
     """Set up 'dust'."""
     try:
         _ = which("dust")
-        log_info(logger, "'dust' is already set up")
+        _LOGGER.info("'dust' is already set up")
     except WhichError:
-        log_info(logger, "Setting up 'dust'....")
+        _LOGGER.info("Setting up 'dust'....")
         match SYSTEM_NAME:
             case "Darwin":
                 match_machine = False
@@ -515,9 +518,9 @@ def setup_eza(
     """Set up 'eza'."""
     try:
         _ = which("eza")
-        log_info(logger, "'eza' is already set up")
+        _LOGGER.info("'eza' is already set up")
     except WhichError:
-        log_info(logger, "Setting up 'eza'....")
+        _LOGGER.info("Setting up 'eza'....")
         match SYSTEM_NAME:
             case "Darwin":
                 asset_owner = "cargo-bins"
@@ -563,9 +566,9 @@ def setup_fd(
     """Set up 'fd'."""
     try:
         _ = which("fd")
-        log_info(logger, "'fd' is already set up")
+        _LOGGER.info("'fd' is already set up")
     except WhichError:
-        log_info(logger, "Setting up 'fd'....")
+        _LOGGER.info("Setting up 'fd'....")
         with yield_gzip_asset(
             "sharkdp",
             "fd",
@@ -604,9 +607,9 @@ def setup_fzf(
         case None:
             try:
                 _ = which("fzf")
-                log_info(logger, "'fzf' is already set up")
+                _LOGGER.info("'fzf' is already set up")
             except WhichError:
-                log_info(logger, "Setting up 'fzf'...")
+                _LOGGER.info("Setting up 'fzf'...")
                 with yield_gzip_asset(
                     "junegunn",
                     "fzf",
@@ -687,7 +690,7 @@ def setup_jq(
 ) -> None:
     """Set up 'jq'."""
     if (shutil.which("jq") is None) or force:
-        log_info(logger, "Setting up 'jq'...")
+        _LOGGER.info("Setting up 'jq'...")
         dest = Path(path_binaries, "jq")
         setup_asset(
             "jqlang",
@@ -703,7 +706,7 @@ def setup_jq(
             group=group,
         )
     else:
-        log_info(logger, "'jq' is already set up")
+        _LOGGER.info("'jq' is already set up")
 
 
 ##
@@ -726,9 +729,9 @@ def setup_just(
         case None:
             try:
                 _ = which("just")
-                log_info(logger, "'just' is already set up")
+                _LOGGER.info("'just' is already set up")
             except WhichError:
-                log_info(logger, "Setting up 'just'...")
+                _LOGGER.info("Setting up 'just'...")
                 if ssh is None:
                     with yield_gzip_asset(
                         "casey",
@@ -773,9 +776,9 @@ def setup_neovim(
     """Set up 'neovim'."""
     try:
         _ = which("nvim")
-        log_info(logger, "'nvim' is already set up")
+        _LOGGER.info("'nvim' is already set up")
     except WhichError:
-        log_info(logger, "Setting up 'neovim'...")
+        _LOGGER.info("Setting up 'neovim'...")
         with yield_gzip_asset(
             "neovim",
             "neovim",
@@ -806,7 +809,7 @@ def setup_pve_fake_subscription(
             msg = f"Unsupported system: {SYSTEM_NAME!r}"
             raise ValueError(msg)
         case None, "Linux":
-            log_info(logger, "Setting up 'pve-fake-subscription'...")
+            _LOGGER.info("Setting up 'pve-fake-subscription'...")
             with yield_asset(
                 "Jamesits", "pve-fake-subscription", token=token, endswith="deb"
             ) as temp:
@@ -835,7 +838,7 @@ def setup_restic(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'restic'."""
-    log_info(logger, "Setting up 'restic'...")
+    _LOGGER.info("Setting up 'restic'...")
     if ssh is None:
         with yield_bz2_asset(
             "restic", "restic", token=token, match_system=True, match_machine=True
@@ -871,7 +874,7 @@ def setup_ripgrep(
     group: str | int | None = None,
 ) -> None:
     """Set up 'ripgrep'."""
-    log_info(logger, "Setting up 'ripgrep'...")
+    _LOGGER.info("Setting up 'ripgrep'...")
     with yield_gzip_asset(
         "burntsushi",
         "ripgrep",
@@ -913,7 +916,7 @@ def setup_ruff(
     group: str | int | None = None,
 ) -> None:
     """Set up 'ruff'."""
-    log_info(logger, "Setting up 'ruff'...")
+    _LOGGER.info("Setting up 'ruff'...")
     with yield_gzip_asset(
         "astral-sh",
         "ruff",
@@ -942,7 +945,7 @@ def setup_sd(
     group: str | int | None = None,
 ) -> None:
     """Set up 'sd'."""
-    log_info(logger, "Setting up 'sd'...")
+    _LOGGER.info("Setting up 'sd'...")
     with yield_gzip_asset(
         "chmln",
         "sd",
@@ -970,7 +973,7 @@ def setup_shellcheck(
     group: str | int | None = None,
 ) -> None:
     """Set up 'shellcheck'."""
-    log_info(logger, "Setting up 'shellcheck'...")
+    _LOGGER.info("Setting up 'shellcheck'...")
     with yield_gzip_asset(
         "koalaman",
         "shellcheck",
@@ -998,7 +1001,7 @@ def setup_shfmt(
     group: str | int | None = None,
 ) -> None:
     """Set up 'shfmt'."""
-    log_info(logger, "Setting up 'shfmt'...")
+    _LOGGER.info("Setting up 'shfmt'...")
     dest = Path(path_binaries, "shfmt")
     setup_asset(
         "mvdan",
@@ -1030,7 +1033,7 @@ def setup_sops(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'sops'."""
-    log_info(logger, "Setting up 'sops'...")
+    _LOGGER.info("Setting up 'sops'...")
     if ssh is None:
         dest = Path(path_binaries, "sops")
         setup_asset(
@@ -1083,7 +1086,7 @@ def setup_starship(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'starship'."""
-    log_info(logger, "Setting up 'starship'...")
+    _LOGGER.info("Setting up 'starship'...")
     if ssh is None:
         with yield_gzip_asset(
             "starship",
@@ -1160,7 +1163,7 @@ def setup_taplo(
     group: str | int | None = None,
 ) -> None:
     """Set up 'taplo'."""
-    log_info(logger, "Setting up 'taplo'...")
+    _LOGGER.info("Setting up 'taplo'...")
     with yield_gzip_asset(
         "tamasfe", "taplo", token=token, match_system=True, match_machine=True
     ) as src:
@@ -1184,7 +1187,7 @@ def setup_uv(
     retry: Retry | None = None,
 ) -> None:
     """Set up 'uv'."""
-    log_info(logger, "Setting up 'uv'...")
+    _LOGGER.info("Setting up 'uv'...")
     if ssh is None:
         with yield_gzip_asset(
             "astral-sh",
@@ -1248,7 +1251,7 @@ def setup_watchexec(
     group: str | int | None = None,
 ) -> None:
     """Set up 'watchexec'."""
-    log_info(logger, "Setting up 'watchexec'...")
+    _LOGGER.info("Setting up 'watchexec'...")
     with yield_lzma_asset(
         "watchexec",
         "watchexec",
@@ -1277,7 +1280,7 @@ def setup_yq(
     group: str | int | None = None,
 ) -> None:
     """Set up 'yq'."""
-    log_info(logger, "Setting up 'yq'...")
+    _LOGGER.info("Setting up 'yq'...")
     dest = Path(path_binaries, "yq")
     setup_asset(
         "mikefarah",
@@ -1319,7 +1322,7 @@ def setup_zoxide(
     match ssh:
         case None:
             if (shutil.which("zoxide") is None) or force:
-                log_info(logger, "Setting up 'zoxide'...")
+                _LOGGER.info("Setting up 'zoxide'...")
                 with yield_gzip_asset(
                     "ajeetdsouza",
                     "zoxide",
@@ -1351,7 +1354,7 @@ def setup_zoxide(
                     root=FILE_SYSTEM_ROOT if root is None else root,
                 )
             else:
-                log_info(logger, "'zoxide' is already set up")
+                _LOGGER.info("'zoxide' is already set up")
         case str():
             ssh_uv_install(
                 ssh,

@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from click import argument, option
 from utilities.click import Str
 from utilities.core import is_pytest
-from utilities.logging import basic_config
 
 from installer.click import logger_option, retry_option, ssh_option, sudo_option
 from installer.configs.click import home_option, permit_root_login_option, root_option
@@ -38,7 +37,7 @@ def setup_authorized_keys_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_authorized_keys(
         list(keys),
         logger=logger,
@@ -65,7 +64,7 @@ def setup_ssh_config_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_ssh_config(logger=logger, home=home, ssh=ssh, sudo=sudo, retry=retry)
 
 
@@ -86,7 +85,7 @@ def setup_sshd_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     setup_sshd_config(
         logger=logger,
         permit_root_login=permit_root_login,

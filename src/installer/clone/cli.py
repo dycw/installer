@@ -6,7 +6,6 @@ import utilities.click
 from click import argument, option
 from utilities.click import Str
 from utilities.core import is_pytest
-from utilities.logging import basic_config
 
 from installer.click import logger_option, retry_option
 from installer.clone.constants import GIT_CLONE_HOST
@@ -44,7 +43,7 @@ def git_clone_sub_cmd(
 ) -> None:
     if is_pytest():
         return
-    basic_config(obj=logger)
+    set_up_logging(__name__, root=True)
     git_clone(
         key,
         owner,
