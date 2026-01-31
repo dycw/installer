@@ -25,7 +25,6 @@ from installer.apps.lib import (
     set_up_delta,
     set_up_git,
     set_up_rsync,
-    setup_bottom,
     setup_direnv,
     setup_docker,
     setup_dust,
