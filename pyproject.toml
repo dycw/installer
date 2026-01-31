@@ -3,13 +3,13 @@
   requires = ["uv_build"]
 
 [dependency-groups]
-  dev = ["dycw-utilities[test]>=0.188.4", "orjson>=3.11.6", "pyright>=1.1.408"]
+  dev = ["dycw-utilities[test]>=0.188.5", "orjson>=3.11.6", "pyright>=1.1.408"]
 
 [project]
   authors = [{ email = "d.wan@icloud.com", name = "Derek Wan" }]
   dependencies = [
     "click>=8.3.1",
-    "dycw-utilities>=0.188.4",
+    "dycw-utilities>=0.188.5",
     "inflect>=7.5.0",
     "pydantic>=2.12.5",
     "pygithub>=2.8.1",
@@ -19,12 +19,12 @@
   name = "dycw-installer"
   readme = "README.md"
   requires-python = ">= 3.12"
-  version = "0.7.2"
+  version = "0.7.3"
 
   [project.optional-dependencies]
     cli = [
       "click==8.3.1",
-      "dycw-utilities==0.188.4",
+      "dycw-utilities==0.188.5",
       "inflect==7.5.0",
       "pydantic==2.12.5",
       "pygithub==2.8.1",
