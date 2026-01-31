@@ -11,7 +11,7 @@ from installer.apps.lib import (
     set_up_age,
     set_up_bat,
     set_up_btm,
-    setup_delta,
+    set_up_delta,
     setup_direnv,
     setup_dust,
     setup_eza,
@@ -104,11 +104,11 @@ class TestSetUpBtm:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupDelta:
+class TestSetUpDelta:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_delta(path_binaries=tmp_path)
+        set_up_delta(path_binaries=tmp_path, force=True)
         result = run(str(tmp_path / "delta"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: delta [OPTIONS] [MINUS_FILE] [PLUS_FILE]
@@ -116,7 +116,7 @@ class TestSetupDelta:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupDirenv:
+class TestSetUpDirenv:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -128,7 +128,7 @@ class TestSetupDirenv:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupDust:
+class TestSetUpDust:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -140,7 +140,7 @@ class TestSetupDust:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupEza:
+class TestSetUpEza:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=2 * THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -153,7 +153,7 @@ class TestSetupEza:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupFd:
+class TestSetUpFd:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -165,7 +165,7 @@ class TestSetupFd:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupFzf:
+class TestSetUpFzf:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -177,7 +177,7 @@ class TestSetupFzf:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupJq:
+class TestSetUpJq:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -191,7 +191,7 @@ class TestSetupJq:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupJust:
+class TestSetUpJust:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -203,7 +203,7 @@ class TestSetupJust:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupNeovim:
+class TestSetUpNeovim:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -216,7 +216,7 @@ class TestSetupNeovim:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupRestic:
+class TestSetUpRestic:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -229,7 +229,7 @@ class TestSetupRestic:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupRipgrep:
+class TestSetUpRipgrep:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -249,7 +249,7 @@ class TestSetupRipgrep:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupRuff:
+class TestSetUpRuff:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -261,7 +261,7 @@ class TestSetupRuff:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupSd:
+class TestSetUpSd:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -273,7 +273,7 @@ class TestSetupSd:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupShellcheck:
+class TestSetUpShellcheck:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -285,7 +285,7 @@ class TestSetupShellcheck:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupShfmt:
+class TestSetUpShfmt:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -297,7 +297,7 @@ class TestSetupShfmt:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupSops:
+class TestSetUpSops:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -310,7 +310,7 @@ class TestSetupSops:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupStarship:
+class TestSetUpStarship:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -322,7 +322,7 @@ class TestSetupStarship:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupTaplo:
+class TestSetUpTaplo:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -334,7 +334,7 @@ class TestSetupTaplo:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupUv:
+class TestSetUpUv:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -346,7 +346,7 @@ class TestSetupUv:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupUvCmd:
+class TestSetUpUvCmd:
     def test_main(self, *, tmp_path: Path) -> None:
         result = setup_uv_cmd(tmp_path)
         path = tmp_path / "install.sh"
@@ -375,7 +375,7 @@ class TestSetupUvCmd:
         assert result == expected
 
 
-class TestSetupWatchexec:
+class TestSetUpWatchexec:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -387,7 +387,7 @@ class TestSetupWatchexec:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupYq:
+class TestSetUpYq:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
@@ -401,7 +401,7 @@ class TestSetupYq:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetupZoxide:
+class TestSetUpZoxide:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:

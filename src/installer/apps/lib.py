@@ -51,7 +51,7 @@ from installer.apps.download import (
     yield_lzma_asset,
 )
 from installer.configs.constants import FILE_SYSTEM_ROOT
-from installer.configs.lib import setup_shell_config
+from installer.configs.lib import set_up_shell_config
 from installer.utilities import set_up_local_or_remote, split_ssh, ssh_uv_install
 
 if TYPE_CHECKING:
@@ -375,7 +375,7 @@ def setup_direnv(
                         owner=owner,
                         group=group,
                     )
-                    setup_shell_config(
+                    set_up_shell_config(
                         'eval "$(direnv hook bash)"',
                         'eval "$(direnv hook fish)"',
                         "direnv hook fish | source",
@@ -642,7 +642,7 @@ def setup_fzf(
                         owner=owner,
                         group=group,
                     )
-                setup_shell_config(
+                set_up_shell_config(
                     'eval "$(fzf --bash)"',
                     "source <(fzf --zsh)",
                     "fzf --fish | source",
@@ -1093,7 +1093,7 @@ def setup_starship(
         export = ["export STARSHIP_CONFIG='/etc/starship.toml'"] if etc else []
         home_use = HOME if home is None else home
         root_use = FILE_SYSTEM_ROOT if root is None else root
-        setup_shell_config(
+        set_up_shell_config(
             [*export, 'eval "$(starship init bash)"'],
             [*export, 'eval "$(starship init zsh)"'],
             [*export, "starship init fish | source"],
@@ -1325,7 +1325,7 @@ def setup_zoxide(
                         group=group,
                     )
                 shell_use = SHELL if shell is None else shell
-                setup_shell_config(
+                set_up_shell_config(
                     'eval "$(zoxide init --cmd j bash)"',
                     'eval "$(zoxide init --cmd j zsh)"',
                     "zoxide init --cmd j fish | source",
@@ -1364,12 +1364,12 @@ __all__ = [
     "set_up_age",
     "set_up_apt_package",
     "set_up_bat",
+    "set_up_btm",
     "set_up_curl",
     "set_up_delta",
     "set_up_git",
     "set_up_rsync",
     "setup_asset",
-    "setup_bottom",
     "setup_direnv",
     "setup_docker",
     "setup_dust",

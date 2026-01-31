@@ -7,10 +7,10 @@ from pytest import raises
 from utilities.core import normalize_multi_line_str
 
 from installer.configs.lib import (
-    setup_authorized_keys,
-    setup_shell_config,
-    setup_ssh_config,
-    setup_sshd_config,
+    set_up_authorized_keys,
+    set_up_shell_config,
+    set_up_ssh_config,
+    set_up_sshd_config,
     sshd_config,
 )
 
@@ -18,17 +18,17 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-class TestSetupAuthorizedKeys:
+class TestSetUpAuthorizedKeys:
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_authorized_keys(["key1", "key2"], home=tmp_path)
+        set_up_authorized_keys(["key1", "key2"], home=tmp_path)
         path = tmp_path / ".ssh/authorized_keys"
         assert path.is_file()
         assert len(path.read_text().splitlines()) == 2
 
 
-class TestSetupSSHConfig:
+class TestSetUpSSHConfig:
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_ssh_config(home=tmp_path)
+        set_up_ssh_config(home=tmp_path)
         config = tmp_path / ".ssh/config"
         assert config.is_file()
         assert search(r"^Include .*/\*\.conf$", config.read_text())
@@ -37,32 +37,32 @@ class TestSetupSSHConfig:
         assert len(list(config_d.iterdir())) == 0
 
 
-class TestSetupSSHDConfig:
+class TestSetUpSSHDConfig:
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_sshd_config(root=tmp_path)
+        set_up_sshd_config(root=tmp_path)
         path = tmp_path / "etc/ssh/sshd_config.d/default.conf"
         assert path.is_file()
         assert path.read_text() == sshd_config()
 
 
-class TestSetupShellConfig:
+class TestSetUpShellConfig:
     def test_home_bash(self, *, tmp_path: Path) -> None:
-        setup_shell_config("bash", "zsh", "fish", shell="bash", home=tmp_path)  # noqa: S604
+        set_up_shell_config("bash", "zsh", "fish", shell="bash", home=tmp_path)  # noqa: S604
         path = tmp_path / ".bashrc"
         assert path.read_text() == "bash\n"
 
     def test_home_zsh(self, *, tmp_path: Path) -> None:
-        setup_shell_config("bash", "zsh", "fish", shell="zsh", home=tmp_path)  # noqa: S604
+        set_up_shell_config("bash", "zsh", "fish", shell="zsh", home=tmp_path)  # noqa: S604
         path = tmp_path / ".zshrc"
         assert path.read_text() == "zsh\n"
 
     def test_home_fish(self, *, tmp_path: Path) -> None:
-        setup_shell_config("bash", "zsh", "fish", shell="fish", home=tmp_path)  # noqa: S604
+        set_up_shell_config("bash", "zsh", "fish", shell="fish", home=tmp_path)  # noqa: S604
         path = tmp_path / ".config/fish/config.fish"
         assert path.read_text() == "fish\n"
 
     def test_etc_bash_single(self, *, tmp_path: Path) -> None:
-        setup_shell_config(  # noqa: S604
+        set_up_shell_config(  # noqa: S604
             "bash", "zsh", "fish", shell="bash", etc="etc", root=tmp_path
         )
         path = tmp_path / "etc/profile.d/etc.sh"
@@ -73,7 +73,7 @@ class TestSetupShellConfig:
         """)
 
     def test_etc_bash_multiple(self, *, tmp_path: Path) -> None:
-        setup_shell_config(  # noqa: S604
+        set_up_shell_config(  # noqa: S604
             ["bash 1", "bash 2"], "zsh", "fish", shell="bash", etc="etc", root=tmp_path
         )
         path = tmp_path / "etc/profile.d/etc.sh"
@@ -86,7 +86,7 @@ class TestSetupShellConfig:
 
     def test_error_etc_zsh(self) -> None:
         with raises(ValueError, match="Invalid shell for 'etc': 'zsh'"):
-            setup_shell_config(  # noqa: S604
+            set_up_shell_config(  # noqa: S604
                 "bash", " zsh", "fish", shell="zsh", etc="etc"
             )
 

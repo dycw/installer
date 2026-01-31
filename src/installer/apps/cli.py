@@ -21,6 +21,7 @@ from installer.apps.lib import (
     set_up_age,
     set_up_apt_package,
     set_up_bat,
+    set_up_btm,
     set_up_curl,
     set_up_delta,
     set_up_git,
@@ -212,6 +213,9 @@ def curl_sub_cmd(*, ssh: str | None, sudo: bool, retry: Retry | None) -> None:
 @perms_option
 @owner_option
 @group_option
+@ssh_option
+@force_option
+@retry_option
 def delta_sub_cmd(
     *,
     token: SecretLike | None,
@@ -220,6 +224,9 @@ def delta_sub_cmd(
     perms: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
+    ssh: str | None,
+    force: bool,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
@@ -231,6 +238,9 @@ def delta_sub_cmd(
         perms=perms,
         owner=owner,
         group=group,
+        ssh=ssh,
+        force=force,
+        retry=retry,
     )
 
 

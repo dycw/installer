@@ -9,7 +9,7 @@ from utilities.core import always_iterable, to_logger, write_text
 from utilities.subprocess import HOST_KEY_ALGORITHMS, cp, ssh_keyscan
 
 from installer.clone.constants import GIT_CLONE_HOST
-from installer.configs.lib import setup_ssh_config
+from installer.configs.lib import set_up_ssh_config
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -37,7 +37,7 @@ def git_clone(
     branch: str | None = None,
 ) -> None:
     _LOGGER.info("Cloning repository...")
-    setup_ssh_config(home=home)
+    set_up_ssh_config(home=home)
     _set_up_deploy_key(key, home=home)
     _set_up_ssh_conf(key, home=home, host=host, port=port)
     _set_up_known_hosts(  # last step
