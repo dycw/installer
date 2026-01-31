@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from pydantic import SecretStr
 from utilities.core import OneEmptyError, get_env, has_env, one
 from utilities.shellingham import get_shell
-from utilities.subprocess import run
+from utilities.subprocess import RunFileNotFoundError, run
 from utilities.typing import get_args
 
 from installer.types import System
@@ -65,7 +65,7 @@ SYSTEM_NAME_GROUP = _get_system_name_group()
 def _get_c_std_lib_group() -> set[str] | None:
     try:
         result = run("ldd", "--version", return_=True)
-    except FileNotFoundError:
+    except RunFileNotFoundError:
         return None
     groups: list[set[str]] = [{"gnu", "glibc"}, {"musl"}]
 
