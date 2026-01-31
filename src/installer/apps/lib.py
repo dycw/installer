@@ -52,7 +52,7 @@ from installer.apps.download import (
 )
 from installer.configs.constants import FILE_SYSTEM_ROOT
 from installer.configs.lib import setup_shell_config
-from installer.utilities import setup_local_or_remote, split_ssh, ssh_uv_install
+from installer.utilities import set_up_local_or_remote, split_ssh, ssh_uv_install
 
 if TYPE_CHECKING:
     from utilities.core import PermissionsLike
@@ -173,7 +173,7 @@ def set_up_age(
                 dest = Path(path_binaries, src.name)
                 cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
-    setup_local_or_remote(
+    set_up_local_or_remote(
         "age",
         set_up_local,
         ssh=ssh,
@@ -218,7 +218,7 @@ def set_up_bat(
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
-    setup_local_or_remote(
+    set_up_local_or_remote(
         "bat",
         setup_local,
         ssh=ssh,

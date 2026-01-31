@@ -55,7 +55,7 @@ def ensure_line_or_lines(
 ##
 
 
-def setup_local_or_remote(
+def set_up_local_or_remote(
     cmd: str,
     setup_local: Callable[[], None],
     /,
