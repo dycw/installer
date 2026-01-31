@@ -46,9 +46,6 @@ class TestCLI:
             param(["docker", "--sudo"]),
             param(["docker", "--user", "user"]),
             param(["docker", "--retry", "1", "1"]),
-            param(["dust"], id="dust"),
-            param(["eza"], id="eza"),
-            param(["fd"], id="fd"),
             param(["fzf"], id="fzf"),
             param(["fzf", "--ssh", "user@hostname"]),
             param(["fzf", "--token", "token"]),
@@ -175,7 +172,18 @@ class TestCLI:
         result = runner.invoke(cli, commands)
         assert result.exit_code == 0, result.stderr
 
-    @mark.parametrize("cmd", [param("age"), param("bat"), param("btm"), param("delta")])
+    @mark.parametrize(
+        "cmd",
+        [
+            param("age"),
+            param("bat"),
+            param("btm"),
+            param("delta"),
+            param("dust"),
+            param("eza"),
+            param("fd"),
+        ],
+    )
     @mark.parametrize(
         "args",
         [

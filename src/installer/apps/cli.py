@@ -24,13 +24,13 @@ from installer.apps.lib import (
     set_up_btm,
     set_up_curl,
     set_up_delta,
+    set_up_dust,
+    set_up_eza,
+    set_up_fd,
     set_up_git,
     set_up_rsync,
     setup_direnv,
     setup_docker,
-    setup_dust,
-    setup_eza,
-    setup_fd,
     setup_fzf,
     setup_jq,
     setup_just,
@@ -325,6 +325,9 @@ def docker_sub_cmd(
 @perms_option
 @owner_option
 @group_option
+@ssh_option
+@force_option
+@retry_option
 def dust_sub_cmd(
     *,
     token: SecretLike | None,
@@ -333,17 +336,23 @@ def dust_sub_cmd(
     perms: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
+    ssh: str | None,
+    force: bool,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_dust(
+    set_up_dust(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
         perms=perms,
         owner=owner,
         group=group,
+        ssh=ssh,
+        force=force,
+        retry=retry,
     )
 
 
@@ -356,6 +365,9 @@ def dust_sub_cmd(
 @perms_option
 @owner_option
 @group_option
+@ssh_option
+@force_option
+@retry_option
 def eza_sub_cmd(
     *,
     token: SecretLike | None,
@@ -364,17 +376,23 @@ def eza_sub_cmd(
     perms: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
+    ssh: str | None,
+    force: bool,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_eza(
+    set_up_eza(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
         perms=perms,
         owner=owner,
         group=group,
+        ssh=ssh,
+        force=force,
+        retry=retry,
     )
 
 
@@ -387,6 +405,9 @@ def eza_sub_cmd(
 @perms_option
 @owner_option
 @group_option
+@ssh_option
+@force_option
+@retry_option
 def fd_sub_cmd(
     *,
     token: SecretLike | None,
@@ -395,17 +416,23 @@ def fd_sub_cmd(
     perms: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
+    ssh: str | None,
+    force: bool,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_fd(
+    set_up_fd(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
         perms=perms,
         owner=owner,
         group=group,
+        ssh=ssh,
+        force=force,
+        retry=retry,
     )
 
 

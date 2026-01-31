@@ -12,10 +12,10 @@ from installer.apps.lib import (
     set_up_bat,
     set_up_btm,
     set_up_delta,
+    set_up_dust,
+    set_up_eza,
+    set_up_fd,
     setup_direnv,
-    setup_dust,
-    setup_eza,
-    setup_fd,
     setup_fzf,
     setup_jq,
     setup_just,
@@ -132,7 +132,7 @@ class TestSetUpDust:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_dust(path_binaries=tmp_path)
+        set_up_dust(path_binaries=tmp_path)
         result = run(str(tmp_path / "dust"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: dust [OPTIONS] [PATH]...
@@ -144,7 +144,7 @@ class TestSetUpEza:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=2 * THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_eza(path_binaries=tmp_path)
+        set_up_eza(path_binaries=tmp_path)
         result = run(str(tmp_path / "eza"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage:
@@ -157,7 +157,7 @@ class TestSetUpFd:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_fd(path_binaries=tmp_path)
+        set_up_fd(path_binaries=tmp_path)
         result = run(str(tmp_path / "fd"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: fd [OPTIONS] [pattern] [path]...
