@@ -486,7 +486,7 @@ def setup_docker(
 ##
 
 
-def setup_dust(
+def set_up_dust(
     *,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -494,13 +494,13 @@ def setup_dust(
     perms: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
     group: str | int | None = None,
+    ssh: str | None = None,
+    force: bool = False,
+    retry: Retry | None = None,
 ) -> None:
     """Set up 'dust'."""
-    try:
-        _ = which("dust")
-        _LOGGER.info("'dust' is already set up")
-    except WhichError:
-        _LOGGER.info("Setting up 'dust'....")
+
+    def set_up_local() -> None:
         match SYSTEM_NAME:
             case "Darwin":
                 match_machine = False
@@ -520,11 +520,25 @@ def setup_dust(
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
+    set_up_local_or_remote(
+        "dust",
+        set_up_local,
+        ssh=ssh,
+        force=force,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
+    )
+
 
 ##
 
 
-def setup_eza(
+def set_up_eza(
     *,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -532,13 +546,13 @@ def setup_eza(
     perms: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
     group: str | int | None = None,
+    ssh: str | None = None,
+    force: bool = False,
+    retry: Retry | None = None,
 ) -> None:
     """Set up 'eza'."""
-    try:
-        _ = which("eza")
-        _LOGGER.info("'eza' is already set up")
-    except WhichError:
-        _LOGGER.info("Setting up 'eza'....")
+
+    def set_up_local() -> None:
         match SYSTEM_NAME:
             case "Darwin":
                 asset_owner = "cargo-bins"
@@ -567,11 +581,25 @@ def setup_eza(
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
+    set_up_local_or_remote(
+        "eza",
+        set_up_local,
+        ssh=ssh,
+        force=force,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
+    )
+
 
 ##
 
 
-def setup_fd(
+def set_up_fd(
     *,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -579,13 +607,13 @@ def setup_fd(
     perms: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
     group: str | int | None = None,
+    ssh: str | None = None,
+    force: bool = False,
+    retry: Retry | None = None,
 ) -> None:
     """Set up 'fd'."""
-    try:
-        _ = which("fd")
-        _LOGGER.info("'fd' is already set up")
-    except WhichError:
-        _LOGGER.info("Setting up 'fd'....")
+
+    def set_up_local() -> None:
         with yield_gzip_asset(
             "sharkdp",
             "fd",
@@ -597,6 +625,20 @@ def setup_fd(
             src = temp / "fd"
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+
+    set_up_local_or_remote(
+        "fd",
+        set_up_local,
+        ssh=ssh,
+        force=force,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
+    )
 
 
 ##
@@ -1367,14 +1409,14 @@ __all__ = [
     "set_up_btm",
     "set_up_curl",
     "set_up_delta",
+    "set_up_dust",
+    "set_up_eza",
+    "set_up_fd",
     "set_up_git",
     "set_up_rsync",
     "setup_asset",
     "setup_direnv",
     "setup_docker",
-    "setup_dust",
-    "setup_eza",
-    "setup_fd",
     "setup_fzf",
     "setup_jq",
     "setup_just",
