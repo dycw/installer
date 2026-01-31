@@ -159,7 +159,7 @@ def set_up_age(
 ) -> None:
     """Set up 'age'."""
 
-    def setup_local() -> None:
+    def set_up_local() -> None:
         with yield_gzip_asset(
             "FiloSottile",
             "age",
@@ -175,7 +175,7 @@ def set_up_age(
 
     setup_local_or_remote(
         "age",
-        setup_local,
+        set_up_local,
         ssh=ssh,
         force=force,
         token=token,
