@@ -20,8 +20,8 @@ from installer.apps.click import (
 from installer.apps.lib import (
     set_up_age,
     set_up_bat,
+    set_up_btm,
     setup_apt_package,
-    setup_bottom,
     setup_curl,
     setup_delta,
     setup_direnv,
@@ -160,7 +160,10 @@ def bat_sub_cmd(
 @perms_option
 @owner_option
 @group_option
-def bottom_sub_cmd(
+@ssh_option
+@force_option
+@retry_option
+def btm_sub_cmd(
     *,
     token: SecretLike | None,
     path_binaries: PathLike,
@@ -168,17 +171,23 @@ def bottom_sub_cmd(
     perms: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
+    ssh: str | None,
+    force: bool,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_bottom(
+    set_up_btm(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
         perms=perms,
         owner=owner,
         group=group,
+        ssh=ssh,
+        force=force,
+        retry=retry,
     )
 
 
@@ -1061,7 +1070,7 @@ __all__ = [
     "age_sub_cmd",
     "apt_package_sub_cmd",
     "bat_sub_cmd",
-    "bottom_sub_cmd",
+    "btm_sub_cmd",
     "curl_sub_cmd",
     "delta_sub_cmd",
     "direnv_sub_cmd",

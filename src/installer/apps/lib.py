@@ -205,7 +205,7 @@ def set_up_bat(
 ) -> None:
     """Set up 'bat'."""
 
-    def setup_local() -> None:
+    def set_up_local() -> None:
         with yield_gzip_asset(
             "sharkdp",
             "bat",
@@ -220,7 +220,7 @@ def set_up_bat(
 
     set_up_local_or_remote(
         "bat",
-        setup_local,
+        set_up_local,
         ssh=ssh,
         force=force,
         token=token,
@@ -236,7 +236,7 @@ def set_up_bat(
 ##
 
 
-def setup_bottom(
+def set_up_btm(
     *,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -244,13 +244,13 @@ def setup_bottom(
     perms: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
     group: str | int | None = None,
+    ssh: str | None = None,
+    force: bool = False,
+    retry: Retry | None = None,
 ) -> None:
     """Set up 'bottom'."""
-    try:
-        _ = which("btm")
-        _LOGGER.info("'bottom' is already set up")
-    except WhichError:
-        _LOGGER.info("Setting up 'bottom'...")
+
+    def set_up_local() -> None:
         with yield_gzip_asset(
             "ClementTsang",
             "bottom",
@@ -263,6 +263,20 @@ def setup_bottom(
             src = temp / "btm"
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+
+    set_up_local_or_remote(
+        "btm",
+        set_up_local,
+        ssh=ssh,
+        force=force,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
+    )
 
 
 ##
@@ -1335,9 +1349,9 @@ def setup_zoxide(
 __all__ = [
     "set_up_age",
     "set_up_bat",
+    "set_up_btm",
     "setup_apt_package",
     "setup_asset",
-    "setup_bottom",
     "setup_curl",
     "setup_delta",
     "setup_direnv",

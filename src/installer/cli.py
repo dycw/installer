@@ -8,7 +8,7 @@ from installer.apps.cli import (
     age_sub_cmd,
     apt_package_sub_cmd,
     bat_sub_cmd,
-    bottom_sub_cmd,
+    btm_sub_cmd,
     curl_sub_cmd,
     delta_sub_cmd,
     direnv_sub_cmd,
@@ -55,7 +55,7 @@ _ = cli.command(name="apt-package", help="Set up an 'apt' package", **CONTEXT_SE
 )
 _ = cli.command(name="age", help="Set up 'age'", **CONTEXT_SETTINGS)(age_sub_cmd)
 _ = cli.command(name="bat", help="Set up 'bat'", **CONTEXT_SETTINGS)(bat_sub_cmd)
-_ = cli.command(name="btm", help="Set up 'btm'", **CONTEXT_SETTINGS)(bottom_sub_cmd)
+_ = cli.command(name="btm", help="Set up 'btm'", **CONTEXT_SETTINGS)(btm_sub_cmd)
 _ = cli.command(name="curl", help="Set up 'curl'", **CONTEXT_SETTINGS)(curl_sub_cmd)
 _ = cli.command(name="delta", help="Set up 'delta'", **CONTEXT_SETTINGS)(delta_sub_cmd)
 _ = cli.command(name="direnv", help="Set up 'direnv'", **CONTEXT_SETTINGS)(
