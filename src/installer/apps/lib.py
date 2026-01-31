@@ -63,7 +63,7 @@ if TYPE_CHECKING:
 _LOGGER = to_logger(__name__)
 
 
-def setup_apt_package(
+def set_up_apt_package(
     package: str,
     /,
     *,
@@ -282,11 +282,11 @@ def set_up_btm(
 ##
 
 
-def setup_curl(
+def set_up_curl(
     *, ssh: str | None = None, sudo: bool = False, retry: Retry | None = None
 ) -> None:
     """Set up 'curl'."""
-    setup_apt_package("curl", ssh=ssh, sudo=sudo, retry=retry)
+    set_up_apt_package("curl", ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -668,7 +668,7 @@ def setup_git(
     *, ssh: str | None = None, sudo: bool = False, retry: Retry | None = None
 ) -> None:
     """Set up 'git'."""
-    setup_apt_package("git", ssh=ssh, sudo=sudo, retry=retry)
+    set_up_apt_package("git", ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -882,7 +882,7 @@ def setup_rsync(
     *, ssh: str | None = None, sudo: bool = False, retry: Retry | None = None
 ) -> None:
     """Set up 'rsync'."""
-    setup_apt_package("rsync", ssh=ssh, sudo=sudo, retry=retry)
+    set_up_apt_package("rsync", ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -1348,11 +1348,11 @@ def setup_zoxide(
 
 __all__ = [
     "set_up_age",
+    "set_up_apt_package",
     "set_up_bat",
-    "set_up_btm",
-    "setup_apt_package",
+    "set_up_curl",
     "setup_asset",
-    "setup_curl",
+    "setup_bottom",
     "setup_delta",
     "setup_direnv",
     "setup_docker",

@@ -20,9 +20,9 @@ from installer.apps.click import (
 from installer.apps.lib import (
     set_up_age,
     set_up_bat,
-    set_up_btm,
+    set_up_curl,
     setup_apt_package,
-    setup_curl,
+    setup_bottom,
     setup_delta,
     setup_direnv,
     setup_docker,
@@ -201,7 +201,7 @@ def curl_sub_cmd(*, ssh: str | None, sudo: bool, retry: Retry | None) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_curl(ssh=ssh, sudo=sudo, retry=retry)
+    set_up_curl(ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
