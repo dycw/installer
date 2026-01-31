@@ -292,7 +292,7 @@ def set_up_curl(
 ##
 
 
-def setup_delta(
+def set_up_delta(
     *,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -300,13 +300,13 @@ def setup_delta(
     perms: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
     group: str | int | None = None,
+    ssh: str | None = None,
+    force: bool = False,
+    retry: Retry | None = None,
 ) -> None:
     """Set up 'delta'."""
-    try:
-        _ = which("delta")
-        _LOGGER.info("'delta' is already set up")
-    except WhichError:
-        _LOGGER.info("Setting up 'delta'...")
+
+    def set_up_local() -> None:
         with yield_gzip_asset(
             "dandavison",
             "delta",
@@ -318,6 +318,20 @@ def setup_delta(
             src = temp / "delta"
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+
+    set_up_local_or_remote(
+        "delta",
+        set_up_local,
+        ssh=ssh,
+        force=force,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
+    )
 
 
 ##
@@ -664,7 +678,7 @@ def setup_fzf(
 ##
 
 
-def setup_git(
+def set_up_git(
     *, ssh: str | None = None, sudo: bool = False, retry: Retry | None = None
 ) -> None:
     """Set up 'git'."""
@@ -878,7 +892,7 @@ def setup_ripgrep(
 ##
 
 
-def setup_rsync(
+def set_up_rsync(
     *, ssh: str | None = None, sudo: bool = False, retry: Retry | None = None
 ) -> None:
     """Set up 'rsync'."""
@@ -1351,23 +1365,23 @@ __all__ = [
     "set_up_apt_package",
     "set_up_bat",
     "set_up_curl",
+    "set_up_delta",
+    "set_up_git",
+    "set_up_rsync",
     "setup_asset",
     "setup_bottom",
-    "setup_delta",
     "setup_direnv",
     "setup_docker",
     "setup_dust",
     "setup_eza",
     "setup_fd",
     "setup_fzf",
-    "setup_git",
     "setup_jq",
     "setup_just",
     "setup_neovim",
     "setup_pve_fake_subscription",
     "setup_restic",
     "setup_ripgrep",
-    "setup_rsync",
     "setup_ruff",
     "setup_sd",
     "setup_shellcheck",
