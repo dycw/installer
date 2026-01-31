@@ -42,7 +42,7 @@ _LOGGER = to_logger(__name__)
 ##
 
 
-def setup_authorized_keys(
+def set_up_authorized_keys(
     keys: list[str],
     /,
     *,
@@ -99,7 +99,7 @@ def setup_authorized_keys(
 ##
 
 
-def setup_shell_config(
+def set_up_shell_config(
     bash: MaybeSequenceStr,
     zsh: MaybeSequenceStr,
     fish: MaybeSequenceStr,
@@ -140,7 +140,7 @@ def setup_shell_config(
 ##
 
 
-def setup_ssh_config(
+def set_up_ssh_config(
     *,
     home: PathLike = HOME,
     ssh: str | None = None,
@@ -174,7 +174,7 @@ def setup_ssh_config(
 ##
 
 
-def setup_sshd_config(
+def set_up_sshd_config(
     *,
     permit_root_login: bool = False,
     root: PathLike = FILE_SYSTEM_ROOT,
@@ -211,9 +211,9 @@ def sshd_config(*, permit_root_login: bool = False) -> str:
 
 
 __all__ = [
-    "setup_authorized_keys",
-    "setup_shell_config",
-    "setup_ssh_config",
-    "setup_sshd_config",
+    "set_up_authorized_keys",
+    "set_up_shell_config",
+    "set_up_ssh_config",
+    "set_up_sshd_config",
     "sshd_config",
 ]

@@ -9,9 +9,9 @@ from utilities.core import is_pytest, set_up_logging
 from installer.click import retry_option, ssh_option, sudo_option
 from installer.configs.click import home_option, permit_root_login_option, root_option
 from installer.configs.lib import (
-    setup_authorized_keys,
-    setup_ssh_config,
-    setup_sshd_config,
+    set_up_authorized_keys,
+    set_up_ssh_config,
+    set_up_sshd_config,
 )
 
 if TYPE_CHECKING:
@@ -36,7 +36,7 @@ def setup_authorized_keys_sub_cmd(
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_authorized_keys(
+    set_up_authorized_keys(
         list(keys), home=home, ssh=ssh, sudo=sudo, batch_mode=batch_mode, retry=retry
     )
 
@@ -51,7 +51,7 @@ def setup_ssh_config_sub_cmd(
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_ssh_config(home=home, ssh=ssh, sudo=sudo, retry=retry)
+    set_up_ssh_config(home=home, ssh=ssh, sudo=sudo, retry=retry)
 
 
 @permit_root_login_option
@@ -70,7 +70,7 @@ def setup_sshd_sub_cmd(
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_sshd_config(
+    set_up_sshd_config(
         permit_root_login=permit_root_login, root=root, ssh=ssh, sudo=sudo, retry=retry
     )
 

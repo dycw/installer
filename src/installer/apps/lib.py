@@ -51,7 +51,7 @@ from installer.apps.download import (
     yield_lzma_asset,
 )
 from installer.configs.constants import FILE_SYSTEM_ROOT
-from installer.configs.lib import setup_shell_config
+from installer.configs.lib import set_up_shell_config
 from installer.utilities import set_up_local_or_remote, split_ssh, ssh_uv_install
 
 if TYPE_CHECKING:
@@ -63,7 +63,7 @@ if TYPE_CHECKING:
 _LOGGER = to_logger(__name__)
 
 
-def setup_apt_package(
+def set_up_apt_package(
     package: str,
     /,
     *,
@@ -282,17 +282,17 @@ def set_up_btm(
 ##
 
 
-def setup_curl(
+def set_up_curl(
     *, ssh: str | None = None, sudo: bool = False, retry: Retry | None = None
 ) -> None:
     """Set up 'curl'."""
-    setup_apt_package("curl", ssh=ssh, sudo=sudo, retry=retry)
+    set_up_apt_package("curl", ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
 
 
-def setup_delta(
+def set_up_delta(
     *,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -300,13 +300,13 @@ def setup_delta(
     perms: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
     group: str | int | None = None,
+    ssh: str | None = None,
+    force: bool = False,
+    retry: Retry | None = None,
 ) -> None:
     """Set up 'delta'."""
-    try:
-        _ = which("delta")
-        _LOGGER.info("'delta' is already set up")
-    except WhichError:
-        _LOGGER.info("Setting up 'delta'...")
+
+    def set_up_local() -> None:
         with yield_gzip_asset(
             "dandavison",
             "delta",
@@ -318,6 +318,20 @@ def setup_delta(
             src = temp / "delta"
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+
+    set_up_local_or_remote(
+        "delta",
+        set_up_local,
+        ssh=ssh,
+        force=force,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
+    )
 
 
 ##
@@ -361,7 +375,7 @@ def setup_direnv(
                         owner=owner,
                         group=group,
                     )
-                    setup_shell_config(
+                    set_up_shell_config(
                         'eval "$(direnv hook bash)"',
                         'eval "$(direnv hook fish)"',
                         "direnv hook fish | source",
@@ -628,7 +642,7 @@ def setup_fzf(
                         owner=owner,
                         group=group,
                     )
-                setup_shell_config(
+                set_up_shell_config(
                     'eval "$(fzf --bash)"',
                     "source <(fzf --zsh)",
                     "fzf --fish | source",
@@ -664,11 +678,11 @@ def setup_fzf(
 ##
 
 
-def setup_git(
+def set_up_git(
     *, ssh: str | None = None, sudo: bool = False, retry: Retry | None = None
 ) -> None:
     """Set up 'git'."""
-    setup_apt_package("git", ssh=ssh, sudo=sudo, retry=retry)
+    set_up_apt_package("git", ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -878,11 +892,11 @@ def setup_ripgrep(
 ##
 
 
-def setup_rsync(
+def set_up_rsync(
     *, ssh: str | None = None, sudo: bool = False, retry: Retry | None = None
 ) -> None:
     """Set up 'rsync'."""
-    setup_apt_package("rsync", ssh=ssh, sudo=sudo, retry=retry)
+    set_up_apt_package("rsync", ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -1079,7 +1093,7 @@ def setup_starship(
         export = ["export STARSHIP_CONFIG='/etc/starship.toml'"] if etc else []
         home_use = HOME if home is None else home
         root_use = FILE_SYSTEM_ROOT if root is None else root
-        setup_shell_config(
+        set_up_shell_config(
             [*export, 'eval "$(starship init bash)"'],
             [*export, 'eval "$(starship init zsh)"'],
             [*export, "starship init fish | source"],
@@ -1311,7 +1325,7 @@ def setup_zoxide(
                         group=group,
                     )
                 shell_use = SHELL if shell is None else shell
-                setup_shell_config(
+                set_up_shell_config(
                     'eval "$(zoxide init --cmd j bash)"',
                     'eval "$(zoxide init --cmd j zsh)"',
                     "zoxide init --cmd j fish | source",
@@ -1348,26 +1362,26 @@ def setup_zoxide(
 
 __all__ = [
     "set_up_age",
+    "set_up_apt_package",
     "set_up_bat",
     "set_up_btm",
-    "setup_apt_package",
+    "set_up_curl",
+    "set_up_delta",
+    "set_up_git",
+    "set_up_rsync",
     "setup_asset",
-    "setup_curl",
-    "setup_delta",
     "setup_direnv",
     "setup_docker",
     "setup_dust",
     "setup_eza",
     "setup_fd",
     "setup_fzf",
-    "setup_git",
     "setup_jq",
     "setup_just",
     "setup_neovim",
     "setup_pve_fake_subscription",
     "setup_restic",
     "setup_ripgrep",
-    "setup_rsync",
     "setup_ruff",
     "setup_sd",
     "setup_shellcheck",

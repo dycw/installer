@@ -19,25 +19,25 @@ from installer.apps.click import (
 )
 from installer.apps.lib import (
     set_up_age,
+    set_up_apt_package,
     set_up_bat,
     set_up_btm,
-    setup_apt_package,
-    setup_curl,
-    setup_delta,
+    set_up_curl,
+    set_up_delta,
+    set_up_git,
+    set_up_rsync,
     setup_direnv,
     setup_docker,
     setup_dust,
     setup_eza,
     setup_fd,
     setup_fzf,
-    setup_git,
     setup_jq,
     setup_just,
     setup_neovim,
     setup_pve_fake_subscription,
     setup_restic,
     setup_ripgrep,
-    setup_rsync,
     setup_ruff,
     setup_sd,
     setup_shellcheck,
@@ -68,7 +68,7 @@ def apt_package_sub_cmd(
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_apt_package(package, ssh=ssh, sudo=sudo, retry=retry)
+    set_up_apt_package(package, ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -201,7 +201,7 @@ def curl_sub_cmd(*, ssh: str | None, sudo: bool, retry: Retry | None) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_curl(ssh=ssh, sudo=sudo, retry=retry)
+    set_up_curl(ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -213,6 +213,9 @@ def curl_sub_cmd(*, ssh: str | None, sudo: bool, retry: Retry | None) -> None:
 @perms_option
 @owner_option
 @group_option
+@ssh_option
+@force_option
+@retry_option
 def delta_sub_cmd(
     *,
     token: SecretLike | None,
@@ -221,17 +224,23 @@ def delta_sub_cmd(
     perms: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
+    ssh: str | None,
+    force: bool,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_delta(
+    set_up_delta(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
         perms=perms,
         owner=owner,
         group=group,
+        ssh=ssh,
+        force=force,
+        retry=retry,
     )
 
 
@@ -462,7 +471,7 @@ def git_sub_cmd(*, ssh: str | None, sudo: bool, retry: Retry | None) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_git(ssh=ssh, sudo=sudo, retry=retry)
+    set_up_git(ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##
@@ -660,7 +669,7 @@ def rsync_sub_cmd(*, ssh: str | None, sudo: bool, retry: Retry | None) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_rsync(ssh=ssh, sudo=sudo, retry=retry)
+    set_up_rsync(ssh=ssh, sudo=sudo, retry=retry)
 
 
 ##

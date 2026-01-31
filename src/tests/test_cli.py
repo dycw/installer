@@ -23,41 +23,10 @@ class TestCLI:
             param(["apt-package", "git", "--ssh", "user@hostname"]),
             param(["apt-package", "git", "--sudo"]),
             param(["apt-package", "git", "--retry", "1", "1"]),
-            param(["age"], id="age"),
-            param(["age", "--token", "token"]),
-            param(["age", "--path-binaries", "path"]),
-            param(["age", "--sudo"]),
-            param(["age", "--perms", "perms"]),
-            param(["age", "--owner", "owner"]),
-            param(["age", "--group", "group"]),
-            param(["age", "--ssh", "user@hostname"]),
-            param(["age", "--force"]),
-            param(["age", "--retry", "1", "1"]),
-            param(["bat"], id="bat"),
-            param(["bat", "--token", "token"]),
-            param(["bat", "--path-binaries", "path"]),
-            param(["bat", "--sudo"]),
-            param(["bat", "--perms", "perms"]),
-            param(["bat", "--owner", "owner"]),
-            param(["bat", "--group", "group"]),
-            param(["bat", "--ssh", "user@hostname"]),
-            param(["bat", "--force"]),
-            param(["bat", "--retry", "1", "1"]),
-            param(["btm"], id="btm"),
-            param(["btm", "--token", "token"]),
-            param(["btm", "--path-binaries", "path"]),
-            param(["btm", "--sudo"]),
-            param(["btm", "--perms", "perms"]),
-            param(["btm", "--owner", "owner"]),
-            param(["btm", "--group", "group"]),
-            param(["btm", "--ssh", "user@hostname"]),
-            param(["btm", "--force"]),
-            param(["btm", "--retry", "1", "1"]),
             param(["curl"], id="curl"),
             param(["curl", "--ssh", "user@hostname"]),
             param(["curl", "--sudo"]),
             param(["curl", "--retry", "1", "1"]),
-            param(["delta"], id="delta"),
             param(["direnv"], id="direnv"),
             param(["direnv", "--ssh", "user@hostname"]),
             param(["direnv", "--path-binaries", "path"]),
@@ -204,6 +173,28 @@ class TestCLI:
     def test_commands(self, *, commands: list[str]) -> None:
         runner = CliRunner()
         result = runner.invoke(cli, commands)
+        assert result.exit_code == 0, result.stderr
+
+    @mark.parametrize("cmd", [param("age"), param("bat"), param("btm"), param("delta")])
+    @mark.parametrize(
+        "args",
+        [
+            param([]),
+            param(["--token", "token"]),
+            param(["--path-binaries", "path"]),
+            param(["--sudo"]),
+            param(["--perms", "perms"]),
+            param(["--owner", "owner"]),
+            param(["--group", "group"]),
+            param(["--ssh", "user@hostname"]),
+            param(["--force"]),
+            param(["--retry", "1", "1"]),
+        ],
+    )
+    @throttle_test(duration=MINUTE)
+    def test_commands_github(self, *, cmd: str, args: list[str]) -> None:
+        runner = CliRunner()
+        result = runner.invoke(cli, [cmd, *args])
         assert result.exit_code == 0, result.stderr
 
     @mark.parametrize(
