@@ -19,8 +19,8 @@ from installer.apps.click import (
 )
 from installer.apps.lib import (
     set_up_age,
+    set_up_bat,
     setup_apt_package,
-    setup_bat,
     setup_bottom,
     setup_curl,
     setup_delta,
@@ -120,6 +120,9 @@ def age_sub_cmd(
 @perms_option
 @owner_option
 @group_option
+@ssh_option
+@force_option
+@retry_option
 def bat_sub_cmd(
     *,
     token: SecretLike | None,
@@ -128,17 +131,23 @@ def bat_sub_cmd(
     perms: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
+    ssh: str | None,
+    force: bool,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_bat(
+    set_up_bat(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
         perms=perms,
         owner=owner,
         group=group,
+        ssh=ssh,
+        force=force,
+        retry=retry,
     )
 
 

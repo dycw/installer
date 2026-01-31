@@ -52,7 +52,7 @@ from installer.apps.download import (
 )
 from installer.configs.constants import FILE_SYSTEM_ROOT
 from installer.configs.lib import setup_shell_config
-from installer.utilities import setup_local_or_remote, split_ssh, ssh_uv_install
+from installer.utilities import set_up_local_or_remote, split_ssh, ssh_uv_install
 
 if TYPE_CHECKING:
     from utilities.core import PermissionsLike
@@ -159,7 +159,7 @@ def set_up_age(
 ) -> None:
     """Set up 'age'."""
 
-    def setup_local() -> None:
+    def set_up_local() -> None:
         with yield_gzip_asset(
             "FiloSottile",
             "age",
@@ -173,9 +173,9 @@ def set_up_age(
                 dest = Path(path_binaries, src.name)
                 cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
-    setup_local_or_remote(
+    set_up_local_or_remote(
         "age",
-        setup_local,
+        set_up_local,
         ssh=ssh,
         force=force,
         token=token,
@@ -191,7 +191,7 @@ def set_up_age(
 ##
 
 
-def setup_bat(
+def set_up_bat(
     *,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -199,13 +199,13 @@ def setup_bat(
     perms: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
     group: str | int | None = None,
+    ssh: str | None = None,
+    force: bool = False,
+    retry: Retry | None = None,
 ) -> None:
     """Set up 'bat'."""
-    try:
-        _ = which("bat")
-        _LOGGER.info("'bat' is already set up")
-    except WhichError:
-        _LOGGER.info("Setting up 'bat'...")
+
+    def setup_local() -> None:
         with yield_gzip_asset(
             "sharkdp",
             "bat",
@@ -217,6 +217,20 @@ def setup_bat(
             src = temp / "bat"
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+
+    set_up_local_or_remote(
+        "bat",
+        setup_local,
+        ssh=ssh,
+        force=force,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
+    )
 
 
 ##
@@ -1320,9 +1334,9 @@ def setup_zoxide(
 
 __all__ = [
     "set_up_age",
+    "set_up_bat",
     "setup_apt_package",
     "setup_asset",
-    "setup_bat",
     "setup_bottom",
     "setup_curl",
     "setup_delta",

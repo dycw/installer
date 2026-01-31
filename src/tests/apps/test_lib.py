@@ -9,7 +9,7 @@ from utilities.subprocess import run
 
 from installer.apps.lib import (
     set_up_age,
-    setup_bat,
+    set_up_bat,
     setup_bottom,
     setup_delta,
     setup_direnv,
@@ -79,6 +79,19 @@ class TestSetUpAge:
         assert search(escape(pattern4), result4) is not None, result4
 
 
+class TestSetUpBat:
+    @run_test_frac(frac=RUN_TEST_FRAC)
+    @throttle_test(duration=THROTTLE_DURATION)
+    def test_main(self, *, tmp_path: Path) -> None:
+        set_up_bat(path_binaries=tmp_path, force=True)
+        result = run(str(tmp_path / "bat"), "--help", return_=True)
+        pattern = normalize_multi_line_str("""
+            Usage: bat [OPTIONS] [FILE]...
+                   bat <COMMAND>
+        """)
+        assert search(escape(pattern), result) is not None, result
+
+
 class TestSetupBottom:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
@@ -87,19 +100,6 @@ class TestSetupBottom:
         result = run(str(tmp_path / "btm"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: btm [OPTIONS]
-        """)
-        assert search(escape(pattern), result) is not None, result
-
-
-class TestSetupBat:
-    @run_test_frac(frac=RUN_TEST_FRAC)
-    @throttle_test(duration=THROTTLE_DURATION)
-    def test_main(self, *, tmp_path: Path) -> None:
-        setup_bat(path_binaries=tmp_path)
-        result = run(str(tmp_path / "bat"), "--help", return_=True)
-        pattern = normalize_multi_line_str("""
-            Usage: bat [OPTIONS] [FILE]...
-                   bat <COMMAND>
         """)
         assert search(escape(pattern), result) is not None, result
 
