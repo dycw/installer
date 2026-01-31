@@ -132,7 +132,7 @@ class TestSetUpDust:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        set_up_dust(path_binaries=tmp_path)
+        set_up_dust(path_binaries=tmp_path, force=True)
         result = run(str(tmp_path / "dust"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: dust [OPTIONS] [PATH]...
@@ -144,7 +144,7 @@ class TestSetUpEza:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=2 * THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        set_up_eza(path_binaries=tmp_path)
+        set_up_eza(path_binaries=tmp_path, force=True)
         result = run(str(tmp_path / "eza"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage:
@@ -157,7 +157,7 @@ class TestSetUpFd:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        set_up_fd(path_binaries=tmp_path)
+        set_up_fd(path_binaries=tmp_path, force=True)
         result = run(str(tmp_path / "fd"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: fd [OPTIONS] [pattern] [path]...
