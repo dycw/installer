@@ -65,14 +65,14 @@ def yield_asset(
     else:
         release = next(r for r in repository.get_releases() if search(tag, r.tag_name))
     assets = list(release.get_assets())
-    _LOGGER.info("Got %s: %s", counted_noun(assets, "asset"), [a.name for a in assets])
+    _LOGGER.debug("Got %s: %s", counted_noun(assets, "asset"), [a.name for a in assets])
     if match_system:
         assets = [
             a
             for a in assets
             if any(search(c, a.name, flags=IGNORECASE) for c in SYSTEM_NAME_GROUP)
         ]
-        _LOGGER.info(
+        _LOGGER.debug(
             "Post system name group %s, got %s: %s",
             SYSTEM_NAME_GROUP,
             counted_noun(assets, "asset"),
@@ -84,7 +84,7 @@ def yield_asset(
             for a in assets
             if any(search(c, a.name, flags=IGNORECASE) for c in C_STD_LIB_GROUP)
         ]
-        _LOGGER.info(
+        _LOGGER.debug(
             "Post 'match_c_std_lib' %s, got %s: %s",
             C_STD_LIB_GROUP,
             counted_noun(assets, "asset"),
@@ -96,7 +96,7 @@ def yield_asset(
             for a in assets
             if any(search(m, a.name, flags=IGNORECASE) for m in MACHINE_TYPE_GROUP)
         ]
-        _LOGGER.info(
+        _LOGGER.debug(
             "Post 'match_machine' %s, got %s: %s",
             MACHINE_TYPE_GROUP,
             counted_noun(assets, "asset"),
@@ -106,14 +106,14 @@ def yield_asset(
         assets = [
             a for a in assets if all(search(p, a.name) is None for p in not_matches)
         ]
-        _LOGGER.info(
+        _LOGGER.debug(
             "Post 'not_matches', got %s: %s",
             counted_noun(assets, "asset"),
             [a.name for a in assets],
         )
     if endswith is not None:
         assets = [a for a in assets if any(a.name.endswith(e) for e in endswith)]
-        _LOGGER.info(
+        _LOGGER.debug(
             "Post 'endswith', got %s: %s",
             counted_noun(assets, "asset"),
             [a.name for a in assets],
@@ -122,7 +122,7 @@ def yield_asset(
         assets = [
             a for a in assets if all(not a.name.endswith(e) for e in not_endswith)
         ]
-        _LOGGER.info(
+        _LOGGER.debug(
             "Post 'not_endswith', got %s: %s",
             counted_noun(assets, "asset"),
             [a.name for a in assets],
