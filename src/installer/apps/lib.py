@@ -845,7 +845,7 @@ def setup_neovim(
 ##
 
 
-def setup_pve_fake_subscription(
+def set_up_pve_fake_subscription(
     *,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
@@ -1055,20 +1055,21 @@ def setup_shfmt(
 ##
 
 
-def setup_sops(
+def set_up_sops(
     *,
-    ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
     group: str | int | None = None,
+    ssh: str | None = None,
+    force: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Set up 'sops'."""
-    _LOGGER.info("Setting up 'sops'...")
-    if ssh is None:
+
+    def set_up_local() -> None:
         dest = Path(path_binaries, "sops")
         setup_asset(
             "getsops",
@@ -1083,10 +1084,12 @@ def setup_sops(
             owner=owner,
             group=group,
         )
-        return
-    ssh_uv_install(
-        ssh,
+
+    set_up_local_or_remote(
         "sops",
+        set_up_local,
+        ssh=ssh,
+        force=force,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -1413,7 +1416,9 @@ __all__ = [
     "set_up_eza",
     "set_up_fd",
     "set_up_git",
+    "set_up_pve_fake_subscription",
     "set_up_rsync",
+    "set_up_sops",
     "setup_asset",
     "setup_direnv",
     "setup_docker",
@@ -1421,14 +1426,12 @@ __all__ = [
     "setup_jq",
     "setup_just",
     "setup_neovim",
-    "setup_pve_fake_subscription",
     "setup_restic",
     "setup_ripgrep",
     "setup_ruff",
     "setup_sd",
     "setup_shellcheck",
     "setup_shfmt",
-    "setup_sops",
     "setup_starship",
     "setup_taplo",
     "setup_uv",

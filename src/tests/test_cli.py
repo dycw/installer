@@ -104,15 +104,6 @@ class TestCLI:
             param(["sd"], id="sd"),
             param(["shellcheck"], id="shellcheck"),
             param(["shfmt"], id="shfmt"),
-            param(["sops"], id="sops"),
-            param(["sops", "--ssh", "user@hostname"]),
-            param(["sops", "--token", "token"]),
-            param(["sops", "--path-binaries", "path"]),
-            param(["sops", "--sudo"]),
-            param(["sops", "--perms", "perms"]),
-            param(["sops", "--owner", "owner"]),
-            param(["sops", "--group", "group"]),
-            param(["sops", "--retry", "1", "1"]),
             param(["starship"], id="starship"),
             param(["starship", "--ssh", "user@hostname"]),
             param(["starship", "--token", "token"]),
@@ -182,6 +173,7 @@ class TestCLI:
             param("dust"),
             param("eza"),
             param("fd"),
+            param("sops"),
         ],
     )
     @mark.parametrize(
