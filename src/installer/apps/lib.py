@@ -1193,34 +1193,44 @@ def set_up_uv(
     perms: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
     group: str | int | None = None,
+    force: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Set up 'uv'."""
     _LOGGER.info("Setting up 'uv'...")
-    if ssh is None:
-        with yield_gzip_asset(
-            "astral-sh",
-            "uv",
-            token=token,
-            match_system=True,
-            match_c_std_lib=True,
-            match_machine=True,
-            not_endswith=["sha256"],
-        ) as temp:
-            src = temp / "uv"
-            dest = Path(path_binaries, src.name)
-            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-    else:
-        user, hostname = split_ssh(ssh)
-        with yield_ssh_temp_dir(user, hostname, retry=retry, logger=_LOGGER) as temp:
-            utilities.subprocess.ssh(
-                user,
-                hostname,
-                *BASH_LS,
-                input=setup_uv_cmd(temp, path_binaries=path_binaries, sudo=sudo),
-                retry=retry,
-                logger=_LOGGER,
-            )
+    match ssh, shutil.which("uv"), force:
+        case (None, None, _) | (None, str(), True):
+            _LOGGER.info("Setting up 'uv'...")
+            with yield_gzip_asset(
+                "astral-sh",
+                "uv",
+                token=token,
+                match_system=True,
+                match_c_std_lib=True,
+                match_machine=True,
+                not_endswith=["sha256"],
+            ) as temp:
+                src = temp / "uv"
+                dest = Path(path_binaries, src.name)
+                cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+        case None, str(), False:
+            _LOGGER.info("Setting up 'uv'...")
+        case str(), _, _:
+            ssh_user, ssh_hostname = split_ssh(ssh)
+            _LOGGER.info("Setting up 'uv' on %r...", ssh_hostname)
+            with yield_ssh_temp_dir(
+                ssh_user, ssh_hostname, retry=retry, logger=_LOGGER
+            ) as temp:
+                utilities.subprocess.ssh(
+                    ssh_user,
+                    ssh_hostname,
+                    *BASH_LS,
+                    input=setup_uv_cmd(temp, path_binaries=path_binaries, sudo=sudo),
+                    retry=retry,
+                    logger=_LOGGER,
+                )
+        case never:
+            assert_never(never)
 
 
 def setup_uv_cmd(
