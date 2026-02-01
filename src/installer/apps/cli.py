@@ -31,13 +31,13 @@ from installer.apps.lib import (
     set_up_fd,
     set_up_fzf,
     set_up_git,
+    set_up_just,
     set_up_pve_fake_subscription,
     set_up_rsync,
     set_up_sops,
     set_up_starship,
     set_up_zoxide,
     setup_jq,
-    setup_just,
     setup_neovim,
     setup_restic,
     setup_ripgrep,
@@ -541,36 +541,39 @@ def jq_sub_cmd(
 ##
 
 
-@ssh_option
 @token_option
 @path_binaries_option
 @sudo_option
 @perms_option
 @owner_option
 @group_option
+@ssh_option
+@force_option
 @retry_option
 def just_sub_cmd(
     *,
-    ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
     perms: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
+    ssh: str | None,
+    force: bool,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_just(
-        ssh=ssh,
+    set_up_just(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
         perms=perms,
         owner=owner,
         group=group,
+        ssh=ssh,
+        force=force,
         retry=retry,
     )
 

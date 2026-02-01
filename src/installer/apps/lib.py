@@ -741,50 +741,41 @@ def setup_jq(
 ##
 
 
-def setup_just(
+def set_up_just(
     *,
-    ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
     group: str | int | None = None,
+    ssh: str | None = None,
+    force: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Set up 'just'."""
-    match ssh:
-        case None:
-            try:
-                _ = which("just")
-                _LOGGER.info("'just' is already set up")
-            except WhichError:
-                _LOGGER.info("Setting up 'just'...")
-                if ssh is None:
-                    with yield_gzip_asset(
-                        "casey",
-                        "just",
-                        token=token,
-                        match_system=True,
-                        match_machine=True,
-                    ) as temp:
-                        src = temp / "just"
-                        dest = Path(path_binaries, src.name)
-                        cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        case str():
-            ssh_uv_install(
-                ssh,
-                "just",
-                token=token,
-                path_binaries=path_binaries,
-                sudo=sudo,
-                perms=perms,
-                owner=owner,
-                group=group,
-                retry=retry,
-            )
-        case never:
-            assert_never(never)
+
+    def set_up_local() -> None:
+        with yield_gzip_asset(
+            "casey", "just", token=token, match_system=True, match_machine=True
+        ) as temp:
+            src = temp / "just"
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
+
+    set_up_local_or_remote(
+        "just",
+        set_up_local,
+        ssh=ssh,
+        force=force,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms=perms,
+        owner=owner,
+        group=group,
+        retry=retry,
+    )
 
 
 ##
@@ -1380,6 +1371,7 @@ __all__ = [
     "set_up_fd",
     "set_up_fzf",
     "set_up_git",
+    "set_up_just",
     "set_up_pve_fake_subscription",
     "set_up_rsync",
     "set_up_sops",
@@ -1387,7 +1379,6 @@ __all__ = [
     "set_up_zoxide",
     "setup_asset",
     "setup_jq",
-    "setup_just",
     "setup_neovim",
     "setup_restic",
     "setup_ripgrep",
