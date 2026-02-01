@@ -130,21 +130,6 @@ class TestCLI:
             param(["uv", "--group", "group"]),
             param(["uv", "--retry", "1", "1"]),
             param(["yq"], id="yq"),
-            param(["zoxide"], id="zoxide"),
-            param(["zoxide", "--ssh", "user@hostname"]),
-            param(["zoxide", "--force"]),
-            param(["zoxide", "--token", "token"]),
-            param(["zoxide", "--path-binaries", "path"]),
-            param(["zoxide", "--sudo"]),
-            param(["zoxide", "--perms-binary", "perms"]),
-            param(["zoxide", "--owner", "owner"]),
-            param(["zoxide", "--group", "group"]),
-            param(["zoxide", "--etc"]),
-            param(["zoxide", "--shell", "bash"]),
-            param(["zoxide", "--home", "home"]),
-            param(["zoxide", "--perms-config", "perms"]),
-            param(["zoxide", "--root", "/"]),
-            param(["zoxide", "--retry", "1", "1"]),
             ##
             param(["setup-authorized-keys"], id="setup-authorized-keys 0"),
             param(["setup-authorized-keys", "key1"], id="setup-authorized-keys 1"),
@@ -193,6 +178,33 @@ class TestCLI:
     )
     @throttle_test(duration=MINUTE)
     def test_commands_github(self, *, cmd: str, args: list[str]) -> None:
+        runner = CliRunner()
+        result = runner.invoke(cli, [cmd, *args])
+        assert result.exit_code == 0, result.stderr
+
+    @mark.parametrize("cmd", [param("zoxide")])
+    @mark.parametrize(
+        "args",
+        [
+            param([]),
+            param(["--token", "token"]),
+            param(["--path-binaries", "path"]),
+            param(["--sudo"]),
+            param(["--perms-binary", "perms"]),
+            param(["--owner", "owner"]),
+            param(["--group", "group"]),
+            param(["--shell", "shell"]),
+            param(["--etc"]),
+            param(["--home", "path"]),
+            param(["--perms-config", "perms"]),
+            param(["--root", "path"]),
+            param(["--ssh", "user@hostname"]),
+            param(["--force"]),
+            param(["--retry", "1", "1"]),
+        ],
+    )
+    @throttle_test(duration=MINUTE)
+    def test_commands_with_shell_github(self, *, cmd: str, args: list[str]) -> None:
         runner = CliRunner()
         result = runner.invoke(cli, [cmd, *args])
         assert result.exit_code == 0, result.stderr

@@ -31,6 +31,7 @@ from installer.apps.lib import (
     set_up_pve_fake_subscription,
     set_up_rsync,
     set_up_sops,
+    set_up_zoxide,
     setup_direnv,
     setup_docker,
     setup_fzf,
@@ -48,7 +49,6 @@ from installer.apps.lib import (
     setup_uv,
     setup_watchexec,
     setup_yq,
-    setup_zoxide,
 )
 from installer.click import retry_option, ssh_option, sudo_option
 from installer.configs.click import etc_option, home_option, root_option, shell_option
@@ -1053,54 +1053,54 @@ def yq_sub_cmd(
 ##
 
 
-@ssh_option
-@force_option
 @token_option
 @path_binaries_option
 @sudo_option
 @perms_binary_option
 @owner_option
 @group_option
-@etc_option
 @shell_option
+@etc_option
 @home_option
 @perms_config_option
 @root_option
+@ssh_option
+@force_option
 @retry_option
 def zoxide_sub_cmd(
     *,
-    ssh: str | None,
-    force: bool,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
     perms_binary: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
-    etc: bool,
     shell: Shell | None,
+    etc: bool,
     home: PathLike,
     perms_config: PermissionsLike,
     root: PathLike | None,
+    ssh: str | None,
+    force: bool,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_zoxide(
-        ssh=ssh,
-        force=force,
+    set_up_zoxide(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
         perms_binary=perms_binary,
         owner=owner,
         group=group,
-        etc=etc,
         shell=shell,
+        etc=etc,
         home=home,
         perms_config=perms_config,
         root=root,
+        ssh=ssh,
+        force=force,
         retry=retry,
     )
 

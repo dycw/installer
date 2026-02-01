@@ -1330,79 +1330,64 @@ def setup_yq(
 ##
 
 
-def setup_zoxide(
+def set_up_zoxide(
     *,
-    ssh: str | None = None,
-    force: bool = False,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms_binary: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
     group: str | int | None = None,
-    etc: bool = False,
     shell: Shell | None = None,
+    etc: bool = False,
     home: PathLike | None = None,
     perms_config: PermissionsLike = PERMISSIONS_CONFIG,
     root: PathLike | None = None,
+    ssh: str | None = None,
+    force: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Set up 'zoxide'."""
-    match ssh:
-        case None:
-            if (shutil.which("zoxide") is None) or force:
-                _LOGGER.info("Setting up 'zoxide'...")
-                with yield_gzip_asset(
-                    "ajeetdsouza",
-                    "zoxide",
-                    token=token,
-                    match_system=True,
-                    match_machine=True,
-                ) as temp:
-                    src = temp / "zoxide"
-                    dest = Path(path_binaries, src.name)
-                    cp(
-                        src,
-                        dest,
-                        sudo=sudo,
-                        perms=perms_binary,
-                        owner=owner,
-                        group=group,
-                    )
-                shell_use = SHELL if shell is None else shell
-                set_up_shell_config(
-                    'eval "$(zoxide init --cmd j bash)"',
-                    'eval "$(zoxide init --cmd j zsh)"',
-                    "zoxide init --cmd j fish | source",
-                    etc="zoxide" if etc else None,
-                    shell=shell_use,
-                    home=HOME if home is None else home,
-                    perms=perms_config,
-                    owner=owner,
-                    group=group,
-                    root=FILE_SYSTEM_ROOT if root is None else root,
-                )
-            else:
-                _LOGGER.info("'zoxide' is already set up")
-        case str():
-            ssh_uv_install(
-                ssh,
-                "zoxide",
-                token=token,
-                path_binaries=path_binaries,
-                sudo=sudo,
-                perms_binary=perms_binary,
-                owner=owner,
-                group=group,
-                etc=etc,
-                shell=shell,
-                home=home,
-                perms_config=perms_config,
-                root=root,
-                retry=retry,
-            )
-        case never:
-            assert_never(never)
+
+    def set_up_local() -> None:
+        with yield_gzip_asset(
+            "ajeetdsouza", "zoxide", token=token, match_system=True, match_machine=True
+        ) as temp:
+            src = temp / "zoxide"
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms_binary, owner=owner, group=group)
+        shell_use = SHELL if shell is None else shell
+        set_up_shell_config(
+            'eval "$(zoxide init --cmd j bash)"',
+            'eval "$(zoxide init --cmd j zsh)"',
+            "zoxide init --cmd j fish | source",
+            etc="zoxide" if etc else None,
+            shell=shell_use,
+            home=HOME if home is None else home,
+            perms=perms_config,
+            owner=owner,
+            group=group,
+            root=FILE_SYSTEM_ROOT if root is None else root,
+        )
+
+    set_up_local_or_remote(
+        "zoxide",
+        set_up_local,
+        ssh=ssh,
+        force=force,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms_binary=perms_binary,
+        owner=owner,
+        group=group,
+        shell=shell,
+        etc=etc,
+        home=home,
+        perms_config=perms_config,
+        root=root,
+        retry=retry,
+    )
 
 
 __all__ = [
@@ -1419,6 +1404,7 @@ __all__ = [
     "set_up_pve_fake_subscription",
     "set_up_rsync",
     "set_up_sops",
+    "set_up_zoxide",
     "setup_asset",
     "setup_direnv",
     "setup_docker",
@@ -1437,5 +1423,4 @@ __all__ = [
     "setup_uv",
     "setup_uv_cmd",
     "setup_yq",
-    "setup_zoxide",
 ]
