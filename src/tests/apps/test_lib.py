@@ -338,7 +338,7 @@ class TestSetUpUv:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        set_up_uv(path_binaries=tmp_path)
+        set_up_uv(path_binaries=tmp_path, force=True)
         result = run(str(tmp_path / "uv"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: uv [OPTIONS] <COMMAND>
