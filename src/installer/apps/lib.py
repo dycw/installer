@@ -839,29 +839,32 @@ def set_up_pve_fake_subscription(
 ##
 
 
-def setup_restic(
+def set_up_restic(
     *,
-    ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
     group: str | int | None = None,
+    ssh: str | None = None,
+    force: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Set up 'restic'."""
-    _LOGGER.info("Setting up 'restic'...")
-    if ssh is None:
+
+    def set_up_local() -> None:
         with yield_bz2_asset(
             "restic", "restic", token=token, match_system=True, match_machine=True
         ) as src:
             dest = Path(path_binaries, "restic")
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
-        return
-    ssh_uv_install(
-        ssh,
-        "restic",
+
+    set_up_local_or_remote(
+        "age",
+        set_up_local,
+        ssh=ssh,
+        force=force,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -1373,6 +1376,7 @@ __all__ = [
     "set_up_git",
     "set_up_just",
     "set_up_pve_fake_subscription",
+    "set_up_restic",
     "set_up_rsync",
     "set_up_sops",
     "set_up_starship",
@@ -1380,7 +1384,6 @@ __all__ = [
     "setup_asset",
     "setup_jq",
     "setup_neovim",
-    "setup_restic",
     "setup_ripgrep",
     "setup_ruff",
     "setup_sd",

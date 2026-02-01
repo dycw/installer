@@ -18,12 +18,12 @@ from installer.apps.lib import (
     set_up_fd,
     set_up_fzf,
     set_up_just,
+    set_up_restic,
     set_up_sops,
     set_up_starship,
     set_up_zoxide,
     setup_jq,
     setup_neovim,
-    setup_restic,
     setup_ripgrep,
     setup_ruff,
     setup_sd,
@@ -220,7 +220,7 @@ class TestSetUpRestic:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_restic(path_binaries=tmp_path)
+        set_up_restic(path_binaries=tmp_path)
         result = run(str(tmp_path / "restic"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage:
