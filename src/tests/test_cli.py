@@ -27,11 +27,6 @@ class TestCLI:
             param(["curl", "--ssh", "user@hostname"]),
             param(["curl", "--sudo"]),
             param(["curl", "--retry", "1", "1"]),
-            param(["docker"], id="docker"),
-            param(["docker", "--ssh", "user@hostname"]),
-            param(["docker", "--sudo"]),
-            param(["docker", "--user", "user"]),
-            param(["docker", "--retry", "1", "1"]),
             param(["git"], id="git"),
             param(["git", "--ssh", "user@hostname"]),
             param(["git", "--sudo"]),
@@ -103,6 +98,23 @@ class TestCLI:
     def test_commands(self, *, commands: list[str]) -> None:
         runner = CliRunner()
         result = runner.invoke(cli, commands)
+        assert result.exit_code == 0, result.stderr
+
+    @mark.parametrize(
+        "args",
+        [
+            param([]),
+            param(["--sudo"]),
+            param(["--user", "user"]),
+            param(["--ssh", "user@hostname"]),
+            param(["--force"]),
+            param(["--retry", "1", "1"]),
+        ],
+    )
+    @throttle_test(duration=MINUTE)
+    def test_commands_docker(self, *, args: list[str]) -> None:
+        runner = CliRunner()
+        result = runner.invoke(cli, ["docker", *args])
         assert result.exit_code == 0, result.stderr
 
     @mark.parametrize(

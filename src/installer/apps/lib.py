@@ -406,23 +406,20 @@ def set_up_direnv(
 ##
 
 
-def setup_docker(
+def set_up_docker(
     *,
-    ssh: str | None = None,
     sudo: bool = False,
     user: str | None = None,
+    ssh: str | None = None,
+    force: bool = False,
     retry: Retry | None = None,
 ) -> None:
-    match ssh, SYSTEM_NAME:
-        case None, "Darwin":
-            msg = f"Unsupported system: {SYSTEM_NAME!r}"
-            raise ValueError(msg)
-        case None, "Linux":
-            try:
-                _ = which("docker")
-                _LOGGER.info("'docker' is already set up")
-            except WhichError:
-                _LOGGER.info("Setting up 'docker'....")
+    def set_up_local() -> None:
+        match SYSTEM_NAME:
+            case "Darwin":
+                msg = f"Unsupported system: {SYSTEM_NAME!r}"
+                raise ValueError(msg)
+            case "Linux":
                 apt_remove(
                     "docker.io",
                     "docker-doc",
@@ -470,12 +467,12 @@ def setup_docker(
                     update=True,
                     sudo=sudo,
                 )
-            if user is not None:
-                run(*maybe_sudo_cmd("usermod", "-aG", "docker", user, sudo=sudo))
-        case str(), _:
-            ssh_uv_install(ssh, "docker", sudo=sudo, user=user, retry=retry)
-        case never:
-            assert_never(never)
+                if user is not None:
+                    run(*maybe_sudo_cmd("usermod", "-aG", "docker", user, sudo=sudo))
+
+    set_up_local_or_remote(
+        "docker", set_up_local, ssh=ssh, force=force, sudo=sudo, user=user, retry=retry
+    )
 
 
 ##
@@ -1377,6 +1374,7 @@ __all__ = [
     "set_up_curl",
     "set_up_delta",
     "set_up_direnv",
+    "set_up_docker",
     "set_up_dust",
     "set_up_eza",
     "set_up_fd",
@@ -1388,7 +1386,6 @@ __all__ = [
     "set_up_starship",
     "set_up_zoxide",
     "setup_asset",
-    "setup_docker",
     "setup_jq",
     "setup_just",
     "setup_neovim",

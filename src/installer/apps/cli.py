@@ -25,6 +25,7 @@ from installer.apps.lib import (
     set_up_curl,
     set_up_delta,
     set_up_direnv,
+    set_up_docker,
     set_up_dust,
     set_up_eza,
     set_up_fd,
@@ -35,7 +36,6 @@ from installer.apps.lib import (
     set_up_sops,
     set_up_starship,
     set_up_zoxide,
-    setup_docker,
     setup_jq,
     setup_just,
     setup_neovim,
@@ -302,21 +302,18 @@ def direnv_sub_cmd(
 ##
 
 
-@ssh_option
 @sudo_option
+@ssh_option
 @option("--user", type=Str(), default=None, help="User to add to the 'docker' group")
+@force_option
 @retry_option
 def docker_sub_cmd(
-    *,
-    ssh: str | None = None,
-    sudo: bool = False,
-    user: str | None = None,
-    retry: Retry | None = None,
+    *, sudo: bool, ssh: str | None, user: str | None, force: bool, retry: Retry | None
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_docker(ssh=ssh, sudo=sudo, user=user, retry=retry)
+    set_up_docker(sudo=sudo, ssh=ssh, user=user, force=force, retry=retry)
 
 
 ##
