@@ -1192,7 +1192,7 @@ def setup_taplo(
 ##
 
 
-def setup_uv(
+def set_up_uv(
     *,
     ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
@@ -1395,6 +1395,7 @@ __all__ = [
     "set_up_rsync",
     "set_up_sops",
     "set_up_starship",
+    "set_up_uv",
     "set_up_zoxide",
     "setup_asset",
     "setup_jq",
@@ -1404,7 +1405,6 @@ __all__ = [
     "setup_shellcheck",
     "setup_shfmt",
     "setup_taplo",
-    "setup_uv",
     "setup_uv_cmd",
     "setup_yq",
 ]

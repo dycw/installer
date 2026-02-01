@@ -38,6 +38,7 @@ from installer.apps.lib import (
     set_up_rsync,
     set_up_sops,
     set_up_starship,
+    set_up_uv,
     set_up_zoxide,
     setup_jq,
     setup_ripgrep,
@@ -46,7 +47,6 @@ from installer.apps.lib import (
     setup_shellcheck,
     setup_shfmt,
     setup_taplo,
-    setup_uv,
     setup_watchexec,
     setup_yq,
 )
@@ -997,7 +997,7 @@ def uv_sub_cmd(
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_uv(
+    set_up_uv(
         ssh=ssh,
         token=token,
         path_binaries=path_binaries,
