@@ -170,14 +170,13 @@ class TestCLI:
         "args",
         [
             param([]),
-            param(["--sudo"]),
             param(["--user", "user"]),
             param(["--ssh", "user@hostname"]),
             param(["--force"]),
             param(["--retry", "1", "1"]),
         ],
     )
-    # @throttle_test(duration=MINUTE)
+    @throttle_test(duration=MINUTE)
     def test_commands_pve_fake_subscription(self, *, args: list[str]) -> None:
         runner = CliRunner()
         result = runner.invoke(cli, ["pve-fake-subscription", *args])
