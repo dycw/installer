@@ -54,7 +54,6 @@ from installer.utilities import (
     set_up_local_or_ssh,
     set_up_local_or_ssh_installer_cli,
     split_ssh,
-    ssh_uv_install,
 )
 
 if TYPE_CHECKING:
@@ -821,25 +820,34 @@ def set_up_nvim(
 
 def set_up_pve_fake_subscription(
     *,
-    ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
+    ssh: str | None = None,
+    force: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Set up 'pve-fake-subscription'."""
-    match ssh, SYSTEM_NAME:
-        case None, "Darwin":
-            msg = f"Unsupported system: {SYSTEM_NAME!r}"
-            raise ValueError(msg)
-        case None, "Linux":
-            _LOGGER.info("Setting up 'pve-fake-subscription'...")
-            with yield_asset(
-                "Jamesits", "pve-fake-subscription", token=token, endswith="deb"
-            ) as temp:
-                run("dpkg", "-i", str(temp))
-        case str(), _:
-            ssh_uv_install(ssh, "pve-fake-subscription", token=token, retry=retry)
-        case never:
-            assert_never(never)
+
+    def set_up_local() -> None:
+        match SYSTEM_NAME:
+            case "Darwin":
+                msg = f"Unsupported system: {SYSTEM_NAME!r}"
+                raise ValueError(msg)
+            case "Linux":
+                with yield_asset(
+                    "Jamesits", "pve-fake-subscription", token=token, endswith="deb"
+                ) as temp:
+                    run("dpkg", "-i", str(temp))
+            case never:
+                assert_never(never)
+
+    set_up_local_or_ssh_installer_cli(
+        "pve-fake-subscription",
+        set_up_local,
+        ssh=ssh,
+        force=force,
+        token=token,
+        retry=retry,
+    )
 
 
 ##

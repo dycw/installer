@@ -159,15 +159,32 @@ class TestCLI:
         ],
     )
     @throttle_test(duration=MINUTE)
-    def test_commands_with_shell_github(self, *, cmd: str, args: list[str]) -> None:
+    def test_commands_github_with_shell(self, *, cmd: str, args: list[str]) -> None:
         runner = CliRunner()
         result = runner.invoke(cli, [cmd, *args])
         assert result.exit_code == 0, result.stderr
 
     @throttle_test(duration=MINUTE)
-    def test_commands_with_shell_starship_github(self) -> None:
+    def test_commands_starship(self) -> None:
         runner = CliRunner()
         result = runner.invoke(cli, ["starship", "--starship-toml", "path"])
+        assert result.exit_code == 0, result.stderr
+
+    @mark.parametrize(
+        "args",
+        [
+            param([]),
+            param(["--sudo"]),
+            param(["--user", "user"]),
+            param(["--ssh", "user@hostname"]),
+            param(["--force"]),
+            param(["--retry", "1", "1"]),
+        ],
+    )
+    @throttle_test(duration=MINUTE)
+    def test_commands_pve_fake_subscription(self, *, args: list[str]) -> None:
+        runner = CliRunner()
+        result = runner.invoke(cli, ["pve-fake-subscription", *args])
         assert result.exit_code == 0, result.stderr
 
     @mark.parametrize(

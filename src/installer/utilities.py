@@ -247,4 +247,4 @@ def ssh_uv_install(
     )
 
 
-__all__ = ["ensure_line_or_lines", "split_ssh", "ssh_uv_install"]
+__all__ = ["ensure_line_or_lines", "set_up_local_or_ssh", "split_ssh", "ssh_uv_install"]

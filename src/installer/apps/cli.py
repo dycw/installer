@@ -621,16 +621,17 @@ def nvim_sub_cmd(
 ##
 
 
-@ssh_option
 @token_option
+@ssh_option
+@force_option
 @retry_option
 def pve_fake_subscription_sub_cmd(
-    *, ssh: str | None, token: SecretLike | None, retry: Retry | None
+    *, token: SecretLike | None, ssh: str | None, force: bool, retry: Retry | None
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    set_up_pve_fake_subscription(ssh=ssh, token=token, retry=retry)
+    set_up_pve_fake_subscription(token=token, ssh=ssh, force=force, retry=retry)
 
 
 ##
