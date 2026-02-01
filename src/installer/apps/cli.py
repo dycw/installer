@@ -32,6 +32,7 @@ from installer.apps.lib import (
     set_up_pve_fake_subscription,
     set_up_rsync,
     set_up_sops,
+    set_up_starship,
     set_up_zoxide,
     setup_docker,
     setup_fzf,
@@ -44,7 +45,6 @@ from installer.apps.lib import (
     setup_sd,
     setup_shellcheck,
     setup_shfmt,
-    setup_starship,
     setup_taplo,
     setup_uv,
     setup_watchexec,
@@ -869,7 +869,6 @@ def sops_sub_cmd(
 ##
 
 
-@ssh_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -877,17 +876,18 @@ def sops_sub_cmd(
 @owner_option
 @group_option
 @etc_option
-@home_option
 @shell_option
+@home_option
+@perms_config_option
+@root_option
 @option(
     "--starship-toml", type=utilities.click.Path(exist="file if exists"), default=None
 )
-@perms_config_option
-@root_option
+@ssh_option
+@force_option
 @retry_option
 def starship_sub_cmd(
     *,
-    ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -895,18 +895,19 @@ def starship_sub_cmd(
     owner: str | int | None,
     group: str | int | None,
     etc: bool,
-    home: PathLike,
     shell: Shell | None,
-    starship_toml: PathLike | None,
+    home: PathLike | None,
     perms_config: PermissionsLike,
     root: PathLike | None,
+    starship_toml: PathLike | None,
+    ssh: str | None,
+    force: bool,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_starship(
-        ssh=ssh,
+    set_up_starship(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -914,11 +915,13 @@ def starship_sub_cmd(
         owner=owner,
         group=group,
         etc=etc,
-        home=home,
         shell=shell,
-        starship_toml=starship_toml,
+        home=home,
         perms_config=perms_config,
         root=root,
+        starship_toml=starship_toml,
+        ssh=ssh,
+        force=force,
         retry=retry,
     )
 

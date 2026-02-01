@@ -17,6 +17,7 @@ from installer.apps.lib import (
     set_up_eza,
     set_up_fd,
     set_up_sops,
+    set_up_starship,
     set_up_zoxide,
     setup_fzf,
     setup_jq,
@@ -28,7 +29,6 @@ from installer.apps.lib import (
     setup_sd,
     setup_shellcheck,
     setup_shfmt,
-    setup_starship,
     setup_taplo,
     setup_uv,
     setup_uv_cmd,
@@ -314,7 +314,7 @@ class TestSetUpStarship:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_starship(path_binaries=tmp_path, home=tmp_path, force=True)
+        set_up_starship(path_binaries=tmp_path, home=tmp_path, force=True)
         result = run(str(tmp_path / "starship"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: starship <COMMAND>

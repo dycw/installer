@@ -1098,7 +1098,7 @@ def set_up_sops(
 ##
 
 
-def setup_starship(
+def set_up_starship(
     *,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
@@ -1399,6 +1399,7 @@ __all__ = [
     "set_up_pve_fake_subscription",
     "set_up_rsync",
     "set_up_sops",
+    "set_up_starship",
     "set_up_zoxide",
     "setup_asset",
     "setup_docker",
@@ -1412,7 +1413,6 @@ __all__ = [
     "setup_sd",
     "setup_shellcheck",
     "setup_shfmt",
-    "setup_starship",
     "setup_taplo",
     "setup_uv",
     "setup_uv_cmd",
