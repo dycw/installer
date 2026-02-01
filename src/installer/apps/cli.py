@@ -24,16 +24,18 @@ from installer.apps.lib import (
     set_up_btm,
     set_up_curl,
     set_up_delta,
+    set_up_direnv,
     set_up_dust,
     set_up_eza,
     set_up_fd,
+    set_up_fzf,
     set_up_git,
     set_up_pve_fake_subscription,
     set_up_rsync,
     set_up_sops,
-    setup_direnv,
+    set_up_starship,
+    set_up_zoxide,
     setup_docker,
-    setup_fzf,
     setup_jq,
     setup_just,
     setup_neovim,
@@ -43,12 +45,10 @@ from installer.apps.lib import (
     setup_sd,
     setup_shellcheck,
     setup_shfmt,
-    setup_starship,
     setup_taplo,
     setup_uv,
     setup_watchexec,
     setup_yq,
-    setup_zoxide,
 )
 from installer.click import retry_option, ssh_option, sudo_option
 from installer.configs.click import etc_option, home_option, root_option, shell_option
@@ -247,51 +247,54 @@ def delta_sub_cmd(
 ##
 
 
-@ssh_option
-@path_binaries_option
 @token_option
+@path_binaries_option
 @sudo_option
 @perms_binary_option
 @owner_option
 @group_option
 @etc_option
-@home_option
 @shell_option
+@home_option
 @perms_config_option
 @root_option
+@ssh_option
+@force_option
 @retry_option
 def direnv_sub_cmd(
     *,
-    ssh: str | None,
-    path_binaries: PathLike,
     token: SecretLike | None,
+    path_binaries: PathLike,
     sudo: bool,
     perms_binary: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
+    shell: Shell | None,
     etc: bool,
     home: PathLike,
-    shell: Shell | None,
     perms_config: PermissionsLike,
     root: PathLike | None,
+    ssh: str | None,
+    force: bool,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_direnv(
-        ssh=ssh,
-        path_binaries=path_binaries,
+    set_up_direnv(
         token=token,
+        path_binaries=path_binaries,
         sudo=sudo,
         perms_binary=perms_binary,
         owner=owner,
         group=group,
         etc=etc,
-        home=home,
         shell=shell,
+        home=home,
         perms_config=perms_config,
         root=root,
+        ssh=ssh,
+        force=force,
         retry=retry,
     )
 
@@ -439,7 +442,6 @@ def fd_sub_cmd(
 ##
 
 
-@ssh_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -451,10 +453,11 @@ def fd_sub_cmd(
 @home_option
 @perms_config_option
 @root_option
+@ssh_option
+@force_option
 @retry_option
 def fzf_sub_cmd(
     *,
-    ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -466,13 +469,14 @@ def fzf_sub_cmd(
     home: PathLike,
     perms_config: PermissionsLike,
     root: PathLike | None,
+    ssh: str | None,
+    force: bool,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_fzf(
-        ssh=ssh,
+    set_up_fzf(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -484,6 +488,8 @@ def fzf_sub_cmd(
         home=home,
         perms_config=perms_config,
         root=root,
+        ssh=ssh,
+        force=force,
         retry=retry,
     )
 
@@ -866,7 +872,6 @@ def sops_sub_cmd(
 ##
 
 
-@ssh_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -874,17 +879,18 @@ def sops_sub_cmd(
 @owner_option
 @group_option
 @etc_option
-@home_option
 @shell_option
+@home_option
+@perms_config_option
+@root_option
 @option(
     "--starship-toml", type=utilities.click.Path(exist="file if exists"), default=None
 )
-@perms_config_option
-@root_option
+@ssh_option
+@force_option
 @retry_option
 def starship_sub_cmd(
     *,
-    ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -892,18 +898,19 @@ def starship_sub_cmd(
     owner: str | int | None,
     group: str | int | None,
     etc: bool,
-    home: PathLike,
     shell: Shell | None,
-    starship_toml: PathLike | None,
+    home: PathLike | None,
     perms_config: PermissionsLike,
     root: PathLike | None,
+    starship_toml: PathLike | None,
+    ssh: str | None,
+    force: bool,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_starship(
-        ssh=ssh,
+    set_up_starship(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -911,11 +918,13 @@ def starship_sub_cmd(
         owner=owner,
         group=group,
         etc=etc,
-        home=home,
         shell=shell,
-        starship_toml=starship_toml,
+        home=home,
         perms_config=perms_config,
         root=root,
+        starship_toml=starship_toml,
+        ssh=ssh,
+        force=force,
         retry=retry,
     )
 
@@ -1053,8 +1062,6 @@ def yq_sub_cmd(
 ##
 
 
-@ssh_option
-@force_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -1066,11 +1073,11 @@ def yq_sub_cmd(
 @home_option
 @perms_config_option
 @root_option
+@ssh_option
+@force_option
 @retry_option
 def zoxide_sub_cmd(
     *,
-    ssh: str | None,
-    force: bool,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -1082,14 +1089,14 @@ def zoxide_sub_cmd(
     home: PathLike,
     perms_config: PermissionsLike,
     root: PathLike | None,
+    ssh: str | None,
+    force: bool,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_zoxide(
-        ssh=ssh,
-        force=force,
+    set_up_zoxide(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -1101,6 +1108,8 @@ def zoxide_sub_cmd(
         home=home,
         perms_config=perms_config,
         root=root,
+        ssh=ssh,
+        force=force,
         retry=retry,
     )
 

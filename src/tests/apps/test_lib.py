@@ -12,12 +12,14 @@ from installer.apps.lib import (
     set_up_bat,
     set_up_btm,
     set_up_delta,
+    set_up_direnv,
     set_up_dust,
     set_up_eza,
     set_up_fd,
+    set_up_fzf,
     set_up_sops,
-    setup_direnv,
-    setup_fzf,
+    set_up_starship,
+    set_up_zoxide,
     setup_jq,
     setup_just,
     setup_neovim,
@@ -27,13 +29,11 @@ from installer.apps.lib import (
     setup_sd,
     setup_shellcheck,
     setup_shfmt,
-    setup_starship,
     setup_taplo,
     setup_uv,
     setup_uv_cmd,
     setup_watchexec,
     setup_yq,
-    setup_zoxide,
 )
 from tests.conftest import RUN_TEST_FRAC, THROTTLE_DURATION
 
@@ -120,7 +120,7 @@ class TestSetUpDirenv:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_direnv(path_binaries=tmp_path, home=tmp_path)
+        set_up_direnv(path_binaries=tmp_path, home=tmp_path, force=True)
         result = run(str(tmp_path / "direnv"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: direnv COMMAND [...ARGS]
@@ -169,7 +169,7 @@ class TestSetUpFzf:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_fzf(path_binaries=tmp_path, home=tmp_path)
+        set_up_fzf(path_binaries=tmp_path, home=tmp_path, force=True)
         result = run(str(tmp_path / "fzf"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: fzf [options]
@@ -314,7 +314,7 @@ class TestSetUpStarship:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_starship(path_binaries=tmp_path, home=tmp_path)
+        set_up_starship(path_binaries=tmp_path, home=tmp_path, force=True)
         result = run(str(tmp_path / "starship"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: starship <COMMAND>
@@ -405,7 +405,7 @@ class TestSetUpZoxide:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_zoxide(force=True, path_binaries=tmp_path, home=tmp_path)
+        set_up_zoxide(path_binaries=tmp_path, home=tmp_path, force=True)
         result = run(str(tmp_path / "zoxide"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage:

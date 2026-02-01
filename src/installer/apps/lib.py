@@ -337,11 +337,10 @@ def set_up_delta(
 ##
 
 
-def setup_direnv(
+def set_up_direnv(
     *,
-    ssh: str | None = None,
-    path_binaries: PathLike = PATH_BINARIES,
     token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms_binary: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
@@ -351,61 +350,57 @@ def setup_direnv(
     home: PathLike | None = None,
     perms_config: PermissionsLike = PERMISSIONS_CONFIG,
     root: PathLike | None = None,
+    ssh: str | None = None,
+    force: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Set up 'direnv'."""
-    match ssh:
-        case None:
-            try:
-                _ = which("direnv")
-                _LOGGER.info("'direnv' is already set up")
-            except WhichError:
-                _LOGGER.info("Setting up 'direnv'...")
-                if ssh is None:
-                    dest = Path(path_binaries, "direnv")
-                    setup_asset(
-                        "direnv",
-                        "direnv",
-                        dest,
-                        token=token,
-                        match_system=True,
-                        match_machine=True,
-                        sudo=sudo,
-                        perms=perms_binary,
-                        owner=owner,
-                        group=group,
-                    )
-                    set_up_shell_config(
-                        'eval "$(direnv hook bash)"',
-                        'eval "$(direnv hook fish)"',
-                        "direnv hook fish | source",
-                        etc="direnv" if etc else None,
-                        shell=SHELL if shell is None else shell,
-                        home=HOME if home is None else home,
-                        perms=perms_config,
-                        owner=owner,
-                        group=group,
-                        root=FILE_SYSTEM_ROOT if root is None else root,
-                    )
-        case str():
-            ssh_uv_install(
-                ssh,
-                "direnv",
-                path_binaries=path_binaries,
-                token=token,
-                sudo=sudo,
-                perms_binary=perms_binary,
-                owner=owner,
-                group=group,
-                etc=etc,
-                shell=shell,
-                home=home,
-                perms_config=perms_config,
-                root=root,
-                retry=retry,
-            )
-        case never:
-            assert_never(never)
+
+    def set_up_local() -> None:
+        dest = Path(path_binaries, "direnv")
+        setup_asset(
+            "direnv",
+            "direnv",
+            dest,
+            token=token,
+            match_system=True,
+            match_machine=True,
+            sudo=sudo,
+            perms=perms_binary,
+            owner=owner,
+            group=group,
+        )
+        set_up_shell_config(
+            'eval "$(direnv hook bash)"',
+            'eval "$(direnv hook fish)"',
+            "direnv hook fish | source",
+            etc="direnv" if etc else None,
+            shell=SHELL if shell is None else shell,
+            home=HOME if home is None else home,
+            perms=perms_config,
+            owner=owner,
+            group=group,
+            root=FILE_SYSTEM_ROOT if root is None else root,
+        )
+
+    set_up_local_or_remote(
+        "direnv",
+        set_up_local,
+        ssh=ssh,
+        force=force,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms_binary=perms_binary,
+        owner=owner,
+        group=group,
+        etc=etc,
+        shell=shell,
+        home=home,
+        perms_config=perms_config,
+        root=root,
+        retry=retry,
+    )
 
 
 ##
@@ -644,9 +639,8 @@ def set_up_fd(
 ##
 
 
-def setup_fzf(
+def set_up_fzf(
     *,
-    ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -658,63 +652,49 @@ def setup_fzf(
     home: PathLike | None = None,
     perms_config: PermissionsLike = PERMISSIONS_CONFIG,
     root: PathLike | None = None,
+    ssh: str | None = None,
+    force: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Set up 'fzf'."""
-    match ssh:
-        case None:
-            try:
-                _ = which("fzf")
-                _LOGGER.info("'fzf' is already set up")
-            except WhichError:
-                _LOGGER.info("Setting up 'fzf'...")
-                with yield_gzip_asset(
-                    "junegunn",
-                    "fzf",
-                    token=token,
-                    match_system=True,
-                    match_machine=True,
-                ) as src:
-                    dest = Path(path_binaries, src.name)
-                    cp(
-                        src,
-                        dest,
-                        sudo=sudo,
-                        perms=perms_binary,
-                        owner=owner,
-                        group=group,
-                    )
-                set_up_shell_config(
-                    'eval "$(fzf --bash)"',
-                    "source <(fzf --zsh)",
-                    "fzf --fish | source",
-                    etc="fzf" if etc else None,
-                    shell=SHELL if shell is None else shell,
-                    home=HOME if home is None else home,
-                    perms=perms_config,
-                    owner=owner,
-                    group=group,
-                    root=FILE_SYSTEM_ROOT if root is None else root,
-                )
-        case str():
-            ssh_uv_install(
-                ssh,
-                "fzf",
-                token=token,
-                path_binaries=path_binaries,
-                sudo=sudo,
-                perms_binary=perms_binary,
-                owner=owner,
-                group=group,
-                etc=etc,
-                shell=shell,
-                home=home,
-                perms_config=perms_config,
-                root=root,
-                retry=retry,
-            )
-        case never:
-            assert_never(never)
+
+    def set_up_local() -> None:
+        with yield_gzip_asset(
+            "junegunn", "fzf", token=token, match_system=True, match_machine=True
+        ) as src:
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms_binary, owner=owner, group=group)
+        set_up_shell_config(
+            'eval "$(fzf --bash)"',
+            "source <(fzf --zsh)",
+            "fzf --fish | source",
+            etc="fzf" if etc else None,
+            shell=SHELL if shell is None else shell,
+            home=HOME if home is None else home,
+            perms=perms_config,
+            owner=owner,
+            group=group,
+            root=FILE_SYSTEM_ROOT if root is None else root,
+        )
+
+    set_up_local_or_remote(
+        "fzf",
+        set_up_local,
+        ssh=ssh,
+        force=force,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms_binary=perms_binary,
+        owner=owner,
+        group=group,
+        etc=etc,
+        shell=shell,
+        home=home,
+        perms_config=perms_config,
+        root=root,
+        retry=retry,
+    )
 
 
 ##
@@ -1103,9 +1083,8 @@ def set_up_sops(
 ##
 
 
-def setup_starship(
+def set_up_starship(
     *,
-    ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -1113,16 +1092,18 @@ def setup_starship(
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
-    home: PathLike | None = None,
     shell: Shell | None = None,
-    starship_toml: PathLike | None = None,
-    perms_config: PermissionsLike = PERMISSIONS_BINARY,
+    home: PathLike | None = None,
+    perms_config: PermissionsLike = PERMISSIONS_CONFIG,
     root: PathLike | None = None,
+    starship_toml: PathLike | None = None,
+    ssh: str | None = None,
+    force: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Set up 'starship'."""
-    _LOGGER.info("Setting up 'starship'...")
-    if ssh is None:
+
+    def set_up_local() -> None:
         with yield_gzip_asset(
             "starship",
             "starship",
@@ -1134,21 +1115,18 @@ def setup_starship(
         ) as src:
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms_binary, owner=owner, group=group)
-        shell_use = SHELL if shell is None else shell
         export = ["export STARSHIP_CONFIG='/etc/starship.toml'"] if etc else []
-        home_use = HOME if home is None else home
-        root_use = FILE_SYSTEM_ROOT if root is None else root
         set_up_shell_config(
             [*export, 'eval "$(starship init bash)"'],
             [*export, 'eval "$(starship init zsh)"'],
             [*export, "starship init fish | source"],
             etc="starship" if etc else None,
-            shell=shell_use,
-            home=home_use,
+            shell=SHELL if shell is None else shell,
+            home=(home_use := HOME if home is None else home),
             perms=perms_config,
             owner=owner,
             group=group,
-            root=root_use,
+            root=(root_use := FILE_SYSTEM_ROOT if root is None else root),
         )
         if starship_toml is not None:
             if etc:
@@ -1163,10 +1141,12 @@ def setup_starship(
                 owner=owner,
                 group=group,
             )
-        return
-    ssh_uv_install(
-        ssh,
-        "starship",
+
+    set_up_local_or_remote(
+        "zoxide",
+        set_up_local,
+        ssh=ssh,
+        force=force,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -1174,11 +1154,11 @@ def setup_starship(
         owner=owner,
         group=group,
         etc=etc,
-        home=home,
         shell=shell,
-        starship_toml=starship_toml,
+        home=home,
         perms_config=perms_config,
         root=root,
+        starship_toml=starship_toml,
         retry=retry,
     )
 
@@ -1330,10 +1310,8 @@ def setup_yq(
 ##
 
 
-def setup_zoxide(
+def set_up_zoxide(
     *,
-    ssh: str | None = None,
-    force: bool = False,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -1345,64 +1323,50 @@ def setup_zoxide(
     home: PathLike | None = None,
     perms_config: PermissionsLike = PERMISSIONS_CONFIG,
     root: PathLike | None = None,
+    ssh: str | None = None,
+    force: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Set up 'zoxide'."""
-    match ssh:
-        case None:
-            if (shutil.which("zoxide") is None) or force:
-                _LOGGER.info("Setting up 'zoxide'...")
-                with yield_gzip_asset(
-                    "ajeetdsouza",
-                    "zoxide",
-                    token=token,
-                    match_system=True,
-                    match_machine=True,
-                ) as temp:
-                    src = temp / "zoxide"
-                    dest = Path(path_binaries, src.name)
-                    cp(
-                        src,
-                        dest,
-                        sudo=sudo,
-                        perms=perms_binary,
-                        owner=owner,
-                        group=group,
-                    )
-                shell_use = SHELL if shell is None else shell
-                set_up_shell_config(
-                    'eval "$(zoxide init --cmd j bash)"',
-                    'eval "$(zoxide init --cmd j zsh)"',
-                    "zoxide init --cmd j fish | source",
-                    etc="zoxide" if etc else None,
-                    shell=shell_use,
-                    home=HOME if home is None else home,
-                    perms=perms_config,
-                    owner=owner,
-                    group=group,
-                    root=FILE_SYSTEM_ROOT if root is None else root,
-                )
-            else:
-                _LOGGER.info("'zoxide' is already set up")
-        case str():
-            ssh_uv_install(
-                ssh,
-                "zoxide",
-                token=token,
-                path_binaries=path_binaries,
-                sudo=sudo,
-                perms_binary=perms_binary,
-                owner=owner,
-                group=group,
-                etc=etc,
-                shell=shell,
-                home=home,
-                perms_config=perms_config,
-                root=root,
-                retry=retry,
-            )
-        case never:
-            assert_never(never)
+
+    def set_up_local() -> None:
+        with yield_gzip_asset(
+            "ajeetdsouza", "zoxide", token=token, match_system=True, match_machine=True
+        ) as temp:
+            src = temp / "zoxide"
+            dest = Path(path_binaries, src.name)
+            cp(src, dest, sudo=sudo, perms=perms_binary, owner=owner, group=group)
+        set_up_shell_config(
+            'eval "$(zoxide init --cmd j bash)"',
+            'eval "$(zoxide init --cmd j zsh)"',
+            "zoxide init --cmd j fish | source",
+            etc="zoxide" if etc else None,
+            shell=SHELL if shell is None else shell,
+            home=HOME if home is None else home,
+            perms=perms_config,
+            owner=owner,
+            group=group,
+            root=FILE_SYSTEM_ROOT if root is None else root,
+        )
+
+    set_up_local_or_remote(
+        "zoxide",
+        set_up_local,
+        ssh=ssh,
+        force=force,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms_binary=perms_binary,
+        owner=owner,
+        group=group,
+        etc=etc,
+        shell=shell,
+        home=home,
+        perms_config=perms_config,
+        root=root,
+        retry=retry,
+    )
 
 
 __all__ = [
@@ -1412,17 +1376,19 @@ __all__ = [
     "set_up_btm",
     "set_up_curl",
     "set_up_delta",
+    "set_up_direnv",
     "set_up_dust",
     "set_up_eza",
     "set_up_fd",
+    "set_up_fzf",
     "set_up_git",
     "set_up_pve_fake_subscription",
     "set_up_rsync",
     "set_up_sops",
+    "set_up_starship",
+    "set_up_zoxide",
     "setup_asset",
-    "setup_direnv",
     "setup_docker",
-    "setup_fzf",
     "setup_jq",
     "setup_just",
     "setup_neovim",
@@ -1432,10 +1398,8 @@ __all__ = [
     "setup_sd",
     "setup_shellcheck",
     "setup_shfmt",
-    "setup_starship",
     "setup_taplo",
     "setup_uv",
     "setup_uv_cmd",
     "setup_yq",
-    "setup_zoxide",
 ]
