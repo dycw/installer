@@ -38,6 +38,7 @@ from installer.apps.lib import (
     set_up_rsync,
     set_up_sops,
     set_up_starship,
+    set_up_uv,
     set_up_zoxide,
     setup_jq,
     setup_ripgrep,
@@ -46,7 +47,6 @@ from installer.apps.lib import (
     setup_shellcheck,
     setup_shfmt,
     setup_taplo,
-    setup_uv,
     setup_watchexec,
     setup_yq,
 )
@@ -621,16 +621,17 @@ def nvim_sub_cmd(
 ##
 
 
-@ssh_option
 @token_option
+@ssh_option
+@force_option
 @retry_option
 def pve_fake_subscription_sub_cmd(
-    *, ssh: str | None, token: SecretLike | None, retry: Retry | None
+    *, token: SecretLike | None, ssh: str | None, force: bool, retry: Retry | None
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    set_up_pve_fake_subscription(ssh=ssh, token=token, retry=retry)
+    set_up_pve_fake_subscription(token=token, ssh=ssh, force=force, retry=retry)
 
 
 ##
@@ -997,7 +998,7 @@ def uv_sub_cmd(
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_uv(
+    set_up_uv(
         ssh=ssh,
         token=token,
         path_binaries=path_binaries,

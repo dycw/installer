@@ -22,6 +22,7 @@ from installer.apps.lib import (
     set_up_restic,
     set_up_sops,
     set_up_starship,
+    set_up_uv,
     set_up_zoxide,
     setup_jq,
     setup_ripgrep,
@@ -30,7 +31,6 @@ from installer.apps.lib import (
     setup_shellcheck,
     setup_shfmt,
     setup_taplo,
-    setup_uv,
     setup_uv_cmd,
     setup_watchexec,
     setup_yq,
@@ -338,7 +338,7 @@ class TestSetUpUv:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_uv(path_binaries=tmp_path)
+        set_up_uv(path_binaries=tmp_path, force=True)
         result = run(str(tmp_path / "uv"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: uv [OPTIONS] <COMMAND>
