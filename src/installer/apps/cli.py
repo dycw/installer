@@ -24,6 +24,7 @@ from installer.apps.lib import (
     set_up_btm,
     set_up_curl,
     set_up_delta,
+    set_up_direnv,
     set_up_dust,
     set_up_eza,
     set_up_fd,
@@ -32,7 +33,6 @@ from installer.apps.lib import (
     set_up_rsync,
     set_up_sops,
     set_up_zoxide,
-    setup_direnv,
     setup_docker,
     setup_fzf,
     setup_jq,
@@ -247,51 +247,54 @@ def delta_sub_cmd(
 ##
 
 
-@ssh_option
-@path_binaries_option
 @token_option
+@path_binaries_option
 @sudo_option
 @perms_binary_option
 @owner_option
 @group_option
 @etc_option
-@home_option
 @shell_option
+@home_option
 @perms_config_option
 @root_option
+@ssh_option
+@force_option
 @retry_option
 def direnv_sub_cmd(
     *,
-    ssh: str | None,
-    path_binaries: PathLike,
     token: SecretLike | None,
+    path_binaries: PathLike,
     sudo: bool,
     perms_binary: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
+    shell: Shell | None,
     etc: bool,
     home: PathLike,
-    shell: Shell | None,
     perms_config: PermissionsLike,
     root: PathLike | None,
+    ssh: str | None,
+    force: bool,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_direnv(
-        ssh=ssh,
-        path_binaries=path_binaries,
+    set_up_direnv(
         token=token,
+        path_binaries=path_binaries,
         sudo=sudo,
         perms_binary=perms_binary,
         owner=owner,
         group=group,
         etc=etc,
-        home=home,
         shell=shell,
+        home=home,
         perms_config=perms_config,
         root=root,
+        ssh=ssh,
+        force=force,
         retry=retry,
     )
 
@@ -1059,8 +1062,8 @@ def yq_sub_cmd(
 @perms_binary_option
 @owner_option
 @group_option
-@shell_option
 @etc_option
+@shell_option
 @home_option
 @perms_config_option
 @root_option
@@ -1075,8 +1078,8 @@ def zoxide_sub_cmd(
     perms_binary: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
-    shell: Shell | None,
     etc: bool,
+    shell: Shell | None,
     home: PathLike,
     perms_config: PermissionsLike,
     root: PathLike | None,
@@ -1094,8 +1097,8 @@ def zoxide_sub_cmd(
         perms_binary=perms_binary,
         owner=owner,
         group=group,
-        shell=shell,
         etc=etc,
+        shell=shell,
         home=home,
         perms_config=perms_config,
         root=root,

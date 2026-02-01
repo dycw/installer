@@ -12,12 +12,12 @@ from installer.apps.lib import (
     set_up_bat,
     set_up_btm,
     set_up_delta,
+    set_up_direnv,
     set_up_dust,
     set_up_eza,
     set_up_fd,
     set_up_sops,
     set_up_zoxide,
-    setup_direnv,
     setup_fzf,
     setup_jq,
     setup_just,
@@ -120,7 +120,7 @@ class TestSetUpDirenv:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_direnv(path_binaries=tmp_path, home=tmp_path)
+        set_up_direnv(path_binaries=tmp_path, home=tmp_path)
         result = run(str(tmp_path / "direnv"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: direnv COMMAND [...ARGS]

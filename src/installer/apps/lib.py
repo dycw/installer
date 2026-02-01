@@ -337,11 +337,10 @@ def set_up_delta(
 ##
 
 
-def setup_direnv(
+def set_up_direnv(
     *,
-    ssh: str | None = None,
-    path_binaries: PathLike = PATH_BINARIES,
     token: SecretLike | None = GITHUB_TOKEN,
+    path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
     perms_binary: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
@@ -351,61 +350,57 @@ def setup_direnv(
     home: PathLike | None = None,
     perms_config: PermissionsLike = PERMISSIONS_CONFIG,
     root: PathLike | None = None,
+    ssh: str | None = None,
+    force: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Set up 'direnv'."""
-    match ssh:
-        case None:
-            try:
-                _ = which("direnv")
-                _LOGGER.info("'direnv' is already set up")
-            except WhichError:
-                _LOGGER.info("Setting up 'direnv'...")
-                if ssh is None:
-                    dest = Path(path_binaries, "direnv")
-                    setup_asset(
-                        "direnv",
-                        "direnv",
-                        dest,
-                        token=token,
-                        match_system=True,
-                        match_machine=True,
-                        sudo=sudo,
-                        perms=perms_binary,
-                        owner=owner,
-                        group=group,
-                    )
-                    set_up_shell_config(
-                        'eval "$(direnv hook bash)"',
-                        'eval "$(direnv hook fish)"',
-                        "direnv hook fish | source",
-                        etc="direnv" if etc else None,
-                        shell=SHELL if shell is None else shell,
-                        home=HOME if home is None else home,
-                        perms=perms_config,
-                        owner=owner,
-                        group=group,
-                        root=FILE_SYSTEM_ROOT if root is None else root,
-                    )
-        case str():
-            ssh_uv_install(
-                ssh,
-                "direnv",
-                path_binaries=path_binaries,
-                token=token,
-                sudo=sudo,
-                perms_binary=perms_binary,
-                owner=owner,
-                group=group,
-                etc=etc,
-                shell=shell,
-                home=home,
-                perms_config=perms_config,
-                root=root,
-                retry=retry,
-            )
-        case never:
-            assert_never(never)
+
+    def set_up_local() -> None:
+        dest = Path(path_binaries, "direnv")
+        setup_asset(
+            "direnv",
+            "direnv",
+            dest,
+            token=token,
+            match_system=True,
+            match_machine=True,
+            sudo=sudo,
+            perms=perms_binary,
+            owner=owner,
+            group=group,
+        )
+        set_up_shell_config(
+            'eval "$(direnv hook bash)"',
+            'eval "$(direnv hook fish)"',
+            "direnv hook fish | source",
+            etc="direnv" if etc else None,
+            shell=SHELL if shell is None else shell,
+            home=HOME if home is None else home,
+            perms=perms_config,
+            owner=owner,
+            group=group,
+            root=FILE_SYSTEM_ROOT if root is None else root,
+        )
+
+    set_up_local_or_remote(
+        "direnv",
+        set_up_local,
+        ssh=ssh,
+        force=force,
+        token=token,
+        path_binaries=path_binaries,
+        sudo=sudo,
+        perms_binary=perms_binary,
+        owner=owner,
+        group=group,
+        etc=etc,
+        shell=shell,
+        home=home,
+        perms_config=perms_config,
+        root=root,
+        retry=retry,
+    )
 
 
 ##
@@ -1338,8 +1333,8 @@ def set_up_zoxide(
     perms_binary: PermissionsLike = PERMISSIONS_BINARY,
     owner: str | int | None = None,
     group: str | int | None = None,
-    shell: Shell | None = None,
     etc: bool = False,
+    shell: Shell | None = None,
     home: PathLike | None = None,
     perms_config: PermissionsLike = PERMISSIONS_CONFIG,
     root: PathLike | None = None,
@@ -1356,13 +1351,12 @@ def set_up_zoxide(
             src = temp / "zoxide"
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms_binary, owner=owner, group=group)
-        shell_use = SHELL if shell is None else shell
         set_up_shell_config(
             'eval "$(zoxide init --cmd j bash)"',
             'eval "$(zoxide init --cmd j zsh)"',
             "zoxide init --cmd j fish | source",
             etc="zoxide" if etc else None,
-            shell=shell_use,
+            shell=SHELL if shell is None else shell,
             home=HOME if home is None else home,
             perms=perms_config,
             owner=owner,
@@ -1381,8 +1375,8 @@ def set_up_zoxide(
         perms_binary=perms_binary,
         owner=owner,
         group=group,
-        shell=shell,
         etc=etc,
+        shell=shell,
         home=home,
         perms_config=perms_config,
         root=root,
@@ -1397,6 +1391,7 @@ __all__ = [
     "set_up_btm",
     "set_up_curl",
     "set_up_delta",
+    "set_up_direnv",
     "set_up_dust",
     "set_up_eza",
     "set_up_fd",
@@ -1406,7 +1401,6 @@ __all__ = [
     "set_up_sops",
     "set_up_zoxide",
     "setup_asset",
-    "setup_direnv",
     "setup_docker",
     "setup_fzf",
     "setup_jq",
