@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
+from shlex import join
 from typing import TYPE_CHECKING, assert_never
 
 import utilities.subprocess
@@ -17,13 +18,19 @@ from utilities.core import (
     write_text,
 )
 from utilities.pydantic import extract_secret
-from utilities.subprocess import uv_tool_run_cmd
+from utilities.subprocess import BASH_LS, uv_tool_run_cmd
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
     from utilities.shellingham import Shell
-    from utilities.types import MaybeSequenceStr, PathLike, Retry, SecretLike
+    from utilities.types import (
+        MaybeSequenceStr,
+        PathLike,
+        Retry,
+        SecretLike,
+        SequenceStr,
+    )
 
 
 _LOGGER = to_logger(__name__)
@@ -55,9 +62,43 @@ def ensure_line_or_lines(
 ##
 
 
-def set_up_local_or_remote(
+def set_up_local_or_ssh(
     cmd: str,
-    setup_local: Callable[[], None],
+    set_up_local: Callable[[], None],
+    /,
+    *cmds: SequenceStr,
+    ssh: str | None = None,
+    force: bool = False,
+    retry: Retry | None = None,
+) -> None:
+    match ssh:
+        case None:
+            if (shutil.which(cmd) is None) or force:
+                _LOGGER.info("Setting up %r...", cmd)
+                set_up_local()
+            else:
+                _LOGGER.info("%r is already set up", cmd)
+        case str():
+            ssh_user, ssh_hostname = split_ssh(ssh)
+            _LOGGER.info("Setting up %r on %r...", cmd, ssh_hostname)
+            utilities.subprocess.ssh(
+                ssh_user,
+                ssh_hostname,
+                *BASH_LS,
+                input=normalize_str("\n".join(map(join, cmds))),
+                retry=retry,
+                logger=_LOGGER,
+            )
+        case never:
+            assert_never(never)
+
+
+##
+
+
+def set_up_local_or_ssh_installer_cli(
+    cmd: str,
+    set_up_local: Callable[[], None],
     /,
     *,
     ssh: str | None = None,
@@ -82,7 +123,7 @@ def set_up_local_or_remote(
         case None:
             if (shutil.which(cmd) is None) or force:
                 _LOGGER.info("Setting up %r...", cmd)
-                setup_local()
+                set_up_local()
             else:
                 _LOGGER.info("%r is already set up", cmd)
         case str():

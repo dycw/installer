@@ -9,13 +9,11 @@ from typing import TYPE_CHECKING, assert_never
 import utilities.subprocess
 from utilities.constants import HOME
 from utilities.core import (
-    WhichError,
     extract_group,
     normalize_multi_line_str,
     normalize_str,
     one,
     to_logger,
-    which,
 )
 from utilities.subprocess import (
     APT_UPDATE,
@@ -52,7 +50,12 @@ from installer.apps.download import (
 )
 from installer.configs.constants import FILE_SYSTEM_ROOT
 from installer.configs.lib import set_up_shell_config
-from installer.utilities import set_up_local_or_remote, split_ssh, ssh_uv_install
+from installer.utilities import (
+    set_up_local_or_ssh,
+    set_up_local_or_ssh_installer_cli,
+    split_ssh,
+    ssh_uv_install,
+)
 
 if TYPE_CHECKING:
     from utilities.core import PermissionsLike
@@ -67,40 +70,29 @@ def set_up_apt_package(
     package: str,
     /,
     *,
-    ssh: str | None = None,
     sudo: bool = False,
+    ssh: str | None = None,
+    force: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Setup an 'apt' package."""
-    match ssh, SYSTEM_NAME:
-        case None, "Darwin":
-            msg = f"Unsupported system: {SYSTEM_NAME!r}"
-            raise ValueError(msg)
-        case None, "Linux":
-            try:
-                _ = which(package)
-                _LOGGER.info("'apt' package %r is already set up", package)
-            except WhichError:
-                _LOGGER.info("Setting up 'apt' package %r...", package)
-                run(*maybe_sudo_cmd(*APT_UPDATE, sudo=sudo))
-                run(*maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo))
-        case str(), _:
-            user, hostname = split_ssh(ssh)
-            _LOGGER.info("Setting up 'apt' package %r on %r...", package, hostname)
-            cmds: list[list[str]] = [
-                maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
-                maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo),
-            ]
-            utilities.subprocess.ssh(
-                user,
-                hostname,
-                *BASH_LS,
-                input=normalize_str("\n".join(map(join, cmds))),
-                retry=retry,
-                logger=_LOGGER,
-            )
-        case never:
-            assert_never(never)
+    cmds: list[list[str]] = [
+        maybe_sudo_cmd(*APT_UPDATE, sudo=sudo),
+        maybe_sudo_cmd(*apt_install_cmd(package), sudo=sudo),
+    ]
+
+    def set_up_local() -> None:
+        match SYSTEM_NAME:
+            case "Darwin":
+                msg = f"Unsupported system: {SYSTEM_NAME!r}"
+                raise ValueError(msg)
+            case "Linux":
+                for cmds_i in cmds:
+                    run(*cmds_i)
+            case never:
+                assert_never(never)
+
+    set_up_local_or_ssh(package, set_up_local, *cmds, ssh=ssh, force=force, retry=retry)
 
 
 ##
@@ -173,7 +165,7 @@ def set_up_age(
                 dest = Path(path_binaries, src.name)
                 cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
-    set_up_local_or_remote(
+    set_up_local_or_ssh_installer_cli(
         "age",
         set_up_local,
         ssh=ssh,
@@ -218,7 +210,7 @@ def set_up_bat(
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
-    set_up_local_or_remote(
+    set_up_local_or_ssh_installer_cli(
         "bat",
         set_up_local,
         ssh=ssh,
@@ -264,7 +256,7 @@ def set_up_btm(
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
-    set_up_local_or_remote(
+    set_up_local_or_ssh_installer_cli(
         "btm",
         set_up_local,
         ssh=ssh,
@@ -319,7 +311,7 @@ def set_up_delta(
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
-    set_up_local_or_remote(
+    set_up_local_or_ssh_installer_cli(
         "delta",
         set_up_local,
         ssh=ssh,
@@ -383,7 +375,7 @@ def set_up_direnv(
             root=FILE_SYSTEM_ROOT if root is None else root,
         )
 
-    set_up_local_or_remote(
+    set_up_local_or_ssh_installer_cli(
         "direnv",
         set_up_local,
         ssh=ssh,
@@ -470,7 +462,7 @@ def set_up_docker(
                 if user is not None:
                     run(*maybe_sudo_cmd("usermod", "-aG", "docker", user, sudo=sudo))
 
-    set_up_local_or_remote(
+    set_up_local_or_ssh_installer_cli(
         "docker", set_up_local, ssh=ssh, force=force, sudo=sudo, user=user, retry=retry
     )
 
@@ -512,7 +504,7 @@ def set_up_dust(
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
-    set_up_local_or_remote(
+    set_up_local_or_ssh_installer_cli(
         "dust",
         set_up_local,
         ssh=ssh,
@@ -573,7 +565,7 @@ def set_up_eza(
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
-    set_up_local_or_remote(
+    set_up_local_or_ssh_installer_cli(
         "eza",
         set_up_local,
         ssh=ssh,
@@ -618,7 +610,7 @@ def set_up_fd(
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
-    set_up_local_or_remote(
+    set_up_local_or_ssh_installer_cli(
         "fd",
         set_up_local,
         ssh=ssh,
@@ -674,7 +666,7 @@ def set_up_fzf(
             root=FILE_SYSTEM_ROOT if root is None else root,
         )
 
-    set_up_local_or_remote(
+    set_up_local_or_ssh_installer_cli(
         "fzf",
         set_up_local,
         ssh=ssh,
@@ -763,7 +755,7 @@ def set_up_just(
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
-    set_up_local_or_remote(
+    set_up_local_or_ssh_installer_cli(
         "just",
         set_up_local,
         ssh=ssh,
@@ -809,7 +801,7 @@ def set_up_nvim(
             dest_bin = Path(path_binaries, "nvim")
             symlink(dest_dir / "bin/nvim", dest_bin, sudo=sudo)
 
-    set_up_local_or_remote(
+    set_up_local_or_ssh_installer_cli(
         "nvim",
         set_up_local,
         ssh=ssh,
@@ -874,7 +866,7 @@ def set_up_restic(
             dest = Path(path_binaries, "restic")
             cp(src, dest, sudo=sudo, perms=perms, owner=owner, group=group)
 
-    set_up_local_or_remote(
+    set_up_local_or_ssh_installer_cli(
         "age",
         set_up_local,
         ssh=ssh,
@@ -1070,7 +1062,7 @@ def set_up_sops(
             group=group,
         )
 
-    set_up_local_or_remote(
+    set_up_local_or_ssh_installer_cli(
         "sops",
         set_up_local,
         ssh=ssh,
@@ -1147,7 +1139,7 @@ def set_up_starship(
                 group=group,
             )
 
-    set_up_local_or_remote(
+    set_up_local_or_ssh_installer_cli(
         "zoxide",
         set_up_local,
         ssh=ssh,
@@ -1354,7 +1346,7 @@ def set_up_zoxide(
             root=FILE_SYSTEM_ROOT if root is None else root,
         )
 
-    set_up_local_or_remote(
+    set_up_local_or_ssh_installer_cli(
         "zoxide",
         set_up_local,
         ssh=ssh,
