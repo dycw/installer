@@ -23,6 +23,7 @@ from installer.apps.lib import (
     set_up_sops,
     set_up_starship,
     set_up_uv,
+    set_up_uv_cmd,
     set_up_zoxide,
     setup_jq,
     setup_ripgrep,
@@ -31,7 +32,6 @@ from installer.apps.lib import (
     setup_shellcheck,
     setup_shfmt,
     setup_taplo,
-    setup_uv_cmd,
     setup_watchexec,
     setup_yq,
 )
@@ -348,7 +348,7 @@ class TestSetUpUv:
 
 class TestSetUpUvCmd:
     def test_main(self, *, tmp_path: Path) -> None:
-        result = setup_uv_cmd(tmp_path)
+        result = set_up_uv_cmd(tmp_path)
         path = tmp_path / "install.sh"
         expected = normalize_multi_line_str(f"""
             curl --fail --location --create-dirs --output {path} --show-error --silent https://astral.sh/uv/install.sh
@@ -357,7 +357,7 @@ class TestSetUpUvCmd:
         assert result == expected
 
     def test_path_binaries(self, *, tmp_path: Path) -> None:
-        result = setup_uv_cmd(tmp_path, path_binaries=tmp_path / "bin")
+        result = set_up_uv_cmd(tmp_path, path_binaries=tmp_path / "bin")
         path = tmp_path / "install.sh"
         expected = normalize_multi_line_str(f"""
             curl --fail --location --create-dirs --output {path} --show-error --silent https://astral.sh/uv/install.sh
@@ -366,7 +366,7 @@ class TestSetUpUvCmd:
         assert result == expected
 
     def test_sudo(self, *, tmp_path: Path) -> None:
-        result = setup_uv_cmd(tmp_path, sudo=True)
+        result = set_up_uv_cmd(tmp_path, sudo=True)
         path = tmp_path / "install.sh"
         expected = normalize_multi_line_str(f"""
             curl --fail --location --create-dirs --output {path} --show-error --silent https://astral.sh/uv/install.sh

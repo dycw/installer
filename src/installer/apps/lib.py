@@ -1233,7 +1233,7 @@ def set_up_uv(
                     ssh_user,
                     ssh_hostname,
                     *BASH_LS,
-                    input=setup_uv_cmd(temp, path_binaries=path_binaries, sudo=sudo),
+                    input=set_up_uv_cmd(temp, path_binaries=path_binaries, sudo=sudo),
                     retry=retry,
                     logger=_LOGGER,
                 )
@@ -1241,7 +1241,7 @@ def set_up_uv(
             assert_never(never)
 
 
-def setup_uv_cmd(
+def set_up_uv_cmd(
     temp_dir: PathLike,
     /,
     *,
@@ -1406,6 +1406,7 @@ __all__ = [
     "set_up_sops",
     "set_up_starship",
     "set_up_uv",
+    "set_up_uv_cmd",
     "set_up_zoxide",
     "setup_asset",
     "setup_jq",
@@ -1415,6 +1416,5 @@ __all__ = [
     "setup_shellcheck",
     "setup_shfmt",
     "setup_taplo",
-    "setup_uv_cmd",
     "setup_yq",
 ]
