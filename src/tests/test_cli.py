@@ -39,10 +39,6 @@ class TestCLI:
             param(["jq", "--perms", "perms"]),
             param(["jq", "--owner", "owner"]),
             param(["jq", "--group", "group"]),
-            param(["pve-fake-subscription"], id="pve-fake-subscription"),
-            param(["pve-fake-subscription", "--ssh", "user@hostname"]),
-            param(["pve-fake-subscription", "--token", "token"]),
-            param(["pve-fake-subscription", "--retry", "1", "1"]),
             param(["ripgrep"], id="ripgrep"),
             param(["rsync"], id="rsync"),
             param(["rsync", "--ssh", "user@hostname"]),
@@ -181,7 +177,7 @@ class TestCLI:
             param(["--retry", "1", "1"]),
         ],
     )
-    @throttle_test(duration=MINUTE)
+    # @throttle_test(duration=MINUTE)
     def test_commands_pve_fake_subscription(self, *, args: list[str]) -> None:
         runner = CliRunner()
         result = runner.invoke(cli, ["pve-fake-subscription", *args])
