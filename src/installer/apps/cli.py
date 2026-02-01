@@ -590,7 +590,7 @@ def just_sub_cmd(
 @ssh_option
 @force_option
 @retry_option
-def neovim_sub_cmd(
+def nvim_sub_cmd(
     *,
     token: SecretLike | None,
     path_binaries: PathLike,
@@ -1141,7 +1141,7 @@ __all__ = [
     "git_sub_cmd",
     "jq_sub_cmd",
     "just_sub_cmd",
-    "neovim_sub_cmd",
+    "nvim_sub_cmd",
     "pve_fake_subscription_sub_cmd",
     "restic_sub_cmd",
     "ripgrep_sub_cmd",
