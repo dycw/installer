@@ -17,13 +17,13 @@ from installer.apps.lib import (
     set_up_eza,
     set_up_fd,
     set_up_fzf,
+    set_up_just,
+    set_up_nvim,
+    set_up_restic,
     set_up_sops,
     set_up_starship,
     set_up_zoxide,
     setup_jq,
-    setup_just,
-    setup_neovim,
-    setup_restic,
     setup_ripgrep,
     setup_ruff,
     setup_sd,
@@ -181,7 +181,7 @@ class TestSetUpJq:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_jq(force=True, path_binaries=tmp_path)
+        setup_jq(path_binaries=tmp_path, force=True)
         result = run(str(tmp_path / "jq"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage:\tjq [options] <jq filter> [file...]
@@ -195,7 +195,7 @@ class TestSetUpJust:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_just(path_binaries=tmp_path)
+        set_up_just(path_binaries=tmp_path, force=True)
         result = run(str(tmp_path / "just"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: just [OPTIONS] [ARGUMENTS]...
@@ -203,11 +203,11 @@ class TestSetUpJust:
         assert search(escape(pattern), result) is not None, result
 
 
-class TestSetUpNeovim:
+class TestSetUpNvim:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_neovim(path_binaries=tmp_path)
+        set_up_nvim(path_binaries=tmp_path, force=True)
         result = run(str(tmp_path / "nvim"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage:
@@ -220,7 +220,7 @@ class TestSetUpRestic:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_restic(path_binaries=tmp_path)
+        set_up_restic(path_binaries=tmp_path, force=True)
         result = run(str(tmp_path / "restic"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage:

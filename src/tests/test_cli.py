@@ -27,11 +27,6 @@ class TestCLI:
             param(["curl", "--ssh", "user@hostname"]),
             param(["curl", "--sudo"]),
             param(["curl", "--retry", "1", "1"]),
-            param(["docker"], id="docker"),
-            param(["docker", "--ssh", "user@hostname"]),
-            param(["docker", "--sudo"]),
-            param(["docker", "--user", "user"]),
-            param(["docker", "--retry", "1", "1"]),
             param(["git"], id="git"),
             param(["git", "--ssh", "user@hostname"]),
             param(["git", "--sudo"]),
@@ -44,29 +39,10 @@ class TestCLI:
             param(["jq", "--perms", "perms"]),
             param(["jq", "--owner", "owner"]),
             param(["jq", "--group", "group"]),
-            param(["just"], id="just"),
-            param(["just", "--ssh", "user@hostname"]),
-            param(["just", "--token", "token"]),
-            param(["just", "--path-binaries", "path"]),
-            param(["just", "--sudo"]),
-            param(["just", "--perms", "perms"]),
-            param(["just", "--owner", "owner"]),
-            param(["just", "--group", "group"]),
-            param(["just", "--retry", "1", "1"]),
-            param(["neovim"], id="neovim"),
             param(["pve-fake-subscription"], id="pve-fake-subscription"),
             param(["pve-fake-subscription", "--ssh", "user@hostname"]),
             param(["pve-fake-subscription", "--token", "token"]),
             param(["pve-fake-subscription", "--retry", "1", "1"]),
-            param(["restic"], id="restic"),
-            param(["restic", "--ssh", "user@hostname"]),
-            param(["restic", "--token", "token"]),
-            param(["restic", "--path-binaries", "path"]),
-            param(["restic", "--sudo"]),
-            param(["restic", "--perms", "perms"]),
-            param(["restic", "--owner", "owner"]),
-            param(["restic", "--group", "group"]),
-            param(["restic", "--retry", "1", "1"]),
             param(["ripgrep"], id="ripgrep"),
             param(["rsync"], id="rsync"),
             param(["rsync", "--ssh", "user@hostname"]),
@@ -106,6 +82,23 @@ class TestCLI:
         assert result.exit_code == 0, result.stderr
 
     @mark.parametrize(
+        "args",
+        [
+            param([]),
+            param(["--sudo"]),
+            param(["--user", "user"]),
+            param(["--ssh", "user@hostname"]),
+            param(["--force"]),
+            param(["--retry", "1", "1"]),
+        ],
+    )
+    @throttle_test(duration=MINUTE)
+    def test_commands_docker(self, *, args: list[str]) -> None:
+        runner = CliRunner()
+        result = runner.invoke(cli, ["docker", *args])
+        assert result.exit_code == 0, result.stderr
+
+    @mark.parametrize(
         "cmd",
         [
             param("age"),
@@ -115,6 +108,9 @@ class TestCLI:
             param("dust"),
             param("eza"),
             param("fd"),
+            param("just"),
+            param("nvim"),
+            param("restic"),
             param("sops"),
         ],
     )

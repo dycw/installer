@@ -25,21 +25,21 @@ from installer.apps.lib import (
     set_up_curl,
     set_up_delta,
     set_up_direnv,
+    set_up_docker,
     set_up_dust,
     set_up_eza,
     set_up_fd,
     set_up_fzf,
     set_up_git,
+    set_up_just,
+    set_up_nvim,
     set_up_pve_fake_subscription,
+    set_up_restic,
     set_up_rsync,
     set_up_sops,
     set_up_starship,
     set_up_zoxide,
-    setup_docker,
     setup_jq,
-    setup_just,
-    setup_neovim,
-    setup_restic,
     setup_ripgrep,
     setup_ruff,
     setup_sd,
@@ -302,21 +302,18 @@ def direnv_sub_cmd(
 ##
 
 
-@ssh_option
 @sudo_option
+@ssh_option
 @option("--user", type=Str(), default=None, help="User to add to the 'docker' group")
+@force_option
 @retry_option
 def docker_sub_cmd(
-    *,
-    ssh: str | None = None,
-    sudo: bool = False,
-    user: str | None = None,
-    retry: Retry | None = None,
+    *, sudo: bool, ssh: str | None, user: str | None, force: bool, retry: Retry | None
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_docker(ssh=ssh, sudo=sudo, user=user, retry=retry)
+    set_up_docker(sudo=sudo, ssh=ssh, user=user, force=force, retry=retry)
 
 
 ##
@@ -544,36 +541,39 @@ def jq_sub_cmd(
 ##
 
 
-@ssh_option
 @token_option
 @path_binaries_option
 @sudo_option
 @perms_option
 @owner_option
 @group_option
+@ssh_option
+@force_option
 @retry_option
 def just_sub_cmd(
     *,
-    ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
     perms: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
+    ssh: str | None,
+    force: bool,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_just(
-        ssh=ssh,
+    set_up_just(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
         perms=perms,
         owner=owner,
         group=group,
+        ssh=ssh,
+        force=force,
         retry=retry,
     )
 
@@ -587,7 +587,10 @@ def just_sub_cmd(
 @perms_option
 @owner_option
 @group_option
-def neovim_sub_cmd(
+@ssh_option
+@force_option
+@retry_option
+def nvim_sub_cmd(
     *,
     token: SecretLike | None,
     path_binaries: PathLike,
@@ -595,17 +598,23 @@ def neovim_sub_cmd(
     perms: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
+    ssh: str | None,
+    force: bool,
+    retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_neovim(
+    set_up_nvim(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
         perms=perms,
         owner=owner,
         group=group,
+        ssh=ssh,
+        force=force,
+        retry=retry,
     )
 
 
@@ -627,36 +636,39 @@ def pve_fake_subscription_sub_cmd(
 ##
 
 
-@ssh_option
 @token_option
 @path_binaries_option
 @sudo_option
 @perms_option
 @owner_option
 @group_option
+@ssh_option
+@force_option
 @retry_option
 def restic_sub_cmd(
     *,
-    ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
     perms: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
+    ssh: str | None,
+    force: bool,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_restic(
-        ssh=ssh,
+    set_up_restic(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
         perms=perms,
         owner=owner,
         group=group,
+        ssh=ssh,
+        force=force,
         retry=retry,
     )
 
@@ -1129,7 +1141,7 @@ __all__ = [
     "git_sub_cmd",
     "jq_sub_cmd",
     "just_sub_cmd",
-    "neovim_sub_cmd",
+    "nvim_sub_cmd",
     "pve_fake_subscription_sub_cmd",
     "restic_sub_cmd",
     "ripgrep_sub_cmd",
