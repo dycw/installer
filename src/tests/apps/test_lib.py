@@ -16,10 +16,10 @@ from installer.apps.lib import (
     set_up_dust,
     set_up_eza,
     set_up_fd,
+    set_up_fzf,
     set_up_sops,
     set_up_starship,
     set_up_zoxide,
-    setup_fzf,
     setup_jq,
     setup_just,
     setup_neovim,
@@ -169,7 +169,7 @@ class TestSetUpFzf:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_fzf(path_binaries=tmp_path, home=tmp_path, force=True)
+        set_up_fzf(path_binaries=tmp_path, home=tmp_path, force=True)
         result = run(str(tmp_path / "fzf"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             Usage: fzf [options]

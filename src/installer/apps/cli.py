@@ -28,6 +28,7 @@ from installer.apps.lib import (
     set_up_dust,
     set_up_eza,
     set_up_fd,
+    set_up_fzf,
     set_up_git,
     set_up_pve_fake_subscription,
     set_up_rsync,
@@ -35,7 +36,6 @@ from installer.apps.lib import (
     set_up_starship,
     set_up_zoxide,
     setup_docker,
-    setup_fzf,
     setup_jq,
     setup_just,
     setup_neovim,
@@ -442,7 +442,6 @@ def fd_sub_cmd(
 ##
 
 
-@ssh_option
 @token_option
 @path_binaries_option
 @sudo_option
@@ -454,10 +453,11 @@ def fd_sub_cmd(
 @home_option
 @perms_config_option
 @root_option
+@ssh_option
+@force_option
 @retry_option
 def fzf_sub_cmd(
     *,
-    ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
@@ -469,13 +469,14 @@ def fzf_sub_cmd(
     home: PathLike,
     perms_config: PermissionsLike,
     root: PathLike | None,
+    ssh: str | None,
+    force: bool,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_fzf(
-        ssh=ssh,
+    set_up_fzf(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -487,6 +488,8 @@ def fzf_sub_cmd(
         home=home,
         perms_config=perms_config,
         root=root,
+        ssh=ssh,
+        force=force,
         retry=retry,
     )
 
