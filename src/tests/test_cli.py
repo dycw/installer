@@ -170,7 +170,7 @@ class TestCLI:
         "args",
         [
             param([]),
-            param(["--user", "user"]),
+            param(["--token", "token"]),
             param(["--ssh", "user@hostname"]),
             param(["--force"]),
             param(["--retry", "1", "1"]),
