@@ -28,21 +28,21 @@ from installer.apps.lib import (
     set_up_eza,
     set_up_fd,
     set_up_git,
+    set_up_pve_fake_subscription,
     set_up_rsync,
+    set_up_sops,
     setup_direnv,
     setup_docker,
     setup_fzf,
     setup_jq,
     setup_just,
     setup_neovim,
-    setup_pve_fake_subscription,
     setup_restic,
     setup_ripgrep,
     setup_ruff,
     setup_sd,
     setup_shellcheck,
     setup_shfmt,
-    setup_sops,
     setup_starship,
     setup_taplo,
     setup_uv,
@@ -615,7 +615,7 @@ def pve_fake_subscription_sub_cmd(
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_pve_fake_subscription(ssh=ssh, token=token, retry=retry)
+    set_up_pve_fake_subscription(ssh=ssh, token=token, retry=retry)
 
 
 ##
@@ -826,36 +826,39 @@ def shfmt_sub_cmd(
 ##
 
 
-@ssh_option
 @token_option
 @path_binaries_option
 @sudo_option
 @perms_option
 @owner_option
 @group_option
+@ssh_option
+@force_option
 @retry_option
 def sops_sub_cmd(
     *,
-    ssh: str | None,
     token: SecretLike | None,
     path_binaries: PathLike,
     sudo: bool,
     perms: PermissionsLike,
     owner: str | int | None,
     group: str | int | None,
+    ssh: str | None,
+    force: bool,
     retry: Retry | None,
 ) -> None:
     if is_pytest():
         return
     set_up_logging(__name__, root=True)
-    setup_sops(
-        ssh=ssh,
+    set_up_sops(
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
         perms=perms,
         owner=owner,
         group=group,
+        ssh=ssh,
+        force=force,
         retry=retry,
     )
 

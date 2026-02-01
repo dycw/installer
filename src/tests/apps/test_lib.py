@@ -15,6 +15,7 @@ from installer.apps.lib import (
     set_up_dust,
     set_up_eza,
     set_up_fd,
+    set_up_sops,
     setup_direnv,
     setup_fzf,
     setup_jq,
@@ -26,7 +27,6 @@ from installer.apps.lib import (
     setup_sd,
     setup_shellcheck,
     setup_shfmt,
-    setup_sops,
     setup_starship,
     setup_taplo,
     setup_uv,
@@ -301,7 +301,7 @@ class TestSetUpSops:
     @run_test_frac(frac=RUN_TEST_FRAC)
     @throttle_test(duration=THROTTLE_DURATION)
     def test_main(self, *, tmp_path: Path) -> None:
-        setup_sops(path_binaries=tmp_path)
+        set_up_sops(path_binaries=tmp_path, force=True)
         result = run(str(tmp_path / "sops"), "--help", return_=True)
         pattern = normalize_multi_line_str("""
             NAME:
