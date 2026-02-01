@@ -1100,7 +1100,6 @@ def set_up_sops(
 
 def setup_starship(
     *,
-    ssh: str | None = None,
     token: SecretLike | None = GITHUB_TOKEN,
     path_binaries: PathLike = PATH_BINARIES,
     sudo: bool = False,
@@ -1108,16 +1107,18 @@ def setup_starship(
     owner: str | int | None = None,
     group: str | int | None = None,
     etc: bool = False,
-    home: PathLike | None = None,
     shell: Shell | None = None,
-    starship_toml: PathLike | None = None,
-    perms_config: PermissionsLike = PERMISSIONS_BINARY,
+    home: PathLike | None = None,
+    perms_config: PermissionsLike = PERMISSIONS_CONFIG,
     root: PathLike | None = None,
+    starship_toml: PathLike | None = None,
+    ssh: str | None = None,
+    force: bool = False,
     retry: Retry | None = None,
 ) -> None:
     """Set up 'starship'."""
-    _LOGGER.info("Setting up 'starship'...")
-    if ssh is None:
+
+    def set_up_local() -> None:
         with yield_gzip_asset(
             "starship",
             "starship",
@@ -1129,21 +1130,18 @@ def setup_starship(
         ) as src:
             dest = Path(path_binaries, src.name)
             cp(src, dest, sudo=sudo, perms=perms_binary, owner=owner, group=group)
-        shell_use = SHELL if shell is None else shell
         export = ["export STARSHIP_CONFIG='/etc/starship.toml'"] if etc else []
-        home_use = HOME if home is None else home
-        root_use = FILE_SYSTEM_ROOT if root is None else root
         set_up_shell_config(
             [*export, 'eval "$(starship init bash)"'],
             [*export, 'eval "$(starship init zsh)"'],
             [*export, "starship init fish | source"],
             etc="starship" if etc else None,
-            shell=shell_use,
-            home=home_use,
+            shell=SHELL if shell is None else shell,
+            home=(home_use := HOME if home is None else home),
             perms=perms_config,
             owner=owner,
             group=group,
-            root=root_use,
+            root=(root_use := FILE_SYSTEM_ROOT if root is None else root),
         )
         if starship_toml is not None:
             if etc:
@@ -1158,10 +1156,12 @@ def setup_starship(
                 owner=owner,
                 group=group,
             )
-        return
-    ssh_uv_install(
-        ssh,
-        "starship",
+
+    set_up_local_or_remote(
+        "zoxide",
+        set_up_local,
+        ssh=ssh,
+        force=force,
         token=token,
         path_binaries=path_binaries,
         sudo=sudo,
@@ -1169,11 +1169,11 @@ def setup_starship(
         owner=owner,
         group=group,
         etc=etc,
-        home=home,
         shell=shell,
-        starship_toml=starship_toml,
+        home=home,
         perms_config=perms_config,
         root=root,
+        starship_toml=starship_toml,
         retry=retry,
     )
 

@@ -27,39 +27,11 @@ class TestCLI:
             param(["curl", "--ssh", "user@hostname"]),
             param(["curl", "--sudo"]),
             param(["curl", "--retry", "1", "1"]),
-            param(["direnv"], id="direnv"),
-            param(["direnv", "--ssh", "user@hostname"]),
-            param(["direnv", "--path-binaries", "path"]),
-            param(["direnv", "--token", "token"]),
-            param(["direnv", "--sudo"]),
-            param(["direnv", "--perms-binary", "perms"]),
-            param(["direnv", "--owner", "owner"]),
-            param(["direnv", "--group", "group"]),
-            param(["direnv", "--etc"]),
-            param(["direnv", "--home", "home"]),
-            param(["direnv", "--shell", "bash"]),
-            param(["direnv", "--perms-config", "perms"]),
-            param(["direnv", "--root", "/"]),
-            param(["direnv", "--retry", "1", "1"]),
             param(["docker"], id="docker"),
             param(["docker", "--ssh", "user@hostname"]),
             param(["docker", "--sudo"]),
             param(["docker", "--user", "user"]),
             param(["docker", "--retry", "1", "1"]),
-            param(["fzf"], id="fzf"),
-            param(["fzf", "--ssh", "user@hostname"]),
-            param(["fzf", "--token", "token"]),
-            param(["fzf", "--path-binaries", "path"]),
-            param(["fzf", "--sudo"]),
-            param(["fzf", "--perms-binary", "perms"]),
-            param(["fzf", "--owner", "owner"]),
-            param(["fzf", "--group", "group"]),
-            param(["fzf", "--etc"]),
-            param(["fzf", "--shell", "bash"]),
-            param(["fzf", "--home", "home"]),
-            param(["fzf", "--perms-config", "perms"]),
-            param(["fzf", "--root", "/"]),
-            param(["fzf", "--retry", "1", "1"]),
             param(["git"], id="git"),
             param(["git", "--ssh", "user@hostname"]),
             param(["git", "--sudo"]),
@@ -104,21 +76,6 @@ class TestCLI:
             param(["sd"], id="sd"),
             param(["shellcheck"], id="shellcheck"),
             param(["shfmt"], id="shfmt"),
-            param(["starship"], id="starship"),
-            param(["starship", "--ssh", "user@hostname"]),
-            param(["starship", "--token", "token"]),
-            param(["starship", "--path-binaries", "path"]),
-            param(["starship", "--sudo"]),
-            param(["starship", "--perms-binary", "perms"]),
-            param(["starship", "--owner", "owner"]),
-            param(["starship", "--group", "group"]),
-            param(["starship", "--etc"]),
-            param(["starship", "--home", "home"]),
-            param(["starship", "--shell", "bash"]),
-            param(["starship", "--starship-toml", "starship.toml"]),
-            param(["starship", "--perms-config", "perms"]),
-            param(["starship", "--root", "/"]),
-            param(["starship", "--retry", "1", "1"]),
             param(["taplo"], id="taplo"),
             param(["uv"], id="uv"),
             param(["uv", "--ssh", "user@hostname"]),
@@ -182,7 +139,9 @@ class TestCLI:
         result = runner.invoke(cli, [cmd, *args])
         assert result.exit_code == 0, result.stderr
 
-    @mark.parametrize("cmd", [param("zoxide")])
+    @mark.parametrize(
+        "cmd", [param("direnv"), param("fzf"), param("starship"), param("zoxide")]
+    )
     @mark.parametrize(
         "args",
         [
@@ -207,6 +166,12 @@ class TestCLI:
     def test_commands_with_shell_github(self, *, cmd: str, args: list[str]) -> None:
         runner = CliRunner()
         result = runner.invoke(cli, [cmd, *args])
+        assert result.exit_code == 0, result.stderr
+
+    @throttle_test(duration=MINUTE)
+    def test_commands_with_shell_starship_github(self) -> None:
+        runner = CliRunner()
+        result = runner.invoke(cli, ["starship", "--starship-toml", "path"])
         assert result.exit_code == 0, result.stderr
 
     @mark.parametrize(
